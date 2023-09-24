@@ -3,7 +3,7 @@ import { CommandExists, decodeENV, Safe, Jfy, Sfy, Loop, Delay, env, log } from 
 import { Sequelize, DataTypes } from 'sequelize'
 import { initChunks } from './chunks'
 
-const { name, version, mode, me, proxy, debug } = decodeENV()
+const { name, version, mode, me, debug } = decodeENV()
 log.success(`"${env.npm_package_name}" <${version}> module is running on "${process.pid}" / [${mode}] 🚀🚀🚀\n`)
 
 Safe(async () => {
