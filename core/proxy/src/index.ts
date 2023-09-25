@@ -3,7 +3,7 @@ import { Core, Host } from 'unet'
 import { Run, decodeENV, Sfy, log } from 'utils'
 import { Manage } from './pm2'
 
-const { name, version, mode, port, secret } = decodeENV()
+const { name, version, mode, ports, secret } = decodeENV()
 log.success(`"${name}" <${version}> module is running on "${process.pid}" / [${mode}] 🚀🚀🚀\n`)
 log.warn(`Secret: [${secret.slice(0, 8)}...]`)
 
@@ -12,10 +12,10 @@ Run({
     onStart: (_: any) => {
 
         /** Process Manage **/
-        _.name = process.env.LERNA_PACKAGE_NAME
+        _.name = name
         _.manage = new Manage()
         _.proxy = new Core({
-            port: Number(port),
+            port: Number(ports[0]),
             auth: (req: any, res: any, next: any) => {
                 try {
 
@@ -28,7 +28,7 @@ Run({
         })
 
         /** Process Manage **/
-        const API = new Host({ name: 'proxy', timeout: 30 * 1000 })
+        const API = new Host({ name: 'proxy', timeout: 30 * 1000, port: Number(ports[1]) })
 
         API.on('start', async ({ query }: any) => await _.manage.start(query.name))
         API.on('stop', async ({ query }: any) => await _.manage.stop(query.name))

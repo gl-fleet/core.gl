@@ -6,6 +6,7 @@ const env = encodeENV({
     name: pkg.name,
     version: pkg.version,
     mode: process.env.MODE,
+    ports: `4020,4021,4022`,
     uh: `8081,2201`,
     bn: `8082,2202`,
 

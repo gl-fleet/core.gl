@@ -6,6 +6,7 @@ const env = encodeENV({
     name: pkg.name,
     version: pkg.version,
     mode: process.env.MODE,
+    ports: `4010,4011,4012`,
     me: 'master',
     replication_debug: true,
     sequelize_debug: true,
