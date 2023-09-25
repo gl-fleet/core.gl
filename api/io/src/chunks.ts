@@ -55,6 +55,7 @@ export const initChunks = (
         me: me,
         name: 'chunks',
         channel: io,
+	limit: 50,
         table: Chunks,
         debug: debug === 'true',
     })
