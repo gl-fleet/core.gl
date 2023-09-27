@@ -12,6 +12,7 @@ Run({
     onStart: (_: any) => {
 
         /** Process Manage **/
+        log.success(`Core Server: is starting on ${ports[0]}`)
         _.name = name
         _.manage = new Manage()
         _.proxy = new Core({
