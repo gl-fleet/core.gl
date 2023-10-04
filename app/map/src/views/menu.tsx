@@ -1,4 +1,5 @@
 import { React, Layout, Breadcrumb, Typography } from 'uweb'
+
 import { createGlobalStyle } from 'styled-components'
 
 import RTCM from './rtcm'
@@ -60,7 +61,14 @@ export default (cfg: iArgs) => {
                     title: <RTCM {...cfg} />
                 },
                 {
-                    title: <Text onClick={() => open('file/?type=csv-geojson')}>File</Text>
+                    title: <Text>File</Text>,
+                    menu: {
+                        items: [
+                            { key: '01', label: <Text onClick={() => open('file/?type=dxf-geojson')}>DXF Uploader</Text> },
+                            { key: '02', label: <Text onClick={() => open('file/?type=csv-geojson')}>CSV Uploader</Text> },
+                            { key: '03', label: <Text onClick={() => open('file/?type=json-upload')}>JSON Uploader</Text> },
+                        ]
+                    }
                 },
             ]}
         />

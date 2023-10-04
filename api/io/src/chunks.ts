@@ -1,7 +1,9 @@
 import { Host, Connection, ReplicaMaster } from 'unet'
 import { Sequelize, DataTypes } from 'sequelize'
 import { Now, Sfy, Jfy, log } from 'utils'
+
 import ogr2ogr from 'ogr2ogr'
+import fs from 'fs'
 
 import { SequelTable } from './utils/sequel'
 import { Chunk } from './utils/merger'
@@ -34,14 +36,6 @@ export const initChunks = (
 
     })
 
-    io.on("csv-geojson", async (req: any, res: any) => {
-
-        const { file }: any = await Save(req, res)
-        const { data } = await ogr2ogr(`./${file.path}`)
-        return data
-
-    })
-
     io.on("dxf-geojson", async (req: any, res: any) => {
 
         const { file }: any = await Save(req, res)
@@ -50,12 +44,27 @@ export const initChunks = (
 
     })
 
+    io.on("csv-geojson", async (req: any, res: any) => {
+
+        const { file }: any = await Save(req, res)
+        const { data } = await ogr2ogr(`./${file.path}`)
+        return data
+
+    })
+
+    io.on("json-upload", async (req: any, res: any) => {
+
+        const { file }: any = await Save(req, res)
+        return Jfy(fs.readFileSync(`./${file.path}`))
+
+    })
+
     /** Starting replication */
     const RepChunks = new ReplicaMaster({
         me: me,
         name: 'chunks',
         channel: io,
-	limit: 25,
+        limit: 25,
         table: Chunks,
         debug: debug === 'true',
     })

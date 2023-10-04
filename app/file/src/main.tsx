@@ -45,7 +45,7 @@ export default (cfg: iArgs) => {
     const props = {
         name: 'file',
         multiple: false,
-        action: `${window.location.origin}/io/csv-geojson`,
+        action: `${window.location.origin}/io/${name}`,
         onChange: (info: any) => {
 
             const { status } = info.file
@@ -91,12 +91,12 @@ export default (cfg: iArgs) => {
                 data: json,
             }
 
-            if (payload.name.length <= 3) {
+            if (payload.name.length <= 2) {
                 message.warning(`Please enter file name!`)
                 return
             }
 
-            if (payload.dst.length <= 3) {
+            if (payload.dst.length <= 2) {
                 message.warning(`Please enter equipment name!`)
                 return
             }
