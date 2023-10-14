@@ -1,20 +1,34 @@
 import { React, Row, Col } from 'uweb'
 import { log, Delay, Safe } from 'utils/web'
-import { Point } from 'uweb/utils'
+import { Point, Vehicle } from 'uweb/utils'
+import { maptalks } from 'uweb/maptalks'
 
 import { mapHook } from './hooks/map'
+import { Vehicles } from './hooks/vehicle'
 import Menu from './views/menu'
 
 const { useEffect, useState, useRef } = React
 
 export default (cfg: iArgs) => {
 
-    const { isDarkMode, event } = cfg
+    const { isDarkMode, event, api } = cfg
     const [isMapReady, Maptalks] = mapHook({ containerId: 'render_0', isDarkMode, conf: {} })
 
     useEffect(() => {
 
-    }, [])
+        isMapReady && Safe(async () => {
+
+            const vcs = new Vehicles(Maptalks)
+
+            api.on('stream', (body: any) => {
+
+                vcs.live_update(body)
+
+            })
+
+        })
+
+    }, [isMapReady])
 
     return <Row id="main" style={{ height: '100%' }}>
         <Menu {...cfg} />

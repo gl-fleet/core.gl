@@ -14,8 +14,8 @@ const cfg: iArgs = {
     isDarkMode: true,
     proxy,
     io: {
-        proxy: new Connection({ name: 'proxy', proxy }),
-        io: new Connection({ name: 'io', proxy }),
+        proxy: new Connection({ name: 'core_proxy', proxy }),
+        io: new Connection({ name: 'core_io', proxy }),
     },
 }
 

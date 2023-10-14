@@ -25,7 +25,7 @@ export default (cfg: iArgs) => {
 
     useEffect(() => {
 
-        const rtcm = new Connection({ name: 'rtcm' })
+        const rtcm = new Connection({ name: 'core_rtcm' })
         rtcm.poll('uh', {}, (err: any, data: any) => !err && setInfoUH(data))
         rtcm.poll('bn', {}, (err: any, data: any) => !err && setInfoBN(data))
 

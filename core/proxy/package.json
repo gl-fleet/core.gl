@@ -1,5 +1,5 @@
 {
-  "name": "proxy",
+  "name": "core_proxy",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",

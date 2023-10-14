@@ -1,11 +1,11 @@
 {
-  "name": "core_io",
-  "version": "1.0.1",
+  "name": "core_info",
+  "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "ubin watch_api --npm",
-    "build": "ubin build_api",
+    "start": "ubin watch_app --npm",
+    "build": "ubin build_app --bundle --port 3020",
     "serve": "node ./dist/run.js",
     "clear": "rm -rf ./dist ./node_modules",
     "_serve": "pm2 start ecosystem.config.js",
@@ -13,13 +13,9 @@
     "_delete": "pm2 delete ecosystem.config.js"
   },
   "dependencies": {
-    "lokijs": "^1.5.12",
-    "multer": "^1.4.5-lts.1",
-    "ogr2ogr": "^4.0.1",
-    "sequelize": "^6.28.0",
-    "sqlite3": "^5.1.4"
+    "events": "^3.3.0",
+    "react-json-view": "^1.21.3",
+    "styled-components": "^6.0.8"
   },
-  "devDependencies": {
-    "@types/multer": "^1.4.7"
-  }
+  "devDependencies": {}
 }

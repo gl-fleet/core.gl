@@ -3,6 +3,8 @@ import { CommandExists, decodeENV, Safe, Jfy, Sfy, Loop, Delay, env, log } from 
 import { Sequelize, DataTypes } from 'sequelize'
 import { initChunks } from './chunks'
 
+import { gps_io } from './aggr/gps'
+
 const { name, version, mode, ports, me, debug } = decodeENV()
 log.success(`"${env.npm_package_name}" <${version}> module is running on "${process.pid}" / [${mode}] 🚀🚀🚀\n`)
 
@@ -14,7 +16,10 @@ Safe(async () => {
     const sequelize = new Sequelize({ dialect: 'sqlite', storage: '../../data.sqlite', logging: (msg) => debug === 'true' && log.info(`SQLITE: ${msg}`) })
 
     await sequelize.authenticate()
+
     initChunks(api, sequelize, me, debug)
+    new gps_io(api)
+
     await sequelize.sync({ force: false })
 
 })

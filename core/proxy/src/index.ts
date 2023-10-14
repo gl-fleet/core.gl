@@ -20,6 +20,7 @@ Run({
             auth: (req: any, res: any, next: any) => {
                 try {
 
+                    console.log(req.headers)
                     const verify: any = jwt.verify(req.headers.authorization.split(' ')[1], secret)
                     if (typeof verify === 'object') req.headers = { ...req.headers, ...verify }
                     next()
@@ -29,7 +30,7 @@ Run({
         })
 
         /** Process Manage **/
-        const API = new Host({ name: 'proxy', timeout: 30 * 1000, port: Number(ports[1]) })
+        const API = new Host({ name, timeout: 30 * 1000, port: Number(ports[1]) })
 
         API.on('start', async ({ query }: any) => await _.manage.start(query.name))
         API.on('stop', async ({ query }: any) => await _.manage.stop(query.name))

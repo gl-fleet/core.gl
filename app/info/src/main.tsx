@@ -45,7 +45,7 @@ export default (cfg: iArgs) => {
     const props = {
         name: 'file',
         multiple: false,
-        action: `${window.location.origin}/io/${name}`,
+        action: `${window.location.origin}/core_io/${name}`,
         onChange: (info: any) => {
 
             const { status } = info.file

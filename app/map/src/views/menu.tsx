@@ -42,9 +42,9 @@ export default (cfg: iArgs) => {
     const open = (url: string) => {
         const width = screen.width
         const height = screen.height
-        const popw = 780
+        const popw = 700
         const poph = 640
-        window.open(`/${url}`, url, `top=${(height / 2) - (poph / 2) - 24},left=${(width / 2) - (popw / 2)},width=${popw},height=${poph}`)
+        window.open(`/${url}`, url, `top=${(height / 2) - (poph / 2) - 24},left=${window.screenX + (width / 2) - (popw / 2)},width=${popw},height=${poph}`)
     }
 
     useEffect(() => { }, [])
@@ -64,9 +64,9 @@ export default (cfg: iArgs) => {
                     title: <Text>File</Text>,
                     menu: {
                         items: [
-                            { key: '01', label: <Text onClick={() => open('file/?type=dxf-geojson')}>DXF Uploader</Text> },
-                            { key: '02', label: <Text onClick={() => open('file/?type=csv-geojson')}>CSV Uploader</Text> },
-                            { key: '03', label: <Text onClick={() => open('file/?type=json-upload')}>JSON Uploader</Text> },
+                            { key: '01', label: <Text onClick={() => open('core_file/?type=dxf-geojson')}>DXF Uploader</Text> },
+                            { key: '02', label: <Text onClick={() => open('core_file/?type=csv-geojson')}>CSV Uploader</Text> },
+                            { key: '03', label: <Text onClick={() => open('core_file/?type=json-upload')}>JSON Uploader</Text> },
                         ]
                     }
                 },

@@ -15,26 +15,19 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
     useEffect(() => {
 
         ref.current = new MapView({
+            lat: 43.67338010130343, lon: 105.52008346330428, zoom: 15,
             containerId,
-            lat: 43.67338010130343,
-            lon: 105.52008346330428,
-            zoom: 15,
             isDarkMode,
             simulate: false,
+            urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
             ...conf,
         })
 
-        ref.current.onReady(() => {
-            setReady(true)
-        })
+        ref.current.onReady(() => setReady(true))
 
     }, [])
 
-    useEffect(() => {
-
-        ref.current.setMode && ref.current.setMode(isDarkMode)
-
-    }, [isDarkMode])
+    useEffect(() => { ref.current.setMode && ref.current.setMode(isDarkMode) }, [isDarkMode])
 
     return [isReady, ref.current]
 

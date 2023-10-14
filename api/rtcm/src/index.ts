@@ -9,7 +9,7 @@ log.success(`"${name}" <${version}> module is running on "${process.pid}" / [${m
 
 Safe(() => {
 
-    const API = new Host({ name: 'rtcm', port: Number(ports[0]) })
+    const API = new Host({ name, port: Number(ports[0] - 1) })
 
     UH(API, Number(uh[0]), Number(uh[1]))
     BN(API, Number(bn[0]), Number(bn[1]))
