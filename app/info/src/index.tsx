@@ -13,10 +13,7 @@ const cfg: iArgs = {
     event: new EventEmitter(),
     isDarkMode: true,
     proxy,
-    io: {
-        proxy: new Connection({ name: 'core_proxy', proxy }),
-        io: new Connection({ name: 'core_io', proxy }),
-    },
+    api: new Connection({ name: 'core_data', proxy }),
 }
 
 const main = ({ isDarkMode }: { isDarkMode: boolean }) => {

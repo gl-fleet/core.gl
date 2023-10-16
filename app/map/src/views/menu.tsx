@@ -64,9 +64,9 @@ export default (cfg: iArgs) => {
                     title: <Text>File</Text>,
                     menu: {
                         items: [
-                            { key: '01', label: <Text onClick={() => open('core_file/?type=dxf-geojson')}>DXF Uploader</Text> },
-                            { key: '02', label: <Text onClick={() => open('core_file/?type=csv-geojson')}>CSV Uploader</Text> },
-                            { key: '03', label: <Text onClick={() => open('core_file/?type=json-upload')}>JSON Uploader</Text> },
+                            { key: '01', label: <Text onClick={() => open('core_info/?type=dxf-geojson')}>DXF Uploader</Text> },
+                            { key: '02', label: <Text onClick={() => open('core_info/?type=csv-geojson')}>CSV Uploader</Text> },
+                            { key: '03', label: <Text onClick={() => open('core_info/?type=json-upload')}>JSON Uploader</Text> },
                         ]
                     }
                 },

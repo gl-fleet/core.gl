@@ -22,6 +22,7 @@ export default (cfg: iArgs) => {
 
             api.on('stream', (body: any) => {
 
+                console.log(body)
                 vcs.live_update(body)
 
             })

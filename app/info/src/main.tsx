@@ -28,8 +28,6 @@ const Style = createGlobalStyle`
 
 export default (cfg: iArgs) => {
 
-    const { isDarkMode, event } = cfg
-
     const dl: any = document.location
     let params = (new URL(dl)).searchParams
     let name = params.get("type")
@@ -45,7 +43,7 @@ export default (cfg: iArgs) => {
     const props = {
         name: 'file',
         multiple: false,
-        action: `${window.location.origin}/core_io/${name}`,
+        action: `${window.location.origin}/core_data/${name}`,
         onChange: (info: any) => {
 
             const { status } = info.file
@@ -107,7 +105,7 @@ export default (cfg: iArgs) => {
             }
 
             setLoading(true)
-            cfg.io.io.set('set-chunks', payload)
+            cfg.api.set('set-chunks', payload)
                 .then(e => success())
                 .catch(e => { message.error('Please try again!') })
                 .finally(() => setLoading(false))

@@ -1,5 +1,5 @@
 import multer from 'multer'
-import { Now, log } from 'utils'
+import { Loop, Now, log } from 'utils'
 
 export type tEvent = 'pub_local' | 'pub_cloud' | 'update'
 
@@ -87,7 +87,7 @@ const Upload = multer({
 
         destination: (req, file, cb) => {
             log.info(`[Upload] -> ${file.originalname} / ${file.mimetype}`)
-            return cb(null, './shared')
+            return cb(null, './file')
         },
 
         filename: (req, file, cb) => {
