@@ -42,6 +42,7 @@ Run({
         API.on('me', ({ headers }: any) => headers)
         API.on('sign', ({ query }: any) => jwt.sign(query, secret, { expiresIn: query.expiresIn ?? "14d" }))
         API.on('verify', ({ query }: any) => jwt.verify(query.token, secret))
+        // localhost:8010/proxy/sign?name=SV101&type=vehicle&project=VMP&expiresIn=180d
 
         _.exit = () => {
             _.proxy.stop()
