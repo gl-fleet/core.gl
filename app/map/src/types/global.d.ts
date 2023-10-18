@@ -7,7 +7,6 @@ declare global {
 
         isDarkMode: boolean
         event: EventEmitter
-        proxy: string
         api: Connection
 
     }

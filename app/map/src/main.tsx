@@ -33,7 +33,7 @@ export default (cfg: iArgs) => {
 
     return <Row id="main" style={{ height: '100%' }}>
         <Menu {...cfg} />
-        <Col id='render_0' span={24} style={{ height: '100%' }} />
+        <Col id='render_0_' span={24} style={{ height: '100%' }} />
     </Row>
 
 }

@@ -35,8 +35,8 @@ export default (cfg: iArgs) => {
 
     const [loading, setLoading] = useState(false)
     const [json, setJson] = useState({})
-    const fileRef = useRef()
-    const equipRef = useRef()
+    const fileRef: any = useRef()
+    const equipRef: any = useRef()
 
     useEffect(() => { }, [])
 

@@ -1,4 +1,8 @@
-import { React, Layout, Breadcrumb, Typography } from 'uweb'
+import { React, Layout, Menu, Breadcrumb, Typography } from 'uweb'
+import {
+    AppstoreOutlined,
+    CloudUploadOutlined,
+} from '@ant-design/icons'
 
 import { createGlobalStyle } from 'styled-components'
 
@@ -8,31 +12,23 @@ const { useEffect, useState, useRef } = React
 const { Text, Link } = Typography
 
 const Style = createGlobalStyle`
-    #menu {
-        position: absolute;
-        background: transparent;
-        width: 100%;
-        top: 16px; 
-        z-index: 1;
-    }
-    #menu > nav {
-        font-weight: 800;
-        max-width: 780px;
-        margin: auto;
-        padding: 8px 16px;
-        border-radius: 8px;
-        border: 1px solid #e5e5e5;
-    }
-    #menu a {
-        color: #1677ff;
-    }
-    #menu span {
-        color: #1677ff;
-        cursor: pointer;
-    }
+
     .maptalks-attribution {
         display: none;
     }
+
+    #menu {
+        position: absolute;
+        background: transparent;
+        left: 32px;
+        top: calc(50% - 80px);
+        z-index: 1;
+    }
+
+    .ant-menu {
+        border-radius: 8px;
+    }
+
 `
 
 export default (cfg: iArgs) => {
@@ -47,31 +43,39 @@ export default (cfg: iArgs) => {
         window.open(`/${url}`, url, `top=${(height / 2) - (poph / 2) - 24},left=${window.screenX + (width / 2) - (popw / 2)},width=${popw},height=${poph}`)
     }
 
-    useEffect(() => { }, [])
+    const items: any = [
+        {
+            key: '0',
+            label: 'Applications',
+            icon: <AppstoreOutlined />,
+            children: [
+                { key: '01', label: 'View 1' },
+                { key: '02', label: 'View 2' },
+                { key: '03', label: 'View 3' },
+            ]
+        },
+        {
+            key: '1',
+            label: 'Uploader',
+            icon: <CloudUploadOutlined />,
+            children: [
+                { key: '11', label: <span onClick={() => open('core_info/?type=dxf-geojson')}>DXF Uploader</span> },
+                { key: '12', label: <span onClick={() => open('core_info/?type=csv-geojson')}>CSV Uploader</span> },
+                { key: '13', label: <span onClick={() => open('core_info/?type=json-upload')}>JSON Uploader</span> },
+            ]
+        }
+    ]
 
     return <Layout id="menu">
+
         <Style />
-        <Breadcrumb
-            style={{ background: isDarkMode ? '#000' : '#fff' }}
-            items={[
-                {
-                    title: <Text onClick={() => open('map')}>Map</Text>
-                },
-                {
-                    title: <RTCM {...cfg} />
-                },
-                {
-                    title: <Text>File</Text>,
-                    menu: {
-                        items: [
-                            { key: '01', label: <Text onClick={() => open('core_info/?type=dxf-geojson')}>DXF Uploader</Text> },
-                            { key: '02', label: <Text onClick={() => open('core_info/?type=csv-geojson')}>CSV Uploader</Text> },
-                            { key: '03', label: <Text onClick={() => open('core_info/?type=json-upload')}>JSON Uploader</Text> },
-                        ]
-                    }
-                },
-            ]}
+
+        <Menu
+            mode="inline"
+            inlineCollapsed={true}
+            items={items}
         />
+
     </Layout>
 
 }
