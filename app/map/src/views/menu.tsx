@@ -59,9 +59,9 @@ export default (cfg: iArgs) => {
             label: 'Uploader',
             icon: <CloudUploadOutlined />,
             children: [
-                { key: '11', label: <span onClick={() => open('core_info/?type=dxf-geojson')}>DXF Uploader</span> },
-                { key: '12', label: <span onClick={() => open('core_info/?type=csv-geojson')}>CSV Uploader</span> },
-                { key: '13', label: <span onClick={() => open('core_info/?type=json-upload')}>JSON Uploader</span> },
+                { key: '11', label: <span onClick={() => open('core_info/?view=file&type=dxf-geojson')}>DXF Uploader</span> },
+                { key: '12', label: <span onClick={() => open('core_info/?view=file&type=csv-geojson')}>CSV Uploader</span> },
+                { key: '13', label: <span onClick={() => open('core_info/?view=file&type=json-upload')}>JSON Uploader</span> },
             ]
         }
     ]

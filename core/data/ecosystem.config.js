@@ -10,6 +10,7 @@ const env = encodeENV({
     proxy: process.env.MODE === 'development' ? 'http://localhost:8010' : 'http://139.59.115.158',
     replication_debug: true,
     sequelize_debug: true,
+    pitunnel_token: 'pitunkey_p2S2HPO5qonUyEc1aGxfI4Yo3MaPnhyj',
 
 })
 

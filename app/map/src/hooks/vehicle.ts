@@ -1,11 +1,20 @@
-import { Vehicle, Toyota } from 'uweb/utils'
+import { Vehicle, Toyota, Drill, Dozer } from 'uweb/utils'
 import { MapView, maptalks } from 'uweb/maptalks'
 import { Loop, log } from 'utils/web'
 
 export const getVehicle = (Maptalks: MapView, type: string): Promise<Vehicle> => new Promise((resolve, reject) => {
 
     log.info(`[Vehicles] -> Get Vehicle / ${type}`)
-    Toyota({ size: 55, x: 0, y: -100, z: 0 })
+
+    type === 'vehicle' && Toyota({ size: 50, x: 0, y: 0, z: 0 })
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks })))
+        .catch((err) => reject(err))
+
+    type === 'drill' && Drill({ size: 50, x: 0, y: 0, z: 0 })
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks })))
+        .catch((err) => reject(err))
+
+    type === 'dozer' && Dozer({ size: 50, x: 0, y: 0, z: 0 })
         .then((Truck) => resolve(new Vehicle({ Truck, Maptalks })))
         .catch((err) => reject(err))
 
@@ -25,14 +34,13 @@ export class Vehicles {
 
         this.maptalks = Maptalks
         this.layer = new maptalks.VectorLayer('vector', { enableAltitude: true }).addTo(this.maptalks.map)
-        this.last_updates()
 
     }
 
-    open_window = (type: string, name: string) => {
+    open_window = (key: string, { project, type, name }: any) => {
 
-        const width = screen.width, height = screen.height, popw = 700, poph = 640
-        window.open(`/core_file?type=${type}&name=${name}`, 'vehicle', `top=${(height / 2) - (poph / 2) - 24},left=${window.screenX + (width / 2) - (popw / 2)},width=${popw},height=${poph}`)
+        const width = screen.width, height = screen.height, popw = 720, poph = 720
+        window.open(`/core_info/?view=vehicle&key=${type}&project=${project}&type=${type}&name=${name}`, type, `top=${(height / 2) - (poph / 2) - 24},left=${window.screenX + (width / 2) - (popw / 2)},width=${popw},height=${poph}`)
 
     }
 
@@ -42,22 +50,6 @@ export class Vehicles {
         if (typeof t !== 'undefined') {
             t.update({ ...data_gps })
         }
-
-    }
-
-    create_vehicle = (key: string, type: string) => {
-
-        const proc = (e: any) => {
-
-            this.obj[key].vehicle = e
-            e.on((name: string, arg: any) => {
-                name === 'mouse' && arg === 'dblclick' && this.open_window(key, type)
-            })
-
-        }
-
-        getVehicle(this.maptalks, type)
-            .then(proc).catch(e => { })
 
     }
 
@@ -80,15 +72,31 @@ export class Vehicles {
 
     }
 
-    create_marker = (key: string, type: string) => {
+    create_vehicle = (key: string, { project, type, name }: any) => {
 
-        this.obj[key].marker = new maptalks.Marker([0, 0], {
-            'properties': { 'name': 'SV101', 'altitude': 50 },
+        const proc = (e: any) => {
+
+            this.obj[key].vehicle = e
+            e.on((ename: string, arg: any) => {
+                ename === 'mouse' && arg === 'dblclick' && this.open_window(key, { project, type, name })
+            })
+
+        }
+
+        getVehicle(this.maptalks, type).then(proc).catch(e => { })
+
+    }
+
+    create_marker = (key: string, { project, type, name }: any) => {
+
+        const marker = new maptalks.Marker([0, 0], {
+            'properties': { 'name': name, 'altitude': 50 },
             'symbol': {
                 'textFaceName': 'sans-serif',
                 'textName': '{name}',
                 'textWeight': 'bold', //'bold', 'bolder'
                 'textStyle': 'normal', //'italic', 'oblique'
+                'cursor': 'pointer',
                 'textSize': 12,
                 'textFont': null,     //same as CanvasRenderingContext2D.font, override textName, textWeight and textStyle
                 'textFill': '#fff',
@@ -101,20 +109,12 @@ export class Vehicles {
             }
         }).addTo(this.layer)
 
-        const t = this.obj[key].marker
+        this.obj[key].marker = marker
 
-        t.on('mouseenter', () => {
-            log.warn(`Double click on MARKER!`)
-        })
+        marker.on('dblclick', () => this.open_window(key, { project, type, name }))
 
-        Loop(() => {
-            (Date.now() - this.cfg.last_update >= 10000) && t.updateSymbol({ textFill: '#fff', textHaloFill: 'red' })
-        }, 2500)
+        Loop(() => (Date.now() - this.cfg.last_update >= 5000) && marker.updateSymbol({ textFill: '#fff', textHaloFill: 'red' }), 2500)
 
-    }
-
-    last_updates = () => {
-        // Print last location of vehicles
     }
 
     live_update = (body: any) => {
@@ -125,8 +125,8 @@ export class Vehicles {
 
         if (!exists) {
             this.obj[key] = {}
-            this.create_vehicle(key, type)
-            this.create_marker(key, type)
+            this.create_vehicle(key, { project, type, name })
+            this.create_marker(key, { project, type, name })
         }
 
         this.update_vehicle(key, body)

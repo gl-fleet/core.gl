@@ -10,7 +10,7 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
 }): [boolean, MapView] => {
 
     const [isReady, setReady] = useState(false)
-    const ref: { current: MapView } = useRef(null)
+    const ref: any = useRef(null)
 
     useEffect(() => {
 

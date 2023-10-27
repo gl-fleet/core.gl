@@ -4,7 +4,7 @@ import { log } from 'utils/web'
 const { useEffect, useState } = React
 const { Title, Text } = Typography
 
-export default ({ io, event, isDarkMode }: iArgs) => {
+export default ({ event, isDarkMode }: iArgs) => {
 
     const [info, setInfo] = useState('...')
 

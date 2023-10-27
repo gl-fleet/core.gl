@@ -28,17 +28,13 @@ const Style = createGlobalStyle`
 
 export default (cfg: iArgs) => {
 
-    const dl: any = document.location
-    let params = (new URL(dl)).searchParams
-    let name = params.get("type")
-    log.info(`[${name}]`)
+    const name = ((new URL(document.location.toString())).searchParams).get('type')
+    log.info(`[FILE] -> Query / ${name}`)
 
     const [loading, setLoading] = useState(false)
     const [json, setJson] = useState({})
     const fileRef: any = useRef()
     const equipRef: any = useRef()
-
-    useEffect(() => { }, [])
 
     const props = {
         name: 'file',

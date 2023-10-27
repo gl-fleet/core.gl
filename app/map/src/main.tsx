@@ -20,11 +20,26 @@ export default (cfg: iArgs) => {
 
             const vcs = new Vehicles(Maptalks)
 
-            api.on('stream', (body: any) => {
+            api.get('vehicle-query', { project: '*' }).then((obj: any) => {
 
-                console.log(body)
+                if (typeof obj === 'object') {
+                    for (const project in obj) {
+                        for (const type in obj[project]) {
+                            for (const name in obj[project][type]) {
+                                const data = obj[project][type][name]
+                                vcs.live_update(data)
+                            }
+                        }
+                    }
+                }
+                console.log(obj)
+
+            }).catch((err) => {
+                console.log(err)
+            })
+
+            api.on('vehicle-stream', (body: any) => {
                 vcs.live_update(body)
-
             })
 
         })
