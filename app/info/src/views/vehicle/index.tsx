@@ -1,7 +1,8 @@
-import { React, Layout, Row, Col, Typography } from 'uweb'
+import { React, Layout, Tabs, Row, Col, Typography } from 'uweb'
 import { MapView } from 'uweb/maptalks'
 import { Vehicle } from 'uweb/utils'
-import { Loop, oget, log } from 'utils/web'
+import { Loop, moment, dateFormat, oget, log } from 'utils/web'
+import { FolderOpenOutlined, ApartmentOutlined, WindowsOutlined } from '@ant-design/icons'
 import ReactJson from 'react-json-view'
 
 import { Style, getVehicle } from './helper'
@@ -66,6 +67,8 @@ export default (cfg: iArgs) => {
     console.log('stream', stream)
     console.log('tunnel', tunnel)
 
+    const updated = oget('***')(stream.data, 'last')
+
     return <Layout style={{ padding: 16 }}>
         <Row gutter={[16, 16]} id="main">
 
@@ -74,14 +77,40 @@ export default (cfg: iArgs) => {
             <Col span={24} style={{ position: 'relative' }}>
                 <Title level={4} style={{ position: 'absolute', top: 16, left: 38, zIndex: 100, margin: 0 }}>{stream.data.project} / {stream.data.name}</Title>
                 <Title level={4} style={{ position: 'absolute', top: 16, right: 38, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>{oget('***')(stream.data, 'data_activity', 'state')}</Title>
-                <div key={oget('***')(stream.data, 'last')} className="animate__animated animate__bounce" style={{ position: 'absolute', bottom: 16, right: 38, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>{oget('***')(stream.data, 'last')}</div>
+                <div style={{ position: 'absolute', bottom: 16, right: 38, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>
+                    {oget(["Tablet turned off"])(stream, 'inj_clients')[0]}
+                    <br />
+                    {moment(updated).format(dateFormat)}
+                </div>
                 <StreamView {...stream} />
                 <div id='render_vhc' style={{ position: 'relative', height: 256, borderRadius: 8, overflow: 'hidden' }}></div>
             </Col>
 
             <Col span={24}>
-                <ReactJson src={stream} />
-                <ReactJson src={tunnel} />
+                <Tabs
+                    defaultActiveKey="1"
+                    items={[
+                        {
+                            label: <span><FolderOpenOutlined /> Files</span>,
+                            key: '1',
+                            children: 'value'
+                        },
+                        {
+                            label: <span><ApartmentOutlined /> Status</span>,
+                            key: '2',
+                            children: <div>
+                                <ReactJson src={stream} />
+                            </div>
+                        },
+                        {
+                            label: <span><WindowsOutlined /> Hub</span>,
+                            key: '3',
+                            children: <div>
+                                <ReactJson src={tunnel} />
+                            </div>
+                        }
+                    ]}
+                />
             </Col>
 
         </Row>

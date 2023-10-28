@@ -1,4 +1,3 @@
-import 'animate.css'
 import { React, Render } from 'uweb'
 import { Connection } from 'unet/web'
 import { Safe, Win, Doc, KeyValue, log } from 'utils/web'
@@ -15,7 +14,7 @@ const cfg: iArgs = {
     event: new EventEmitter(),
     isDarkMode: true,
     proxy,
-    api: new Connection({ name: 'core_data', proxy }),
+    api: new Connection({ name: 'core_data', proxy, timeout: 10000 }),
 }
 
 const main = ({ isDarkMode }: { isDarkMode: boolean }) => {

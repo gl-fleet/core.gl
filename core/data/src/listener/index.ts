@@ -1,6 +1,7 @@
 import { Host, Connection, ReplicaSlave } from 'unet'
 import { Sequelize, DataTypes } from 'sequelize'
-import { Now, Safe, Loop, log, decodeENV } from 'utils'
+import { Delay, Loop, log, decodeENV } from 'utils'
+import axios from 'axios'
 
 import { tEvent, roughSizeOfObject, wr, f } from './helper'
 
@@ -74,12 +75,16 @@ export class Listener {
 
         try {
 
-            const res = await fetch('https://api.pitunnel.com/devices', {
+            const { data } = await axios('https://api.pitunnel.com/devices', {
                 method: 'get',
-                headers: new Headers({ 'Authorization': `Basic ${btoa(`${this.pi_token}:${this.pi_token}`)}`, 'Content-Type': 'application/x-www-form-urlencoded' })
+                headers: {
+                    'Authorization': `Basic ${btoa(`${this.pi_token}:${this.pi_token}`)}`,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }
             })
 
-            const json = await res.json()
+            log.warn(`[Emitter.pi_get_devices] ${data.devices.length}`)
+            const json = data
             return json
 
         } catch (err: any) {
@@ -99,17 +104,23 @@ export class Listener {
 
                 const id = this.pob[name].id
 
-                let formData = new FormData()
+                let formData = new URLSearchParams()
                 formData.append('device_id', id)
 
-                const res = await fetch('https://api.pitunnel.com/device_info', {
+                const { data } = await axios('https://api.pitunnel.com/device_info', {
                     method: 'post',
-                    body: formData,
-                    headers: new Headers({ 'Authorization': `Basic ${btoa(`${this.pi_token}:${this.pi_token}`)}` }),
+                    data: formData,
+                    headers: {
+                        'Authorization': `Basic ${btoa(`${this.pi_token}:${this.pi_token}`)}`,
+                    },
                 })
 
-                const { device_info }: any = await res.json()
-                return device_info
+                log.warn(`[Emitter.pi_get_device_info] !`)
+
+                return {
+                    ...data.device_info,
+                    parent: this.pob[name],
+                }
 
             }
 
@@ -133,8 +144,8 @@ export class Listener {
 
         const list = () => this.pi_get_devices().then(parse)
 
-        Safe(() => list())
-        Loop(() => list(), 30 * 1000)
+        Delay(() => list(), 2500)
+        Loop(() => list(), 60 * 1000)
 
     }
 

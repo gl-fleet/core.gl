@@ -1,8 +1,5 @@
 import { React, Row, Col } from 'uweb'
 import { log, Delay, Safe } from 'utils/web'
-import { Point, Vehicle } from 'uweb/utils'
-import { maptalks } from 'uweb/maptalks'
-
 import { mapHook } from './hooks/map'
 import { Vehicles } from './hooks/vehicle'
 import Menu from './views/menu'

@@ -35,7 +35,7 @@ export default ({ loading, err, data }: any) => {
 
     const gps1_value = oget([0, 0, 0])(data, 'data_gps1')[2]
     const gps1_perc = Number(((gps1_value * 100) / 10).toFixed(1))
-    const gps1_color = ColorG2R(gps1_value, [18, 21, 24, 27, 30])
+    const gps1_color = ColorR2G(gps1_value, [18, 21, 24, 27, 30])
 
     const gps2_value = oget([0, 0, 0])(data, 'data_gps2')[2]
     const gps2_perc = Number(((gps2_value * 100) / 30).toFixed(1))
