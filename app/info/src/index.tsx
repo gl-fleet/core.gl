@@ -15,16 +15,23 @@ const cfg: iArgs = {
     isDarkMode: true,
     proxy,
     api: new Connection({ name: 'core_data', proxy, timeout: 10000 }),
+    view: '',
+    name: '',
 }
 
 const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
 
-    const view = ((new URL(document.location.toString())).searchParams).get('view')
-    log.info(`[VIEW] -> Query / ${view}`)
+    const view = ((new URL(document.location.toString())).searchParams).get('view') ?? ''
+    const name = ((new URL(document.location.toString())).searchParams).get('name') ?? ''
+
+    log.info(`[VIEW] -> Query / ${view} / ${name}`)
+
+    cfg.view = view
+    cfg.name = name
 
     if (view === 'file') return <File {...cfg} isDarkMode={isDarkMode} />
     if (view === 'vehicle') return <Vehicle {...cfg} isDarkMode={isDarkMode} />
-    return <p>{view} :(</p>
+    return <p>{view}</p>
 
 }
 

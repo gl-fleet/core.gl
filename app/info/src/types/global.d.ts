@@ -9,6 +9,8 @@ declare global {
         event: EventEmitter
         proxy: string
         api: Connection
+        view: string
+        name: string
 
     }
 

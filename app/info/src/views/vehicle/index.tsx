@@ -1,12 +1,13 @@
-import { React, Layout, Tabs, Row, Col, Typography } from 'uweb'
+import { React, Layout, Tabs, Row, Col, Space, Typography, Button, Tooltip } from 'uweb'
 import { MapView } from 'uweb/maptalks'
 import { Vehicle } from 'uweb/utils'
-import { Loop, moment, dateFormat, oget, log } from 'utils/web'
-import { FolderOpenOutlined, ApartmentOutlined, WindowsOutlined } from '@ant-design/icons'
+import { oget, log } from 'utils/web'
+import { FolderOpenOutlined, SwapOutlined, AndroidOutlined, DesktopOutlined, CodeOutlined } from '@ant-design/icons'
 import ReactJson from 'react-json-view'
 
-import { Style, getVehicle } from './helper'
+import { Style, getVehicle, UpdateStatus } from './helper'
 import StreamView from './stream'
+import Files from './files'
 
 const { useEffect, useState, useRef } = React
 const { Title, Text } = Typography
@@ -15,7 +16,6 @@ export default (cfg: iArgs) => {
 
     const [stream, setStream] = useState<any>({ loading: true, err: "", data: {} })
     const [tunnel, setTunnel] = useState<any>({ loading: true, err: "", data: {} })
-    const [lastUpdate, setLastUpdate] = useState<number>(0)
 
     useEffect(() => {
 
@@ -64,10 +64,9 @@ export default (cfg: iArgs) => {
 
     }, [])
 
-    console.log('stream', stream)
-    console.log('tunnel', tunnel)
+    console.log('stream / tunne', stream, tunnel)
 
-    const updated = oget('***')(stream.data, 'last')
+    const tablet = oget([undefined])(stream, 'data', 'inj_clients')[0] === undefined ? false : true
 
     return <Layout style={{ padding: 16 }}>
         <Row gutter={[16, 16]} id="main">
@@ -75,15 +74,21 @@ export default (cfg: iArgs) => {
             <Style />
 
             <Col span={24} style={{ position: 'relative' }}>
-                <Title level={4} style={{ position: 'absolute', top: 16, left: 38, zIndex: 100, margin: 0 }}>{stream.data.project} / {stream.data.name}</Title>
-                <Title level={4} style={{ position: 'absolute', top: 16, right: 38, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>{oget('***')(stream.data, 'data_activity', 'state')}</Title>
-                <div style={{ position: 'absolute', bottom: 16, right: 38, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>
-                    {oget(["Tablet turned off"])(stream, 'inj_clients')[0]}
-                    <br />
-                    {moment(updated).format(dateFormat)}
+                <Title level={4} style={{ position: 'absolute', top: 16, left: 24, zIndex: 100, margin: 0 }}>{stream.data.project} / {stream.data.name}</Title>
+                <Title level={4} style={{ position: 'absolute', top: 16, right: 24, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>{oget('***')(stream.data, 'data_activity', 'state')}</Title>
+                <div style={{ position: 'absolute', bottom: 16, right: 24, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>
+                    <Space wrap>
+                        <Tooltip title={tablet ? 'VNC: Tablet connected' : 'VNC: Tablet disconnected!'}>
+                            <Button danger={!tablet} type="primary" ghost icon={<DesktopOutlined />} />
+                        </Tooltip>
+                        <Tooltip title={'CMD: PI connected'}>
+                            <Button danger={!tablet} type="primary" ghost icon={<CodeOutlined />} />
+                        </Tooltip>
+                        <UpdateStatus data={stream.data} />
+                    </Space>
                 </div>
                 <StreamView {...stream} />
-                <div id='render_vhc' style={{ position: 'relative', height: 256, borderRadius: 8, overflow: 'hidden' }}></div>
+                <div id='render_vhc' style={{ position: 'relative', height: 200, borderRadius: 8, overflow: 'hidden' }}></div>
             </Col>
 
             <Col span={24}>
@@ -93,17 +98,17 @@ export default (cfg: iArgs) => {
                         {
                             label: <span><FolderOpenOutlined /> Files</span>,
                             key: '1',
-                            children: 'value'
+                            children: <Files {...cfg} />
                         },
                         {
-                            label: <span><ApartmentOutlined /> Status</span>,
+                            label: <span><SwapOutlined /> Stream</span>,
                             key: '2',
                             children: <div>
                                 <ReactJson src={stream} />
                             </div>
                         },
                         {
-                            label: <span><WindowsOutlined /> Hub</span>,
+                            label: <span><AndroidOutlined /> Board</span>,
                             key: '3',
                             children: <div>
                                 <ReactJson src={tunnel} />

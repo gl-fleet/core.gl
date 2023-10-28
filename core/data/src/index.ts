@@ -9,7 +9,7 @@ const { name, version, mode, me, proxy } = decodeENV()
 log.success(`"${env.npm_package_name}" <${version}> module is running on "${process.pid}" / [${mode}] 🚀🚀🚀\n`)
 
 const cf = {
-    local: new Host({ name }),
+    local: new Host({ name, port: 8040 }),
     sequelize: new Sequelize({ dialect: 'sqlite', storage: `../../${me}_${name}.sqlite`, logging: false })
 }
 

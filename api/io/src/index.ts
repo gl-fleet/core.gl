@@ -5,10 +5,13 @@ import { initChunks } from './chunks'
 
 import { gps_io } from './aggr/gps'
 
-const { name, version, mode, ports, me, debug } = decodeENV()
-log.success(`"${env.npm_package_name}" <${version}> module is running on "${process.pid}" / [${mode}] 🚀🚀🚀\n`)
-
 Safe(async () => {
+
+    Loop(() => { }, 1000 * 10)
+    return
+
+    const { name, version, mode, ports, me, debug } = decodeENV()
+    log.success(`"${env.npm_package_name}" <${version}> module is running on "${process.pid}" / [${mode}] 🚀🚀🚀\n`)
 
     !CommandExists('ogr2ogr') && log.error('Install GDAL tools (includes the ogr2ogr command line tool) https://gdal.org/download.html')
 

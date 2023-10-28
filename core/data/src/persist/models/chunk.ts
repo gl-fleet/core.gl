@@ -65,7 +65,7 @@ export class Chunk {
         this.local.on(`del-${this.name}`, async (req: any) => await this.del(req.body))
 
         this.local.on(`get-${this.name}-merged`, async ({ query }: any) => await this.get_merged(query))
-        this.local.on(`get-${this.name}-distinct`, async ({ }) => await this.get_distinct())
+        this.local.on(`get-${this.name}-distinct`, async ({ query }) => await this.get_distinct(query))
         this.local.on("dxf-geojson", this.upload_dxf)
         this.local.on("csv-geojson", this.upload_csv)
         this.local.on("json-upload", this.upload_json)
@@ -91,8 +91,9 @@ export class Chunk {
         return "Success!"
     }
 
-    del = async ({ id }: { id: string }) => {
-        const [updatedRows] = await this.collection.update({ updatedAt: Now(), deletedAt: Now() }, { where: { id: id, src: me }, individualHooks: true })
+    del = async (args: any) => {
+        const { name, type, dst } = args
+        const [updatedRows] = await this.collection.update({ updatedAt: Now(), deletedAt: Now() }, { where: { name, type, dst }, individualHooks: true })
         if (updatedRows > 0) return `${updatedRows} ${updatedRows > 1 ? 'rows' : 'row'} deleted!`
         else throw new Error(`Permission denied!`)
     }
@@ -124,16 +125,17 @@ export class Chunk {
         return Jfy(fs.readFileSync(`./${file.path}`))
     }
 
-    get_distinct = async () => {
+    get_distinct = async (query: any) => {
         return await this.collection.findAll({
             attributes: ['name', 'type', 'src', 'dst', 'createdAt', 'updatedAt', [Sequelize.fn('COUNT', Sequelize.col('offset')), 'count']],
-            where: { deletedAt: null }, order: [['updatedAt', 'DESC']],
+            where: { ...query, deletedAt: null },
+            order: [['updatedAt', 'DESC']],
             group: 'name',
         })
     }
 
-    get_merged = async (args: any) => {
-        const rows = await this.collection.findAll({ where: { ...args, deletedAt: null }, order: [['offset', 'ASC']] })
+    get_merged = async (query: any) => {
+        const rows = await this.collection.findAll({ where: { ...query, deletedAt: null }, order: [['offset', 'ASC']] })
         return chunks.Merge(rows)
     }
 
