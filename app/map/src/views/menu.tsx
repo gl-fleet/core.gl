@@ -1,15 +1,6 @@
-import { React, Layout, Menu, Breadcrumb, Typography } from 'uweb'
-import {
-    AppstoreOutlined,
-    CloudUploadOutlined,
-} from '@ant-design/icons'
-
+import { React, Layout, Menu } from 'uweb'
+import { AppstoreOutlined, CloudUploadOutlined } from '@ant-design/icons'
 import { createGlobalStyle } from 'styled-components'
-
-import RTCM from './rtcm'
-
-const { useEffect, useState, useRef } = React
-const { Text, Link } = Typography
 
 const Style = createGlobalStyle`
 
@@ -20,12 +11,13 @@ const Style = createGlobalStyle`
     #menu {
         position: absolute;
         background: transparent;
-        left: 32px;
+        left: 16px;
         top: calc(50% - 80px);
         z-index: 1;
     }
 
     .ant-menu {
+        width: 50px;
         border-radius: 8px;
     }
 
@@ -33,12 +25,10 @@ const Style = createGlobalStyle`
 
 export default (cfg: iArgs) => {
 
-    const { isDarkMode, event } = cfg
-
     const open = (url: string) => {
         const width = screen.width
         const height = screen.height
-        const popw = 700
+        const popw = 720
         const poph = 640
         window.open(`/${url}`, url, `top=${(height / 2) - (poph / 2) - 24},left=${window.screenX + (width / 2) - (popw / 2)},width=${popw},height=${poph}`)
     }

@@ -1,4 +1,4 @@
-import { React, Layout, Row, Col, Table, Space, Upload, Typography, Input, Button, message, Select, Popconfirm } from 'uweb'
+import { React, Layout, Row, Col, Table, Space, Upload, Typography, Input, Button, message, Select, Popconfirm, Grid } from 'uweb'
 import { UploadOutlined, FolderOutlined, RedoOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import { createGlobalStyle } from 'styled-components'
 import { log, Delay, Safe } from 'utils/web'
@@ -6,6 +6,7 @@ import ReactJson from 'react-json-view'
 
 const { useEffect, useState, useRef } = React
 const { Title, Text } = Typography
+const { useBreakpoint } = Grid
 
 const Style = createGlobalStyle`
     #root > div {
@@ -38,8 +39,9 @@ export default (cfg: iArgs) => {
     const [loading, setLoading] = useState(false)
     const [list, setList] = useState({ loading: false, data: [] })
     const [json, setJson] = useState({})
-    const fileRef: any = useRef()
     const [type, setType] = useState('')
+    const fileRef: any = useRef()
+    const screens = useBreakpoint()
     const name = cfg.name
 
     useEffect(() => fileList(), [])
@@ -131,7 +133,7 @@ export default (cfg: iArgs) => {
 
     }
 
-    const columns = [
+    const columns: any = [
         {
             title: '',
             render: () => <Text style={{ display: 'block', textAlign: 'center' }}><FolderOutlined /></Text>
@@ -149,16 +151,19 @@ export default (cfg: iArgs) => {
         {
             title: 'Chunks',
             dataIndex: 'count',
-            render: (e: string) => <Text>{e}</Text>
+            hidden: screens.xs,
+            render: (e: string) => <Text>{e}</Text>,
         },
         {
             title: 'From',
             dataIndex: 'src',
+            hidden: screens.xs,
             render: (e: string) => <Text>{e}</Text>
         },
         {
             title: 'To',
             dataIndex: 'dst',
+            hidden: screens.xs,
             render: (e: string) => <Text>{e}</Text>
         },
         {
@@ -177,7 +182,7 @@ export default (cfg: iArgs) => {
                 </center>
             }
         }
-    ]
+    ].filter(item => !item.hidden)
 
     return <Layout style={{ padding: 16 }}>
         <Row gutter={[16, 16]} id="main">
@@ -195,7 +200,7 @@ export default (cfg: iArgs) => {
                 <ReactJson src={json} theme="monokai" collapsed={true} />
             </Col>
 
-            <Col span={12}>
+            <Col xs={24} sm={12} span={12}>
                 <Space.Compact style={{ width: '100%' }}>
                     <Select
                         style={{ width: '100%' }}
@@ -213,7 +218,7 @@ export default (cfg: iArgs) => {
                 </Space.Compact>
             </Col>
 
-            <Col span={12}>
+            <Col xs={24} sm={12} span={12}>
                 <Space.Compact style={{ width: '100%' }}>
                     <Input ref={fileRef} placeholder="File name" />
                     <Button loading={loading} type="primary" onClick={() => save()}>Save</Button>

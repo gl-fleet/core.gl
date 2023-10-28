@@ -91,7 +91,7 @@ export default (cfg: iArgs) => {
                 <div id='render_vhc' style={{ position: 'relative', height: 200, borderRadius: 8, overflow: 'hidden' }}></div>
             </Col>
 
-            <Col span={24}>
+            <Col span={24} style={{ overflowX: 'hidden' }}>
                 <Tabs
                     defaultActiveKey="1"
                     items={[
