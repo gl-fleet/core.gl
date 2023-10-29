@@ -96,19 +96,19 @@ export default (cfg: iArgs) => {
                     defaultActiveKey="1"
                     items={[
                         {
-                            label: <span><FolderOpenOutlined /> Files</span>,
+                            label: <b><FolderOpenOutlined />Files</b>,
                             key: '1',
                             children: <Files {...cfg} />
                         },
                         {
-                            label: <span><SwapOutlined /> Stream</span>,
+                            label: <b><SwapOutlined />Stream</b>,
                             key: '2',
                             children: <div>
                                 <ReactJson src={stream} />
                             </div>
                         },
                         {
-                            label: <span><AndroidOutlined /> Board</span>,
+                            label: <b><AndroidOutlined />Board</b>,
                             key: '3',
                             children: <div>
                                 <ReactJson src={tunnel} />
