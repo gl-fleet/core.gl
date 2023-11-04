@@ -38,3 +38,55 @@ export const roughSizeOfObject = (object: any) => {
     return bytes
 
 }
+
+/**
+ * NOT YET TESTED THIS METHOD
+ */
+export class InstanceManager {
+
+    objects: any = {}
+    callbacks: any = [] /** Must be array of cbs **/
+    states: any = {}
+
+    constructor() {
+        //
+    }
+
+    setObject = (name: string, classInstance: any) => {
+
+        this.objects[name] = classInstance
+
+    }
+
+    getObject = (name: string) => {
+
+        return this.objects[name] ?? null
+
+    }
+
+    onStateChange = (name: string, cb: any) => { /** Should provide initial states? **/
+
+        this.callbacks.push([name, cb])
+        cb(this.states[name] ?? {})
+
+    }
+
+    setState = (name: string, field: string, value: any) => {
+
+        if (!this.states.hasOwnProperty(name)) {
+            this.states[name] = {}
+        }
+
+        this.states[name][field] = value
+
+        for (const l of this.callbacks) {
+            if (l[0] === name) { l[1](this.states[name] ?? {}) }
+        }
+
+    }
+
+    getState = (name: string) => {
+        return this.states[name] ?? {}
+    }
+
+}

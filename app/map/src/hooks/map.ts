@@ -1,6 +1,5 @@
 import { React } from 'uweb'
 import { MapView } from 'uweb/maptalks'
-import { log, Delay, Safe } from 'utils/web'
 const { useEffect, useState, useRef } = React
 
 export const mapHook = ({ containerId, isDarkMode, conf }: {
@@ -14,12 +13,18 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
 
     useEffect(() => {
 
+        const lowReso = document.documentElement.clientWidth < 1024
+
         ref.current = new MapView({
-            lat: 43.67338010130343, lon: 105.52008346330428, zoom: 15,
+            zoom: 16, lat: 43.67338010130343, lon: 105.52008346330428,
+            minZoom: 14,
+            devicePixelRatio: lowReso ? 0.5 : 1,
             containerId,
             isDarkMode,
             simulate: false,
+            doubleClickZoom: lowReso,
             urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
+            fps: 40,
             ...conf,
         })
 

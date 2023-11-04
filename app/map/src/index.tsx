@@ -1,7 +1,6 @@
 import { React, Render } from 'uweb'
 import { Connection } from 'unet/web'
 import { EventEmitter } from "events"
-import { Win, log } from 'utils/web'
 
 import Main from './main'
 import Settings from './settings'

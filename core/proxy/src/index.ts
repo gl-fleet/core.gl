@@ -19,9 +19,9 @@ Run({
             port: Number(ports[0]),
             auth: (req: any, res: any, next: any) => {
                 try {
-
+                    req.headers.verified = 'no'
                     const verify: any = jwt.verify(req.headers.authorization.split(' ')[1], secret)
-                    if (typeof verify === 'object') req.headers = { ...req.headers, ...verify }
+                    if (typeof verify === 'object') req.headers = { ...req.headers, ...verify, verified: 'yes' }
                     next()
 
                 } catch (err: any) { next() }
@@ -39,9 +39,19 @@ Run({
 
         /** Authorization Token **/
         API.on('me', ({ headers }: any) => headers)
-        API.on('sign', ({ query }: any) => jwt.sign(query, secret, { expiresIn: query.expiresIn ?? "14d" }))
         API.on('verify', ({ query }: any) => jwt.verify(query.token, secret))
-        // localhost:8010/proxy/sign?name=SV101&type=vehicle&project=VMP&expiresIn=180d
+
+        /** 
+         * The Sign endpoint must be authorized or set redis:false when initializing the host
+         * User:    localhost:8010/core_proxy/sign?name=Tulgaew&role=admin&project=*&expiresIn=180d
+         * Vehicle: localhost:8010/core_proxy/sign?name=DR101&type=drill&project=Cullinan&expiresIn=180d
+         * **/
+        API.on('sign', ({ query }: any) => jwt.sign(query, secret, { expiresIn: query.expiresIn ?? "14d" }))
+
+        const example = {
+            'vehicle': 'localhost:8010/core_proxy/sign?name=DR101&type=drill&project=Cullinan&expiresIn=180d',
+            'user': 'localhost:8010/core_proxy/sign?name=Tulgaew&role=admin&project=*&expiresIn=180d',
+        }
 
         _.exit = () => {
             _.proxy.stop()

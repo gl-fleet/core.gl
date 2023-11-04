@@ -3,6 +3,7 @@ import { log, Delay, Safe } from 'utils/web'
 import { mapHook } from './hooks/map'
 import { Vehicles } from './hooks/vehicle'
 import Menu from './views/menu'
+import Auth from './views/auth'
 
 const { useEffect, useState, useRef } = React
 
@@ -19,6 +20,8 @@ export default (cfg: iArgs) => {
 
             api.get('vehicle-query', { project: '*' }).then((obj: any) => {
 
+                console.log(obj)
+
                 if (typeof obj === 'object') {
                     for (const project in obj) {
                         for (const type in obj[project]) {
@@ -29,7 +32,6 @@ export default (cfg: iArgs) => {
                         }
                     }
                 }
-                console.log(obj)
 
             }).catch((err) => {
                 console.log(err)
@@ -44,6 +46,7 @@ export default (cfg: iArgs) => {
     }, [isMapReady])
 
     return <Row id="main" style={{ height: '100%' }}>
+        <Auth {...cfg} />
         <Menu {...cfg} />
         <Col id='render_0' span={24} style={{ height: '100%' }} />
     </Row>

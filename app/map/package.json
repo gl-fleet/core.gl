@@ -9,6 +9,7 @@
     "serve": "node ./dist/run.js",
     "clear": "rm -rf ./dist ./node_modules",
     "_serve": "pm2 start ecosystem.config.js",
+    "_reload": "pm2 reload ecosystem.config.js",
     "_stop": "pm2 stop ecosystem.config.js",
     "_delete": "pm2 delete ecosystem.config.js"
   },

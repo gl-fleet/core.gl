@@ -1,5 +1,5 @@
 import { Host, Connection, ReplicaMaster, ReplicaSlave } from 'unet'
-import { decodeENV, Uid, Now, Sfy, Loop, Safe, moment, dateFormat, log } from 'utils'
+import { decodeENV, Uid, Now, Sfy, Loop, Safe, moment, dateFormat, log, Delay } from 'utils'
 import { DataTypes, Model, ModelStatic } from 'sequelize'
 import { Sequelize, Op } from 'sequelize'
 
@@ -55,9 +55,17 @@ export class Event {
 
     table_serve = () => {
 
+        const auth = ({ headers }: any) => {
+            const { verified } = headers
+            if (verified === 'no') { throw new Error('Not Authorized!') }
+            else return verified
+        }
+
         this.local.on(`get-${this.name}`, async (req: any) => await this.get(req.query))
         this.local.on(`set-${this.name}`, async (req: any) => await this.set(req.body))
         this.local.on(`del-${this.name}`, async (req: any) => await this.del(req.body))
+
+        this.local.on(`get-${this.name}-latest`, async (req) => auth(req) && await this.get_latest())
 
     }
 
@@ -116,5 +124,16 @@ export class Event {
         call(cb, delay)
 
     }
+
+    get_latest = async () => await this.collection.findAll({
+
+        attributes: ['type', 'name', 'src', 'data', [Sequelize.fn('MAX', Sequelize.col('updatedAt')), 'updatedAt']],
+        where: {
+            updatedAt: { [Op.gte]: moment().add(-7, 'days').format(dateFormat) },
+            deletedAt: null,
+        },
+        group: ["src"],
+
+    })
 
 }

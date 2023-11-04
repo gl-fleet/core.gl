@@ -10,14 +10,13 @@ log.success(`"${env.npm_package_name}" <${version}> module is running on "${proc
 
 const cf = {
     local: new Host({ name, port: 8040 }),
-    sequelize: new Sequelize({ dialect: 'sqlite', storage: `../../${me}_${name}.sqlite`, logging: false })
+    sequelize: new Sequelize({ dialect: 'sqlite', storage: `../../${me}_${name}.sqlite`, logging: false }),
 }
 
 const run = () => {
 
     const listener = new Listener(cf)
     const persist = new Persist(cf)
-
     // persist.save_event({ type: 'status', name: 'device', data })
 
 }
