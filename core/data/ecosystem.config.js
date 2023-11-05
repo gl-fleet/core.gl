@@ -31,7 +31,7 @@ module.exports = {
             exec_mode: "cluster",
             listen_timeout: 15000,
             restart_delay: 15000,
-            instances: 2,
+            instances: 1,
             log_date_format: "YYYY-MM-DD HH:mm:ss.SSS",
             env: env
 
