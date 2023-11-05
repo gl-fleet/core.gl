@@ -9,20 +9,17 @@ import { CloudSyncOutlined } from '@ant-design/icons'
 const { useEffect, useState, useRef } = React
 
 export const Style = createGlobalStyle`
+    html, body {
+        background: ${({ color }: any) => color};
+    }
+    #render_vhc {
+        filter: ${({ filter }: any) => filter};
+    } 
     .maptalks-attribution {
         display: none;
     }
-    #root > div {
-        height: fit-content !important;
-        min-height: 100% !important;
-    }
-    #root .ant-float-btn-group {
-        display: none;
-    }
-    .react-json-view {
-        border-radius: 4px;
-        padding: 8px;
-        margin-bottom: 16px;
+    .ant-tabs-nav-wrap {
+        padding: 0px 16px;
     }
 `
 
@@ -57,14 +54,16 @@ export const UpdateStatus = ({ data }: any) => {
             const delay = Date.now() - last.current
             setDanger(delay > 5000 ? true : false)
 
-        }, 1000)
+        }, 500)
 
     }, [])
 
     if (last.current === 0) return <Button danger={danger} disabled={true} type='dashed' icon={<CloudSyncOutlined />}>
+        <Style filter={danger ? 'grayscale(1)' : 'grayscale(0)'} />
         {'...'}
     </Button>
     else return <Button danger={danger} ghost disabled={false} type='primary' icon={<CloudSyncOutlined />}>
+        <Style filter={danger ? 'grayscale(1)' : 'grayscale(0)'} />
         {moment(last.current).format('HH:mm:ss.SSS')}
     </Button>
 

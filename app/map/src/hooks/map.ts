@@ -18,7 +18,7 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
         ref.current = new MapView({
             zoom: 16, lat: 43.67338010130343, lon: 105.52008346330428,
             minZoom: 14,
-            devicePixelRatio: lowReso ? 0.5 : 1,
+            devicePixelRatio: lowReso ? 1 : 1,
             containerId,
             isDarkMode,
             simulate: false,

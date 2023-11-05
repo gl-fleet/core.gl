@@ -9,7 +9,7 @@ import Settings from './settings'
 import { EventEmitter } from "events"
 
 const proxy = Win.location.origin
-
+const { useState, useEffect } = React
 const meta = document.createElement('meta')
 meta.name = "viewport"
 meta.content = "width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=0.75, minimum-scale=0.75"
@@ -25,6 +25,19 @@ const cfg: iArgs = {
 }
 
 const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
+
+    const [conServer, setConServer] = useState(false)
+    const [conVehicle, setConVehicle] = useState(false)
+
+    useEffect(() => {
+
+        const { api } = cfg
+
+        api.on('connect', () => setConServer(true))
+        api.on('disconnect', () => setConServer(false))
+        api.on('connect_error', () => setConServer(false))
+
+    }, [])
 
     const view = ((new URL(document.location.toString())).searchParams).get('view') ?? ''
     const name = ((new URL(document.location.toString())).searchParams).get('name') ?? ''

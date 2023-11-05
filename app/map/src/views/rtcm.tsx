@@ -35,20 +35,20 @@ export default (cfg: iArgs) => {
 
     const start = () => {
         setStart(true)
-        cfg.io.proxy.emit('start', { name: 'rtcm' }, (err: any, data: any) => {
+        /* cfg.api.emit('start', { name: 'rtcm' }, (err: any, data: any) => {
             setStart(false)
             if (err) message.error(err.message)
             else message.success(`Success!`)
-        })
+        }) */
     }
 
     const stop = () => {
         setStop(true)
-        cfg.io.proxy.emit('stop', { name: 'rtcm' }, (err: any, data: any) => {
+        /* cfg.api.emit('stop', { name: 'rtcm' }, (err: any, data: any) => {
             setStop(false)
             if (err) message.error(err.message)
             else message.success(`Success!`)
-        })
+        }) */
     }
 
     return <>

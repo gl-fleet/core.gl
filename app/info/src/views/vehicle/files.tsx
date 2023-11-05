@@ -184,20 +184,25 @@ export default (cfg: iArgs) => {
         }
     ].filter(item => !item.hidden)
 
-    return <Layout style={{ padding: 16 }}>
+    return <div style={{ padding: 16 }}>
         <Row gutter={[16, 16]} id="main">
 
             <Style />
 
             <Col span={24}>
                 <div style={{ position: 'relative' }}>
-                    <Button onClick={() => fileList()} style={{ position: 'absolute', right: -16, top: -16, zIndex: 1 }} shape="circle" icon={<RedoOutlined />} size={'small'} />
+                    <Button onClick={() => fileList()} style={{ position: 'absolute', right: -12, top: -12, zIndex: 1 }} shape="circle" icon={<RedoOutlined />} size={'small'} />
                     <Table rowKey={'name'} loading={list.loading} dataSource={list.data ?? []} columns={columns} size={'small'} pagination={{ pageSize: 4 }} />
                 </div>
             </Col>
 
             <Col span={24}>
-                <ReactJson src={json} theme="monokai" collapsed={true} />
+                <ReactJson
+                    iconStyle="square"
+                    src={json}
+                    theme={cfg.isDarkMode ? "twilight" : "bright:inverted"}
+                    collapsed={true}
+                />
             </Col>
 
             <Col xs={24} sm={12} span={12}>
@@ -226,6 +231,6 @@ export default (cfg: iArgs) => {
             </Col>
 
         </Row>
-    </Layout>
+    </div>
 
 }

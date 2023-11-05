@@ -1,5 +1,5 @@
-import { React, Modal, Input } from 'uweb'
-import { SafetyCertificateOutlined } from '@ant-design/icons'
+import { React, Layout, Modal, Input, FloatButton } from 'uweb'
+import { SafetyCertificateOutlined, LoginOutlined } from '@ant-design/icons'
 import { createGlobalStyle } from 'styled-components'
 import { Connection } from 'unet/web'
 import { KeyValue } from 'utils/web'
@@ -22,7 +22,7 @@ export default (cfg: iArgs) => {
 
     const proxy: { current: Connection } = useRef(new Connection({ name: 'core_proxy' }))
     const token: any = useRef()
-    const [open, setOpen] = useState(true)
+    const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
 
     const signIn = () => {
@@ -47,6 +47,12 @@ export default (cfg: iArgs) => {
     }, [])
 
     return <div>
+
+        <Layout style={{ background: 'transparent', position: 'absolute', left: 16, top: 16, padding: 0, zIndex: 100 }}>
+            <FloatButton.Group shape="circle" style={{ top: 24, zIndex: 10, height: 180 }}>
+                <FloatButton onClick={() => setOpen(true)} icon={<LoginOutlined />} />
+            </FloatButton.Group>
+        </Layout>
 
         <Modal confirmLoading={loading} centered title="Sign-In" open={open} onOk={() => signIn()} onCancel={() => setOpen(false)} destroyOnClose={true}>
 
