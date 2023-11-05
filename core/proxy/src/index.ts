@@ -19,12 +19,20 @@ Run({
             port: Number(ports[0]),
             auth: (req: any, res: any, next: any) => {
                 try {
+
                     req.headers.verified = 'no'
                     const verify: any = jwt.verify(req.headers.authorization.split(' ')[1], secret)
                     if (typeof verify === 'object') req.headers = { ...req.headers, ...verify, verified: 'yes' }
                     next()
 
-                } catch (err: any) { next() }
+                }
+                catch (err: any) { next() }
+                finally {
+
+                    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '0.0.0.0'
+                    log.warn(`[Finally] -> From: ${ip} Verified: ${req.headers.verified}`)
+
+                }
             }
         })
 

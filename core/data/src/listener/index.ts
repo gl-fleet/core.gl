@@ -1,6 +1,6 @@
 import { Host, Connection, ReplicaSlave } from 'unet'
 import { Sequelize, DataTypes, Op } from 'sequelize'
-import { Delay, Loop, log, decodeENV, moment, dateFormat } from 'utils'
+import { Delay, Loop, log, decodeENV, moment, dateFormat, Sfy } from 'utils'
 import axios from 'axios'
 
 import { tEvent, roughSizeOfObject, wr, f } from './helper'
@@ -51,6 +51,8 @@ export class Listener {
         local.on('stream', ({ headers, body }, res) => {
 
             const { project, type, name } = headers
+
+            log.warn(`[Stream] -> ${project} ${type} ${name}`)
 
             if (typeof project === 'string' && typeof type === 'string' && typeof name === 'string') {
 
