@@ -77,7 +77,7 @@ export default (cfg: iArgs) => {
         <Row gutter={[16, 16]} id="main">
 
             <Style color={cfg.isDarkMode ? '#000' : '#f5f5f5'} />
-            <Col span={24} style={{ position: 'relative' }}>
+            <Col id="stream_view" span={24} style={{ position: 'relative' }}>
                 <Title level={4} style={{ position: 'absolute', top: 16, left: 24, zIndex: 100, margin: 0 }}>{stream.data.project} / {stream.data.name}</Title>
                 <Title level={4} style={{ position: 'absolute', top: 16, right: 24, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>{oget('***')(stream.data, 'data_activity', 'state')}</Title>
                 <div style={{ position: 'absolute', bottom: 16, right: 24, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>

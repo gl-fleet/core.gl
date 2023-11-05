@@ -12,7 +12,7 @@ export const Style = createGlobalStyle`
     html, body {
         background: ${({ color }: any) => color};
     }
-    #render_vhc {
+    #stream_view {
         filter: ${({ filter }: any) => filter};
     } 
     .maptalks-attribution {
