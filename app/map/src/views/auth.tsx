@@ -2,7 +2,7 @@ import { React, Layout, Modal, Input, FloatButton } from 'uweb'
 import { SafetyCertificateOutlined, LoginOutlined } from '@ant-design/icons'
 import { createGlobalStyle } from 'styled-components'
 import { Connection } from 'unet/web'
-import { KeyValue } from 'utils/web'
+import { log, KeyValue } from 'utils/web'
 
 const { useRef, useEffect, useState } = React
 
@@ -18,21 +18,48 @@ const Style = createGlobalStyle`
 
 `
 
+const ParserError = (e: any): { type: string, status: number, message: string } => {
+
+    const result: { type: string, status: number, message: string } = { type: 'warning', status: 0, message: '' }
+
+    if (typeof e === 'object') {
+
+        if (e.hasOwnProperty('response')) {
+
+            result.status = e.response.status ?? 500
+            result.message = e.response.data ?? e.message
+
+        } else {
+
+            result.status = 500
+            result.message = e.message ?? 'Unknown error'
+
+        }
+
+    } else {
+
+        result.status = 500
+        result.message = 'Request error'
+
+    }
+
+    return result
+}
+
 export default (cfg: iArgs) => {
 
-    const proxy: { current: Connection } = useRef(new Connection({ name: 'core_proxy' }))
     const token: any = useRef()
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
 
     const signIn = () => {
 
-        console.log(token.current)
+        log.info(`[SignIn] ${token.current}`)
         const jwt = String(token.current)
         setLoading(true)
-        proxy.current.get('verify', { token: jwt })
+        cfg.proxy.get('verify', { token: jwt })
             .then(e => { console.log(e) })
-            .catch(e => { console.log(e) })
+            .catch(e => { cfg.event.emit('message', ParserError(e)) })
             .finally(() => { setLoading(false) })
 
     }

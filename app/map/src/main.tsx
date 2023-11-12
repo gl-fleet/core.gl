@@ -1,4 +1,4 @@
-import { React, Row, Col } from 'uweb'
+import { React, Row, Col, message } from 'uweb'
 import { log, Delay, Safe } from 'utils/web'
 import { mapHook } from './hooks/map'
 import { Vehicles } from './hooks/vehicle'
@@ -10,7 +10,14 @@ const { useEffect, useState, useRef } = React
 export default (cfg: iArgs) => {
 
     const { isDarkMode, event, api } = cfg
+    const [messageApi, contextHolder] = message.useMessage()
     const [isMapReady, Maptalks] = mapHook({ containerId: 'render_0', isDarkMode, conf: {} })
+
+    useEffect(() => {
+
+        event.on('message', ({ type, message }) => messageApi.open({ type, content: message }))
+
+    }, [])
 
     useEffect(() => {
 
@@ -20,7 +27,7 @@ export default (cfg: iArgs) => {
 
             api.get('vehicle-query', { project: '*' }).then((obj: any) => {
 
-                console.log(obj)
+                console.log(`[vehicle-query]`, obj)
 
                 if (typeof obj === 'object') {
                     for (const project in obj) {
@@ -46,9 +53,11 @@ export default (cfg: iArgs) => {
     }, [isMapReady])
 
     return <Row id="main" style={{ height: '100%' }}>
+        {contextHolder}
         <Auth {...cfg} />
         <Menu {...cfg} />
         <Col id='render_0' span={24} style={{ height: '100%' }} />
+
     </Row>
 
 }

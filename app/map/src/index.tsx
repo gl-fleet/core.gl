@@ -13,6 +13,7 @@ document.getElementsByTagName('head')[0].appendChild(meta)
 const cfg: iArgs = {
     event: new EventEmitter(),
     api: new Connection({ name: 'core_data' }),
+    proxy: new Connection({ name: 'core_proxy' }),
     isDarkMode: true,
 }
 
