@@ -21,7 +21,7 @@
     "ubin": "upacks/ubin#1.1.4",
     "ucan": "upacks/ucan#1.0.4",
     "unet": "upacks/unet#1.1.21",
-    "utils": "upacks/utils#1.1.6",
+    "utils": "upacks/utils#1.1.8",
     "uweb": "upacks/uweb#1.1.32"
   },
   "devDependencies": {

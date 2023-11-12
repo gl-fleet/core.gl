@@ -34,7 +34,11 @@ export class Listener {
 
         local.on('vehicle-query', ({ headers, query }, res) => {
 
+            const { verified, role, project: proj } = headers /** verified must be 'yes' **/
             const { project, type, name } = query
+
+            log.warn(`[AUTH] ${role} ${proj} `)
+            log.warn(`[QUER] ${type} ${name} ${project} `)
 
             try {
 

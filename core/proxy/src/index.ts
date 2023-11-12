@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { Core, Host } from 'unet'
-import { Run, decodeENV, Sfy, log } from 'utils'
+import { dateFormat, moment, Run, decodeENV, Sfy, log } from 'utils'
 import { Manage } from './pm2'
 
 const { name, version, mode, ports, secret } = decodeENV()
@@ -47,7 +47,14 @@ Run({
 
         /** Authorization Token **/
         API.on('me', ({ headers }: any) => headers)
-        API.on('verify', ({ query }: any) => jwt.verify(query.token, secret))
+        API.on('verify', ({ query }: any) => {
+
+            const payload: any = jwt.verify(query.token, secret)
+            payload.iat = moment.unix(payload.iat).format('YY/MM/DD')
+            payload.exp = moment.unix(payload.exp).format('YY/MM/DD')
+            return payload
+
+        })
 
         /** 
          * The Sign endpoint must be authorized or set redis:false when initializing the host

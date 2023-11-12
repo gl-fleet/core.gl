@@ -1,5 +1,6 @@
 import { React, Render } from 'uweb'
 import { Connection } from 'unet/web'
+import { KeyValue } from 'utils/web'
 import { EventEmitter } from "events"
 
 import Main from './main'
@@ -12,8 +13,8 @@ document.getElementsByTagName('head')[0].appendChild(meta)
 
 const cfg: iArgs = {
     event: new EventEmitter(),
-    api: new Connection({ name: 'core_data' }),
-    proxy: new Connection({ name: 'core_proxy' }),
+    proxy: new Connection({ name: 'core_proxy', token: KeyValue('token') }),
+    api: new Connection({ name: 'core_data', token: KeyValue('token') }),
     isDarkMode: true,
 }
 

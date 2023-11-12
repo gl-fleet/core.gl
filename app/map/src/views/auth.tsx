@@ -1,8 +1,8 @@
-import { React, Layout, Modal, Input, FloatButton } from 'uweb'
-import { SafetyCertificateOutlined, LoginOutlined } from '@ant-design/icons'
+import { React, Layout, Modal, Input, FloatButton, Descriptions } from 'uweb'
+import { SafetyCertificateOutlined, LoginOutlined, LoadingOutlined, SafetyOutlined } from '@ant-design/icons'
 import { createGlobalStyle } from 'styled-components'
-import { Connection } from 'unet/web'
-import { log, KeyValue } from 'utils/web'
+import { log, KeyValue, Sfy } from 'utils/web'
+import { handler } from '../hooks/utils'
 
 const { useRef, useEffect, useState } = React
 
@@ -18,74 +18,88 @@ const Style = createGlobalStyle`
 
 `
 
-const ParserError = (e: any): { type: string, status: number, message: string } => {
-
-    const result: { type: string, status: number, message: string } = { type: 'warning', status: 0, message: '' }
-
-    if (typeof e === 'object') {
-
-        if (e.hasOwnProperty('response')) {
-
-            result.status = e.response.status ?? 500
-            result.message = e.response.data ?? e.message
-
-        } else {
-
-            result.status = 500
-            result.message = e.message ?? 'Unknown error'
-
-        }
-
-    } else {
-
-        result.status = 500
-        result.message = 'Request error'
-
-    }
-
-    return result
-}
-
 export default (cfg: iArgs) => {
 
-    const token: any = useRef()
+    const token: any = useRef(KeyValue('token') ?? null)
+    const [did, setDid] = useState(false)
     const [open, setOpen] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [sign, setSign] = useState<any>({ loading: false, payload: null, message: null })
 
     const signIn = () => {
 
-        log.info(`[SignIn] ${token.current}`)
-        const jwt = String(token.current)
-        setLoading(true)
-        cfg.proxy.get('verify', { token: jwt })
-            .then(e => { console.log(e) })
-            .catch(e => { cfg.event.emit('message', ParserError(e)) })
-            .finally(() => { setLoading(false) })
+        // log.info(`[SignIn] ${token.current}`)
+        setSign(handler(null, setSign))
+        cfg.proxy.get('verify', { token: String(token.current) })
+            .then(e => { setSign(handler(e, setSign)) })
+            .catch(e => { setSign(handler(e, setSign)) })
+
+    }
+
+    const signOut = () => {
+
+        // log.info(`[SignIn] ${token.current}`)
+        KeyValue('token', '')
+        setSign({ loading: false, payload: null, message: null })
 
     }
 
     useEffect(() => {
 
         const { event } = cfg
-
         event.on('sign-in', () => { })
         event.on('sign-out', () => { })
 
+        token.current && signIn()
+        setDid(true)
+
     }, [])
 
-    return <div>
+    useEffect(() => {
+
+        sign.payload && KeyValue('token', token.current)
+
+    }, [sign.payload])
+
+    if (!did) { return null }
+
+    /* Sign(d)-In */
+    if (sign.loading === false && sign.payload !== null) return <div>
 
         <Layout style={{ background: 'transparent', position: 'absolute', left: 16, top: 16, padding: 0, zIndex: 100 }}>
             <FloatButton.Group shape="circle" style={{ top: 24, zIndex: 10, height: 180 }}>
-                <FloatButton onClick={() => setOpen(true)} icon={<LoginOutlined />} />
+                <FloatButton type="primary" onClick={() => setOpen(true)} icon={<SafetyOutlined />} />
             </FloatButton.Group>
         </Layout>
 
-        <Modal confirmLoading={loading} centered title="Sign-In" open={open} onOk={() => signIn()} onCancel={() => setOpen(false)} destroyOnClose={true}>
+        <Modal confirmLoading={sign.loading} centered title="Authentication" open={open} okText="Sign-Out" onOk={() => signOut()} onCancel={() => setOpen(false)} destroyOnClose={true}>
+
+            <Style />
+
+            <Descriptions layout="vertical" items={Object.keys(sign.payload).map(key => ({
+                key: key,
+                label: key,
+                children: sign.payload[key]
+            }))} />
+
+        </Modal>
+
+    </div>
+
+    /* Sign(d)-Out */
+    else return <div>
+
+        <Layout style={{ background: 'transparent', position: 'absolute', left: 16, top: 16, padding: 0, zIndex: 100 }}>
+            <FloatButton.Group shape="circle" style={{ top: 24, zIndex: 10, height: 180 }}>
+                <FloatButton onClick={() => setOpen(true)} icon={sign.loading ? <LoadingOutlined /> : <LoginOutlined />} />
+            </FloatButton.Group>
+        </Layout>
+
+        <Modal confirmLoading={sign.loading} centered title="Sign-In" open={open} onOk={() => signIn()} onCancel={() => setOpen(false)} destroyOnClose={true}>
 
             <Style />
 
             <Input
+                status={sign.message ? 'warning' : ''}
                 placeholder="Enter your token"
                 onChange={({ target: { value } }) => { token.current = value }}
                 suffix={<SafetyCertificateOutlined className="site-form-item-icon" />}
