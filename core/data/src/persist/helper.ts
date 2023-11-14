@@ -104,3 +104,27 @@ export const Save = (req: any, res: any) => new Promise((_res, _rej) => {
     return Upload(req, res, (err: any) => err ? _rej(err.message) : _res(req))
 
 })
+
+export const authorize = (req: any) => {
+
+    if (req.hasOwnProperty('headers')) {
+
+        const { verified, role } = req.headers
+
+        const roles = ['level-5', 'level-4', 'level-3', 'level-2', 'level-1']
+
+        if (typeof verified === 'string' && verified === 'yes') {
+
+            if (typeof role === 'string' && roles.includes(role)) {
+
+                return roles.findIndex((s) => s === role) + 1
+
+            }
+
+        }
+
+    }
+
+    throw new Error('Not Authorized!')
+
+}

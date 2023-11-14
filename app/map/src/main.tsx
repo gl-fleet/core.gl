@@ -9,13 +9,19 @@ const { useEffect, useState, useRef } = React
 
 export default (cfg: iArgs) => {
 
-    const { isDarkMode, event, api } = cfg
+    const { isDarkMode, event, api, kv } = cfg
     const [messageApi, contextHolder] = message.useMessage()
     const [isMapReady, Maptalks] = mapHook({ containerId: 'render_0', isDarkMode, conf: {} })
 
     useEffect(() => {
 
         event.on('message', ({ type, message }) => messageApi.open({ type, content: message }))
+
+        kv.on('token', (value) => {
+
+            log.info(`[Map] -> KV.Listen / ${value}`)
+
+        })
 
     }, [])
 
@@ -53,6 +59,7 @@ export default (cfg: iArgs) => {
     }, [isMapReady])
 
     return <Row id="main" style={{ height: '100%' }}>
+
         {contextHolder}
         <Auth {...cfg} />
         <Menu {...cfg} />

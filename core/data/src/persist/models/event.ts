@@ -55,21 +55,36 @@ export class Event {
 
     table_serve = () => {
 
-        const auth = ({ headers }: any) => {
-            const { verified } = headers
-            if (verified === 'no') { throw new Error('Not Authorized!') }
-            else return verified
-        }
-
         this.local.on(`get-${this.name}`, async (req: any) => await this.get(req.query))
         this.local.on(`set-${this.name}`, async (req: any) => await this.set(req.body))
         this.local.on(`del-${this.name}`, async (req: any) => await this.del(req.body))
 
-        this.local.on(`get-${this.name}-latest`, async (req) => auth(req) && await this.get_latest())
+        this.local.on(`get-${this.name}-latest`, async (req) => this.auth(req) && await this.get_latest())
+
+        const sub = [10 /** Days **/, 13 /** Hours **/, 16 /** Minutes **/]
+        this.local.on('test', async () => this.collection.findAll({
+            attributes: [
+                'data',
+                'updatedAt',
+                [Sequelize.literal(`SUBSTRING(updatedAt, 1, ${sub[1]})`), 'updatedIn']
+            ],
+            where: { src: 'SV101', deletedAt: null },
+            order: [['updatedAt', 'ASC']],
+            group: ['updatedIn'],
+            limit: 12,
+        }))
 
     }
 
     /*** *** *** @___Table_Queries___ *** *** ***/
+
+    auth = ({ headers }: any) => {
+
+        const { verified } = headers
+        if (typeof verified === 'string' && verified === 'yes') return true
+        throw new Error('Not Authorized!')
+
+    }
 
     get = async (args: any) => {
 

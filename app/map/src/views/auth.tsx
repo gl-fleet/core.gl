@@ -1,7 +1,6 @@
 import { React, Layout, Modal, Input, FloatButton, Descriptions } from 'uweb'
 import { SafetyCertificateOutlined, LoginOutlined, LoadingOutlined, SafetyOutlined } from '@ant-design/icons'
 import { createGlobalStyle } from 'styled-components'
-import { log, KeyValue, Sfy } from 'utils/web'
 import { handler } from '../hooks/utils'
 
 const { useRef, useEffect, useState } = React
@@ -20,7 +19,9 @@ const Style = createGlobalStyle`
 
 export default (cfg: iArgs) => {
 
-    const token: any = useRef(KeyValue('token') ?? null)
+    const { event, proxy, kv } = cfg
+
+    const token: any = useRef(kv.get('token'))
     const [did, setDid] = useState(false)
     const [open, setOpen] = useState(false)
     const [sign, setSign] = useState<any>({ loading: false, payload: null, message: null })
@@ -29,7 +30,7 @@ export default (cfg: iArgs) => {
 
         // log.info(`[SignIn] ${token.current}`)
         setSign(handler(null, setSign))
-        cfg.proxy.get('verify', { token: String(token.current) })
+        proxy.get('verify', { token: String(token.current) })
             .then(e => { setSign(handler(e, setSign)) })
             .catch(e => { setSign(handler(e, setSign)) })
 
@@ -38,14 +39,13 @@ export default (cfg: iArgs) => {
     const signOut = () => {
 
         // log.info(`[SignIn] ${token.current}`)
-        KeyValue('token', '')
+        kv.set('token', '')
         setSign({ loading: false, payload: null, message: null })
 
     }
 
     useEffect(() => {
 
-        const { event } = cfg
         event.on('sign-in', () => { })
         event.on('sign-out', () => { })
 
@@ -56,7 +56,7 @@ export default (cfg: iArgs) => {
 
     useEffect(() => {
 
-        sign.payload && KeyValue('token', token.current)
+        sign.payload && kv.set('token', token.current)
 
     }, [sign.payload])
 

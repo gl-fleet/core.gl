@@ -1,4 +1,4 @@
-import { React, Layout, Tabs, Row, Col, Space, Typography, Button, Tooltip } from 'uweb'
+import { React, Layout, Tabs, Row, Col, Space, Typography, Button, Tooltip, Slider } from 'uweb'
 import { MapView } from 'uweb/maptalks'
 import { Vehicle } from 'uweb/utils'
 import { oget, log } from 'utils/web'
@@ -11,6 +11,18 @@ import Files from './files'
 
 const { useEffect, useState, useRef } = React
 const { Title, Text } = Typography
+
+const marks: any = {
+    0: '0°C',
+    26: '26°C',
+    37: '37°C',
+    100: {
+        style: {
+            color: '#f50',
+        },
+        label: <strong>100°C</strong>,
+    },
+}
 
 export default (cfg: iArgs) => {
 
@@ -77,6 +89,7 @@ export default (cfg: iArgs) => {
         <Row gutter={[16, 16]} id="main">
 
             <Style color={cfg.isDarkMode ? '#000' : '#f5f5f5'} />
+
             <Col id="stream_view" span={24} style={{ position: 'relative' }}>
                 <Title level={4} style={{ position: 'absolute', top: 16, left: 24, zIndex: 100, margin: 0 }}>{stream.data.project} / {stream.data.name}</Title>
                 <Title level={4} style={{ position: 'absolute', top: 16, right: 24, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>{oget('***')(stream.data, 'data_activity', 'state')}</Title>
@@ -90,6 +103,7 @@ export default (cfg: iArgs) => {
                 </div>
                 <StreamView {...stream} />
                 <div id='render_vhc' style={{ boxShadow: '0px 0px 2px rgba(0,0,0,0.25)', position: 'relative', height: 198, width: '100%', borderRadius: 8, overflow: 'hidden' }}></div>
+                <Slider style={{ position: 'absolute', bottom: 8, left: 16, right: 16 }} marks={marks} included={false} defaultValue={37} />
             </Col>
 
             <Col span={24} style={{ overflowX: 'hidden' }}>

@@ -3,15 +3,14 @@ import { Connection } from 'unet/web'
 import { KeyValue } from 'utils/web'
 import { EventEmitter } from "events"
 
+import { AddMeta, Persist } from './hooks/helper'
 import Main from './main'
 import Settings from './settings'
 
-const meta = document.createElement('meta')
-meta.name = "viewport"
-meta.content = "width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=0.75, minimum-scale=0.75"
-document.getElementsByTagName('head')[0].appendChild(meta)
+AddMeta()
 
 const cfg: iArgs = {
+    kv: new Persist(),
     event: new EventEmitter(),
     proxy: new Connection({ name: 'core_proxy', token: KeyValue('token') }),
     api: new Connection({ name: 'core_data', token: KeyValue('token') }),

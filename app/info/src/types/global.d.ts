@@ -1,5 +1,6 @@
 import { EventEmitter } from "events"
 import { Connection } from 'unet/web'
+import { Persist } from '../hooks/helper'
 
 declare global {
 
@@ -7,7 +8,7 @@ declare global {
 
         isDarkMode: boolean
         event: EventEmitter
-        proxy: string
+        kv: Persist,
         api: Connection
         view: string
         name: string
