@@ -35,9 +35,6 @@ export default (cfg: iArgs) => {
         const project = params.get('project')
         const type = params.get('type')
         const name = params.get('name')
-
-        log.info(`[FILE] -> Query / ${name}`)
-
         let vehicle: Vehicle
 
         const map = new MapView({
@@ -60,7 +57,6 @@ export default (cfg: iArgs) => {
                     setStream({ loading: false, err: "", data: obj })
                     const { data_gps } = obj
                     const { gps } = data_gps
-                    console.log(vehicle, data_gps)
                     map.map && map.map.setCenter(gps)
                     vehicle && vehicle.update(data_gps)
 
@@ -68,7 +64,10 @@ export default (cfg: iArgs) => {
 
                 cfg.api.get('vehicle-query', { project, type, name })
                     .then((obj: any) => update(obj))
-                    .catch((e) => setStream({ loading: false, err: e.message, data: {} }))
+                    .catch((e) => {
+                        console.log(e)
+                        setStream({ loading: false, err: e.message, data: {} })
+                    })
 
                 cfg.api.get('vehicle-tunnel', { project, type, name }).then((obj: any) => {
 
@@ -103,7 +102,6 @@ export default (cfg: iArgs) => {
                 </div>
                 <StreamView {...stream} />
                 <div id='render_vhc' style={{ boxShadow: '0px 0px 2px rgba(0,0,0,0.25)', position: 'relative', height: 198, width: '100%', borderRadius: 8, overflow: 'hidden' }}></div>
-                <Slider style={{ position: 'absolute', bottom: 8, left: 16, right: 16 }} marks={marks} included={false} defaultValue={37} />
             </Col>
 
             <Col span={24} style={{ overflowX: 'hidden' }}>

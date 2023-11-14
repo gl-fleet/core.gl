@@ -1,4 +1,4 @@
-import { React, Render } from 'uweb'
+import { React, Render, Result } from 'uweb'
 import { Connection } from 'unet/web'
 import { Safe, Win, Doc, KeyValue, log } from 'utils/web'
 import { EventEmitter } from "events"
@@ -15,7 +15,7 @@ AddMeta()
 const cfg: iArgs = {
     event: new EventEmitter(),
     kv: new Persist(),
-    api: new Connection({ name: 'core_data', timeout: 10000 }),
+    api: new Connection({ name: 'core_data', timeout: 10000, token: KeyValue('token') }),
     isDarkMode: true,
     view: '',
     name: '',
@@ -23,21 +23,10 @@ const cfg: iArgs = {
 
 const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
 
-    const [conServer, setConServer] = useState(false)
-
     useEffect(() => {
 
-        const { api, kv } = cfg
-
-        api.on('connect', () => setConServer(true))
-        api.on('disconnect', () => setConServer(false))
-        api.on('connect_error', () => setConServer(false))
-
-        kv.on('token', (value) => {
-
-            log.info(`[Info] -> KV.Listen / ${value}`)
-
-        })
+        let prev = cfg.kv.get('token')
+        cfg.kv.on('token', (next) => prev !== next && location.reload())
 
     }, [])
 
@@ -49,9 +38,23 @@ const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
     cfg.view = view
     cfg.name = name
 
-    if (view === 'file') return <File {...cfg} isDarkMode={isDarkMode} />
-    if (view === 'vehicle') return <Vehicle {...cfg} isDarkMode={isDarkMode} />
-    return <p>{view}</p>
+    if (cfg.kv.get('token')) {
+
+        if (view === 'file') return <File {...cfg} isDarkMode={isDarkMode} />
+        if (view === 'vehicle') return <Vehicle {...cfg} isDarkMode={isDarkMode} />
+        return <p>{view}</p>
+
+    } else {
+
+        return <div style={{ display: 'flex', background: isDarkMode ? '#000' : '#fff', height: '100%', zIndex: 999 }}>
+            <Result
+                style={{ margin: 'auto' }}
+                status="403"
+                subTitle="Sorry, you are not authorized to access"
+            />
+        </div>
+
+    }
 
 }
 

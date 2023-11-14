@@ -3,7 +3,7 @@ import { Sequelize, DataTypes, Op } from 'sequelize'
 import { Delay, Loop, log, decodeENV, moment, dateFormat, Sfy } from 'utils'
 import axios from 'axios'
 
-import { tEvent, roughSizeOfObject, wr, f } from './helper'
+import { authorize, tEvent } from './helper'
 
 export class Listener {
 
@@ -34,10 +34,12 @@ export class Listener {
 
         local.on('vehicle-query', ({ headers, query }, res) => {
 
-            const { verified, role, project: proj } = headers /** verified must be 'yes' **/
+            console.log('AUTH', authorize({ headers }))
+
+            const { proj, user, level } = authorize({ headers })
             const { project, type, name } = query
 
-            log.warn(`[AUTH] ${role} ${proj} `)
+            log.warn(`[AUTH] ${level} ${proj} `)
             log.warn(`[QUER] ${type} ${name} ${project} `)
 
             try {

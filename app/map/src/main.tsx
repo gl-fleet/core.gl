@@ -17,12 +17,6 @@ export default (cfg: iArgs) => {
 
         event.on('message', ({ type, message }) => messageApi.open({ type, content: message }))
 
-        kv.on('token', (value) => {
-
-            log.info(`[Map] -> KV.Listen / ${value}`)
-
-        })
-
     }, [])
 
     useEffect(() => {

@@ -90,3 +90,37 @@ export class InstanceManager {
     }
 
 }
+
+export const authorize = (req: any) => {
+
+    if (req.hasOwnProperty('headers')) {
+
+        const { verified, role } = req.headers
+
+        const roles = ['level-1', 'level-2', 'level-3', 'level-4', 'level-5']
+
+        if (typeof verified === 'string' && verified === 'yes') {
+
+            if (typeof role === 'string' && roles.includes(role)) {
+
+                try {
+
+                    const { project, name } = req.headers
+
+                    return {
+                        proj: project,
+                        user: name,
+                        level: roles.findIndex((s) => s === role) + 1,
+                    }
+
+                } catch { }
+
+            }
+
+        }
+
+    }
+
+    throw new Error('Not Authorized!')
+
+}

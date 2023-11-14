@@ -7,6 +7,8 @@ import { AddMeta, Persist } from './hooks/helper'
 import Main from './main'
 import Settings from './settings'
 
+const { useState, useEffect } = React
+
 AddMeta()
 
 const cfg: iArgs = {
@@ -17,7 +19,19 @@ const cfg: iArgs = {
     isDarkMode: true,
 }
 
-const main = ({ isDarkMode }: { isDarkMode: boolean }) => <Main {...cfg} isDarkMode={isDarkMode} />
+const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
+
+    useEffect(() => {
+
+        let prev = cfg.kv.get('token')
+        cfg.kv.on('token', (next) => prev !== next && location.reload())
+
+    }, [])
+
+    return <Main {...cfg} isDarkMode={isDarkMode} />
+
+}
+
 const settings = ({ isDarkMode }: { isDarkMode: boolean }) => <Settings {...cfg} isDarkMode={isDarkMode} />
 
 Render(main, settings, { maxWidth: '100%' })

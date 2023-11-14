@@ -24,21 +24,19 @@ export default (cfg: iArgs) => {
     const token: any = useRef(kv.get('token'))
     const [did, setDid] = useState(false)
     const [open, setOpen] = useState(false)
-    const [sign, setSign] = useState<any>({ loading: false, payload: null, message: null })
+    const [sign, setSign] = useState<any>({ loading: true, payload: null, message: null })
 
     const signIn = () => {
 
-        // log.info(`[SignIn] ${token.current}`)
-        setSign(handler(null, setSign))
+        handler(null, setSign)
         proxy.get('verify', { token: String(token.current) })
-            .then(e => { setSign(handler(e, setSign)) })
-            .catch(e => { setSign(handler(e, setSign)) })
+            .then(e => { handler(e, setSign) })
+            .catch(e => { handler(e, setSign) })
 
     }
 
     const signOut = () => {
 
-        // log.info(`[SignIn] ${token.current}`)
         kv.set('token', '')
         setSign({ loading: false, payload: null, message: null })
 
@@ -46,19 +44,19 @@ export default (cfg: iArgs) => {
 
     useEffect(() => {
 
-        event.on('sign-in', () => { })
-        event.on('sign-out', () => { })
+        if (token.current) signIn()
+        else setSign({ loading: false, payload: null, message: null })
 
-        token.current && signIn()
         setDid(true)
 
     }, [])
 
     useEffect(() => {
 
-        sign.payload && kv.set('token', token.current)
+        console.log(sign)
+        !sign.loading && kv.set('token', sign.payload === null ? '' : token.current)
 
-    }, [sign.payload])
+    }, [sign.loading])
 
     if (!did) { return null }
 
