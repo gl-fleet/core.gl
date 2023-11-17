@@ -52,7 +52,7 @@ export default (cfg: iArgs) => {
 
     }, [isMapReady])
 
-    return <Row id="main" style={{ height: '100%' }}>
+    return <Row id="main" style={{ filter: 'sepia(1)', height: '100%' }}>
 
         {contextHolder}
         <Auth {...cfg} />

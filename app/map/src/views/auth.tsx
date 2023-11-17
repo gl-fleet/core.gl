@@ -53,7 +53,6 @@ export default (cfg: iArgs) => {
 
     useEffect(() => {
 
-        console.log(sign)
         !sign.loading && kv.set('token', sign.payload === null ? '' : token.current)
 
     }, [sign.loading])

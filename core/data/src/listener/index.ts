@@ -32,15 +32,11 @@ export class Listener {
 
         })
 
-        local.on('vehicle-query', ({ headers, query }, res) => {
+        local.on('vehicle-query', ({ headers, query, user }, res) => {
 
-            console.log('AUTH', authorize({ headers }))
-
-            const { proj, user, level } = authorize({ headers })
             const { project, type, name } = query
-
-            log.warn(`[AUTH] ${level} ${proj} `)
-            log.warn(`[QUER] ${type} ${name} ${project} `)
+            console.log(` * [Authorize]`, user)
+            console.log(` * [Query]`, query)
 
             try {
 
@@ -52,7 +48,7 @@ export class Listener {
 
             } catch (err: any) { return {} }
 
-        })
+        }, true)
 
         local.on('stream', ({ headers, body }, res) => {
 

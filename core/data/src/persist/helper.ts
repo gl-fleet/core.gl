@@ -111,9 +111,9 @@ export const authorize = (req: any) => {
 
         const { verified, role } = req.headers
 
-        const roles = ['level-5', 'level-4', 'level-3', 'level-2', 'level-1']
-
         if (typeof verified === 'string' && verified === 'yes') {
+
+            const roles = ['level-5', 'level-4', 'level-3', 'level-2', 'level-1']
 
             if (typeof role === 'string' && roles.includes(role)) {
 
