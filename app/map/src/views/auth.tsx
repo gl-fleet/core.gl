@@ -25,12 +25,16 @@ export default (cfg: iArgs) => {
     const [did, setDid] = useState(false)
     const [open, setOpen] = useState(false)
     const [sign, setSign] = useState<any>({ loading: true, payload: null, message: null })
+    const [isReloading, setReloading] = useState(false)
 
-    const signIn = () => {
+    const signIn = (idx: number = 0) => {
 
         handler(null, setSign)
         proxy.get('verify', { token: String(token.current) })
-            .then(e => { handler(e, setSign) })
+            .then(e => {
+                setReloading(idx === 0)
+                handler(e, setSign)
+            })
             .catch(e => { handler(e, setSign) })
 
     }
@@ -44,7 +48,7 @@ export default (cfg: iArgs) => {
 
     useEffect(() => {
 
-        if (token.current) signIn()
+        if (token.current) signIn(1)
         else setSign({ loading: false, payload: null, message: null })
 
         setDid(true)
@@ -60,7 +64,7 @@ export default (cfg: iArgs) => {
     if (!did) { return null }
 
     /* Sign(d)-In */
-    if (sign.loading === false && sign.payload !== null) return <div>
+    if (!isReloading && sign.loading === false && sign.payload !== null) return <div>
 
         <Layout style={{ background: 'transparent', position: 'absolute', left: 16, top: 16, padding: 0, zIndex: 100 }}>
             <FloatButton.Group shape="circle" style={{ top: 24, zIndex: 10, height: 180 }}>
@@ -91,7 +95,7 @@ export default (cfg: iArgs) => {
             </FloatButton.Group>
         </Layout>
 
-        <Modal confirmLoading={sign.loading} centered title="Sign-In" open={open} onOk={() => signIn()} onCancel={() => setOpen(false)} destroyOnClose={true}>
+        <Modal confirmLoading={isReloading || sign.loading} centered title="Sign-In" open={open} onOk={() => signIn(0)} onCancel={() => setOpen(false)} destroyOnClose={true}>
 
             <Style />
 
@@ -100,7 +104,7 @@ export default (cfg: iArgs) => {
                 placeholder="Enter your token"
                 onChange={({ target: { value } }) => { token.current = value }}
                 suffix={<SafetyCertificateOutlined className="site-form-item-icon" />}
-                onPressEnter={() => signIn()}
+                onPressEnter={() => signIn(0)}
             />
 
         </Modal>

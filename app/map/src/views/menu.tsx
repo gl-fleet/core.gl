@@ -1,5 +1,5 @@
 import { React, Layout, Menu } from 'uweb'
-import { AppstoreOutlined, CloudUploadOutlined } from '@ant-design/icons'
+import { EnvironmentOutlined, ProfileOutlined, RadarChartOutlined, GatewayOutlined, HighlightOutlined } from '@ant-design/icons'
 import { createGlobalStyle } from 'styled-components'
 
 const Style = createGlobalStyle`
@@ -12,7 +12,7 @@ const Style = createGlobalStyle`
         position: absolute;
         background: transparent;
         left: 16px;
-        top: calc(50% - 80px);
+        top: calc(50% - 110px);
         z-index: 1;
     }
 
@@ -25,33 +25,64 @@ const Style = createGlobalStyle`
 
 export default (cfg: iArgs) => {
 
+    const { event } = cfg
+
     const open = (url: string) => {
+
         const width = screen.width
         const height = screen.height
         const popw = 720
         const poph = 640
         window.open(`/${url}`, url, `top=${(height / 2) - (poph / 2) - 24},left=${window.screenX + (width / 2) - (popw / 2)},width=${popw},height=${poph}`)
+
     }
 
     const items: any = [
         {
-            key: '0',
-            label: 'Applications',
-            icon: <AppstoreOutlined />,
+            key: 'equipments',
+            label: 'Equipments',
+            disabled: true,
+            icon: <EnvironmentOutlined />,
+        },
+        {
+            key: 'coverage',
+            label: 'Coverage',
+            disabled: true,
+            icon: <RadarChartOutlined />,
             children: [
-                { key: '01', label: 'View 1' },
-                { key: '02', label: 'View 2' },
-                { key: '03', label: 'View 3' },
+                { key: 'netw', label: 'Network coverage' },
+                { key: 'sate', label: 'Satellite coverage' },
             ]
         },
         {
-            key: '1',
-            label: 'Uploader',
-            icon: <CloudUploadOutlined />,
+            key: 'views',
+            label: 'Views',
+            disabled: true,
+            icon: <ProfileOutlined />,
             children: [
-                { key: '11', label: <span onClick={() => open('core_info/?view=file&type=dxf-geojson')}>DXF Uploader</span> },
-                { key: '12', label: <span onClick={() => open('core_info/?view=file&type=csv-geojson')}>CSV Uploader</span> },
-                { key: '13', label: <span onClick={() => open('core_info/?view=file&type=json-upload')}>JSON Uploader</span> },
+                { key: 'load', label: 'Loads' },
+                { key: 'dump', label: 'Dumps' },
+                { key: 'cycl', label: 'Cycles' },
+            ]
+        },
+        {
+            key: 'measure',
+            label: 'Measure',
+            icon: <GatewayOutlined />,
+            children: [
+                { key: 'dist', label: 'Distance measure', onClick: () => event.emit('distance.tool.enable') },
+                { key: 'area', label: 'Area measure', onClick: () => event.emit('area.tool.enable') },
+            ]
+        },
+        {
+            key: 'draw',
+            label: 'Draw',
+            icon: <HighlightOutlined />,
+            children: [
+                { key: 'line', label: 'Line', onClick: () => event.emit('geometry.tool.enable', 'LineString') },
+                { key: 'poly', label: 'Poligon', onClick: () => event.emit('geometry.tool.enable', 'Polygon') },
+                { key: 'circ', label: 'Circle', onClick: () => event.emit('geometry.tool.enable', 'Circle') },
+                { key: 'rect', label: 'Rectangle', onClick: () => event.emit('geometry.tool.enable', 'Rectangle') },
             ]
         }
     ]
