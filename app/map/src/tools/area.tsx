@@ -21,7 +21,8 @@ export class AreaTool {
 
         const close = () => {
             if (this.tool.isEnabled()) {
-                message.open({ key: als, type: 'loading', content: 'Clearing ...', duration: 0.5 })
+                // message.open({ key: als, type: 'loading', content: 'Clearing ...', duration: 0.5 })
+                message.destroy(als)
                 this.tool.clear()
                 this.tool.disable()
             }
