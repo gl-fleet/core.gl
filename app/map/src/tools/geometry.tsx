@@ -27,6 +27,7 @@ export class GeometryTool {
                 // message.open({ key: als, type: 'loading', content: 'Clearing ...', duration: 0.5 })
                 message.destroy(als)
                 this.layer.clear()
+                this.layer.hide()
                 this.tool.disable()
             }
         }
@@ -44,6 +45,7 @@ export class GeometryTool {
                 >{value} Tool</Paragraph>
             })
 
+            this.layer.show()
             this.tool.setMode(value).enable()
             this.tool.enable()
 
