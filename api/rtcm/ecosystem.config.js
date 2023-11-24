@@ -7,8 +7,8 @@ const env = encodeENV({
     version: pkg.version,
     mode: process.env.MODE,
     ports: `4020,4021,4022`,
-    uh: `8081,2201`,
-    bn: `8088,2202`,
+    uh: `8081,2101`,
+    bn: `8088,2102`,
 
 })
 
