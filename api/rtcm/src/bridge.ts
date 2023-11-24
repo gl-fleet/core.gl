@@ -5,7 +5,7 @@ export class Bridge {
 
     constructor(API: Host, alias: string, p0: number, p1: number) {
 
-        const _ = {
+        const _: any = {
             source: {
                 port: p0,
                 lastMessage: '',
@@ -14,7 +14,7 @@ export class Bridge {
             destination: {
                 port: p1,
                 lastEvent: '',
-                clients: 0,
+                clients: [],
             }
         }
 
@@ -51,7 +51,16 @@ export class Bridge {
         Loop(() => {
 
             _.source.clients = source.clients.length
-            _.destination.clients = destination.clients.length
+            // _.destination.clients = destination.clients.length
+
+            const clients: any = []
+            destination.clients.map(client => {
+
+                try { clients.push(`${client.remoteAddress}:${client.remotePort}`) } catch { }
+
+            })
+
+            _.destination.clients = clients
 
             API.emit(alias, true)
 
