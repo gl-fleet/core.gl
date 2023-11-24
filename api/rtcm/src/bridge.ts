@@ -20,7 +20,7 @@ export class Bridge {
 
         /** [ Receives message from the Easy Production ] **/
 
-        const source = new NetServer({ port: _.source.port }, (client) => {
+        const source = new NetServer({ host: '0.0.0.0', port: _.source.port }, (client) => {
 
             client.on('data', (data) => {
 
@@ -33,7 +33,7 @@ export class Bridge {
 
         /** [ Sends message to the Equipments ] **/
 
-        const destination = new NetServer({ port: _.destination.port }, (client) => {
+        const destination = new NetServer({ host: '0.0.0.0', port: _.destination.port }, (client) => {
 
             _.destination.lastEvent = `[+] ${Now()}`
 
