@@ -1,5 +1,5 @@
 import { Host, NetServer } from 'unet'
-import { Now, Loop } from 'utils'
+import { Now, Loop, log } from 'utils'
 
 export class Bridge {
 
@@ -25,7 +25,12 @@ export class Bridge {
             client.on('data', (data) => {
 
                 _.source.lastMessage = `Message size ${String(data).length} / Clients ${destination.clients.length}`
-                destination.clients.map(client => client.write(data))
+                destination.clients.map(client => {
+
+                    try { client.write(data) }
+                    catch (err: any) { log.error(`While writing to client / ${err.message}`) }
+
+                })
 
             })
 
