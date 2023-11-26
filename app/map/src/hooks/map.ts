@@ -2,6 +2,33 @@ import { React } from 'uweb'
 import { MapView } from 'uweb/maptalks'
 const { useEffect, useState, useRef } = React
 
+export const CanvasFixer = () => {
+
+    const cv: any = document.querySelector('.maptalks-canvas-layer > canvas')
+    const ct: any = cv.getContext('2d')
+
+    if (ct) {
+
+        setInterval(() => {
+
+            try {
+
+                const p = ct.getImageData(0, 0, 1, 1).data
+
+                if (p[0] === 255 || p[0] === 0) {
+                    console.log('[Blank_Fixer]', p)
+                }
+
+            } catch (err) {
+                console.log('[Blank_Fixer]', err)
+            }
+
+        }, 15 * 1000)
+
+    }
+
+}
+
 export const mapHook = ({ containerId, isDarkMode, conf }: {
     containerId: string,
     isDarkMode: boolean,
@@ -28,7 +55,13 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
             ...conf,
         })
 
-        ref.current.onReady(() => setReady(true))
+        ref.current.onReady(() => {
+
+            setReady(true)
+
+            CanvasFixer()
+
+        })
 
     }, [])
 

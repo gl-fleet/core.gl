@@ -1,5 +1,5 @@
 import { React, Row, Col, notification, message } from 'uweb'
-import { log, Delay, Safe } from 'utils/web'
+import { Delay, Loop, Safe } from 'utils/web'
 import { createGlobalStyle } from 'styled-components'
 
 import { mapHook } from './hooks/map'
@@ -38,13 +38,6 @@ export default (cfg: iArgs) => {
     useEffect(() => {
 
         if (!isMapReady) { return }
-
-        Safe(() => {
-
-            const canvas = document.getElementsByClassName('maptalks-canvas-layer > canvas')
-            console.log(canvas)
-
-        }, 'Blank_Fixer')
 
         Safe(() => {
 
