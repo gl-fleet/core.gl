@@ -41,6 +41,13 @@ export default (cfg: iArgs) => {
 
         Safe(() => {
 
+            const canvas = document.getElementsByClassName('maptalks-canvas-layer > canvas')
+            console.log(canvas)
+
+        }, 'Blank_Fixer')
+
+        Safe(() => {
+
             new DistanceTool(Maptalks, cfg, messageApi)
             new AreaTool(Maptalks, cfg, messageApi)
             new GeometryTool(Maptalks, cfg, messageApi, notifApi)
