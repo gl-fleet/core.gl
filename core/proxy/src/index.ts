@@ -66,7 +66,7 @@ Run({
 
         const example = {
             'vehicle': 'localhost:8010/core_proxy/sign?name=DR101&type=drill&project=Cullinan&expiresIn=180d',
-            'user': 'localhost:8010/core_proxy/sign?name=Tulgaew&role=admin&project=*&expiresIn=180d',
+            'user': 'localhost:8010/core_proxy/sign?name=Tulgaew&role=level-5&project=*&expiresIn=180d',
             'roles': ['level-5', 'level-4', 'level-3', 'level-2', 'level-1'],
         }
 

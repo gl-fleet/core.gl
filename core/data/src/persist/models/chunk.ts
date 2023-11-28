@@ -54,6 +54,7 @@ export class Chunk {
             limit: 5,
             table: this.collection,
             debug: false,
+            authorize: true,
         })
 
     }

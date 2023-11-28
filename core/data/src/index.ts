@@ -17,7 +17,6 @@ const run = () => {
 
     const listener = new Listener(cf)
     const persist = new Persist(cf)
-    // persist.save_event({ type: 'status', name: 'device', data })
 
 }
 
@@ -25,6 +24,6 @@ Safe(async () => {
 
     await cf.sequelize.authenticate()
     run()
-    await cf.sequelize.sync({ force: false })
+    await cf.sequelize.sync({ force: true })
 
 })

@@ -20,7 +20,7 @@
   "dependencies": {
     "ubin": "upacks/ubin#1.1.4",
     "ucan": "upacks/ucan#1.0.4",
-    "unet": "upacks/unet#1.1.27",
+    "unet": "upacks/unet#1.1.28",
     "utils": "upacks/utils#1.1.8",
     "uweb": "upacks/uweb#1.1.32"
   },

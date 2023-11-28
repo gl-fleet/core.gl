@@ -31,6 +31,7 @@ export class Event {
         this.collection = this.sequelize.define(this.name, {
 
             id: { primaryKey: true, type: DataTypes.STRING, defaultValue: () => Uid() },
+            proj: { type: DataTypes.STRING, defaultValue: '' },
             type: { type: DataTypes.STRING, defaultValue: '' },
             name: { type: DataTypes.STRING, defaultValue: '' },
             data: { type: DataTypes.TEXT, defaultValue: '' },
@@ -49,6 +50,11 @@ export class Event {
             channel: this.local,
             limit: 25,
             debug: false,
+            authorize: true,
+            onBeforeSave: (item, auth) => ({
+                proj: auth.proj,
+                ...item,
+            })
         })
 
     }
