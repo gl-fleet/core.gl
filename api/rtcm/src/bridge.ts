@@ -24,7 +24,7 @@ export class Bridge {
 
             client.on('data', (data) => {
 
-                _.source.lastMessage = `Message size ${String(data).length} / Destination Clients ${destination.clients.length}`
+                _.source.lastMessage = `Message size ${String(data).length}`
                 destination.clients.map(client => {
 
                     try { client.write(data) }

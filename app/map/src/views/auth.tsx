@@ -67,7 +67,7 @@ export default (cfg: iArgs) => {
     if (!isReloading && sign.loading === false && sign.payload !== null) return <div>
 
         <Layout style={{ background: 'transparent', position: 'absolute', left: 16, top: 16, padding: 0, zIndex: 100 }}>
-            <FloatButton.Group shape="circle" style={{ top: 24, zIndex: 10, height: 180 }}>
+            <FloatButton.Group shape="circle" style={{ top: 24, zIndex: 10, height: 'fit-content' }}>
                 <FloatButton type="primary" onClick={() => setOpen(true)} icon={<SafetyOutlined />} />
             </FloatButton.Group>
         </Layout>

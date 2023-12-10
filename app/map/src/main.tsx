@@ -11,6 +11,7 @@ import { GeometryTool } from './tools/geometry'
 
 import Menu from './views/menu'
 import Auth from './views/auth'
+import Fatigue from './views/fatigue'
 
 const Style = createGlobalStyle`
 
@@ -86,6 +87,7 @@ export default (cfg: iArgs) => {
         {contextHolderNotification}
 
         <Auth {...cfg} />
+        <Fatigue {...cfg} />
         <Menu {...cfg} />
 
         <Col id='render_0' span={24} style={{ height: '100%' }} />
