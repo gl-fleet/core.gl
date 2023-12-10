@@ -15,13 +15,15 @@ Safe(() => {
     const API = new Host({ name, port: Number(ports[0]) })
     const cache = new NodeCache()
 
-    API.on('select', async () => cache.keys().map(key => cache.get(key)))
+    API.on('select', () => cache.keys().map(key => cache.get(key)))
 
     API.on('insert', async ({ body }) => {
 
         await Promise.all(body.map(async (e: any) => {
 
             if (cache.has(e.alarmId)) return null
+
+            log.info(`[Received] ${e.alarmId}`)
 
             const paths = e.mediaPath.split(';')
             const img_paths = paths.filter((p: string) => p.indexOf('.jpg') !== -1)
