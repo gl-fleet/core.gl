@@ -24,11 +24,20 @@ export default (cfg: iArgs) => {
 
         <Layout style={{ background: 'transparent', position: 'absolute', left: 16, top: 16, padding: 0, zIndex: 100 }}>
             <FloatButton.Group shape="circle" style={{ top: 80, zIndex: 10, height: 'fit-content' }}>
-                <FloatButton tooltip={'Alarm fatigue'} badge={{ count: list.length, color: 'orange' }} type="default" onClick={() => setOpen(true)} icon={<VideoCameraOutlined />} />
+                <FloatButton badge={{ count: list.length, color: 'orange' }} type="default" onClick={() => setOpen(true)} icon={<VideoCameraOutlined />} />
             </FloatButton.Group>
         </Layout>
 
-        <Modal title={<Badge status={status} text="Alarm fatigue" />} confirmLoading={false} centered open={open} onOk={() => { }} onCancel={() => setOpen(false)} destroyOnClose={true}>
+        <Modal
+            title={<Badge status={status} text="Alarm fatigue" />}
+            confirmLoading={false}
+            centered
+            open={open}
+            onOk={() => { }}
+            onCancel={() => setOpen(false)}
+            destroyOnClose={true}
+            footer={null}
+        >
 
             <List
                 itemLayout="horizontal"

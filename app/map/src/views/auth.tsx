@@ -30,12 +30,10 @@ export default (cfg: iArgs) => {
     const signIn = (idx: number = 0) => {
 
         handler(null, setSign)
-        proxy.get('verify', { token: String(token.current) })
-            .then(e => {
-                setReloading(idx === 0)
-                handler(e, setSign)
-            })
-            .catch(e => { handler(e, setSign) })
+        proxy.get('verify', { token: String(token.current) }).then(e => {
+            setReloading(idx === 0)
+            handler(e, setSign)
+        }).catch(e => { handler(e, setSign) })
 
     }
 

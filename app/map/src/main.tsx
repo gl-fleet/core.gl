@@ -67,9 +67,7 @@ export default (cfg: iArgs) => {
                     }
                 }
 
-            }).catch((err) => {
-                console.log(err)
-            })
+            }).catch((err) => console.log(err))
 
             api.on('vehicle-stream', (body: any) => {
                 vcs.live_update(body)
