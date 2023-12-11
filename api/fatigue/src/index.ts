@@ -19,7 +19,7 @@ Safe(() => {
 
         const keys = cache.keys().reverse()
         log.info(`[Cache.keys] ${keys.length}`)
-        return keys.map(key => cache.get(key))
+        return keys.map(key => cache.get(key)).filter(e => e)
 
     })
 
