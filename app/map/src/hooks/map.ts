@@ -50,7 +50,7 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
             isDarkMode,
             simulate: false,
             doubleClickZoom: lowReso,
-            urlTemplate: '', // `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
+            urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
             fps: 30,
             ...conf,
         })

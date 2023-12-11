@@ -2,7 +2,7 @@ import { React, Layout, Modal, Avatar, FloatButton, Badge, List } from 'uweb'
 import { VideoCameraOutlined } from '@ant-design/icons'
 
 import { Connection } from 'unet/web'
-import { KeyValue } from 'utils/web'
+import { KeyValue, moment } from 'utils/web'
 
 const { useState, useRef, useEffect } = React
 
@@ -14,17 +14,11 @@ export default (cfg: iArgs) => {
 
     useEffect(() => {
 
-        const api = new Connection({ name: 'core_fatigue', token: KeyValue('token') })
+        const api = new Connection({ /* proxy: 'http://139.59.115.158', */ name: 'core_fatigue', token: KeyValue('token') })
         api.status((name) => setStatus(name))
-        api.poll('get', {}, (err: any, data: any) => !err && setList(data ?? []))
+        api.poll('select', {}, (err: any, data: any) => !err && setList(data ?? []))
 
     }, [])
-
-    useEffect(() => {
-
-        if (open === false) return
-
-    }, [open])
 
     return <>
 
@@ -38,12 +32,13 @@ export default (cfg: iArgs) => {
 
             <List
                 itemLayout="horizontal"
+                pagination={{ pageSize: 5 }}
                 dataSource={list}
-                renderItem={(item: any, index) => (
-                    <List.Item>
+                renderItem={(item: any) => (
+                    <List.Item key={item.key}>
                         <List.Item.Meta
                             avatar={<Avatar shape="square" size={70} src={item.thumb} />}
-                            title={<a target='_blank' href={item.vids[0] ?? '#'}>{item.id} / {item.desc} {item.vids.length > 0 ? <span style={{ color: 'blue' }}>[Video]</span> : ''}</a>}
+                            title={<a target='_blank' href={item.vids[0] ?? '#'}>{item.id} / {item.desc} {item.vids.length > 0 ? <span style={{ color: 'blue' }}>[Video]</span> : ''} <i>{moment(item.date).fromNow()}</i></a>}
                             description={<>
                                 <span>The system triggered a </span>
                                 <b>{item.desc}</b> alert as the <b>{item.id}</b> vehicle was speeding at <b>{item.speed}</b> km/h.
@@ -53,7 +48,7 @@ export default (cfg: iArgs) => {
                 )}
             />
 
-        </Modal>
+        </Modal >
 
     </>
 

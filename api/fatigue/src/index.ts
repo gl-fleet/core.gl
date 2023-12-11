@@ -15,15 +15,24 @@ Safe(() => {
     const API = new Host({ name, port: Number(ports[0]) })
     const cache = new NodeCache()
 
-    API.on('select', () => cache.keys().map(key => cache.get(key)))
+    API.on('select', () => {
+
+        const keys = cache.keys().reverse()
+        log.info(`[Cache.keys] ${keys.length}`)
+        return keys.map(key => cache.get(key))
+
+    })
 
     API.on('insert', async ({ body }) => {
+
+        let notify = false
 
         await Promise.all(body.map(async (e: any) => {
 
             if (cache.has(e.alarmId)) return null
+            else notify = true
 
-            log.info(`[Received] ${e.alarmId}`)
+            log.info(`[Cache.set] ${e.alarmId}`)
 
             const paths = e.mediaPath.split(';')
             const img_paths = paths.filter((p: string) => p.indexOf('.jpg') !== -1)
@@ -46,12 +55,11 @@ Safe(() => {
                 speed: e.speed,
                 date: e.createDate,
 
-            }, 60 * 15)
+            }, 60 * 10)
 
         }))
 
-        API.emit('select', true)
-
+        notify && API.emit('select', true)
         return 'done'
 
     })
