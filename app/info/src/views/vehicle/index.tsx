@@ -53,7 +53,6 @@ export default (cfg: iArgs) => {
 
                 const update = (obj: any) => {
 
-                    console.log('update', obj)
                     setStream({ loading: false, err: "", data: obj })
                     const { data_gps } = obj
                     const { gps } = data_gps
@@ -64,7 +63,6 @@ export default (cfg: iArgs) => {
 
                 cfg.api.get('vehicle-query', { type, name }).then((obj: any) => {
 
-                    console.log('Get', obj, name)
                     update(obj)
                     if (name) cfg.api.on(name, (obj: any) => update(obj))
 
@@ -80,8 +78,6 @@ export default (cfg: iArgs) => {
                     setTunnel({ loading: false, err: "", data: obj })
 
                 }).catch((e) => setTunnel({ loading: false, err: e.message, data: {} }))
-
-                // cfg.api.on(name, (obj: any) => update(obj))
 
             })
         })

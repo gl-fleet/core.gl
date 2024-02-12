@@ -4,7 +4,6 @@ import { Safe, Win, Doc, KeyValue, log } from 'utils/web'
 import { EventEmitter } from "events"
 
 import { AddMeta, Persist } from './hooks/helper'
-import File from './views/file'
 import Vehicle from './views/vehicle'
 import Settings from './settings'
 import { parseJwt } from './views/vehicle/helper'
@@ -53,7 +52,6 @@ const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
 
     if (cfg.kv.get('token') && authorized === 1) {
 
-        if (view === 'file') return <File {...cfg} isDarkMode={isDarkMode} />
         if (view === 'vehicle') return <Vehicle {...cfg} isDarkMode={isDarkMode} />
         return <p>{view}</p>
 
