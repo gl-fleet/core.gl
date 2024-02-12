@@ -14,7 +14,7 @@ export default (cfg: iArgs) => {
 
     useEffect(() => {
 
-        const api = new Connection({ proxy: 'http://139.59.115.158', name: 'core_fatigue', token: KeyValue('token') })
+        const api = new Connection({ name: 'core_fatigue', token: KeyValue('token') })
         api.status((name) => setStatus(name))
         api.poll('select', {}, (err: any, data: any) => !err && setList(data ?? []))
 
