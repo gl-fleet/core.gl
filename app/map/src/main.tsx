@@ -57,21 +57,23 @@ export default (cfg: iArgs) => {
                 console.log(`[vehicle-query]`, obj)
 
                 if (typeof obj === 'object') {
+
+                    api.on(obj.proj, (body: any) => vcs.live_update(body))
+
                     for (const project in obj) {
-                        for (const type in obj[project]) {
-                            for (const name in obj[project][type]) {
-                                const data = obj[project][type][name]
+                        if (typeof obj[project] === 'object') {
+                            for (const tpe in obj[project]) {
+
+                                const data = obj[project][tpe]
                                 vcs.live_update(data)
+
                             }
                         }
                     }
+
                 }
 
             }).catch((err) => console.log(err))
-
-            api.on('vehicle-stream', (body: any) => {
-                vcs.live_update(body)
-            })
 
         })
 

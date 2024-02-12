@@ -7,6 +7,7 @@ import { AddMeta, Persist } from './hooks/helper'
 import File from './views/file'
 import Vehicle from './views/vehicle'
 import Settings from './settings'
+import { parseJwt } from './views/vehicle/helper'
 
 const { useState, useEffect } = React
 
@@ -23,22 +24,34 @@ const cfg: iArgs = {
 
 const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
 
+    const [authorized, setAuthorized] = useState(0)
+
     useEffect(() => {
 
+        const params = (new URL(document.location.toString())).searchParams
+        const project = params.get('project')
         let prev = cfg.kv.get('token')
+        const body = parseJwt(KeyValue('token'))
+
+        if (body && body.project && (body.project === project || body.project === '*')) setAuthorized(1)
+        else setAuthorized(2)
+
         cfg.kv.on('token', (next) => prev !== next && location.reload())
 
     }, [])
 
-    const view = ((new URL(document.location.toString())).searchParams).get('view') ?? ''
-    const name = ((new URL(document.location.toString())).searchParams).get('name') ?? ''
+    const params = (new URL(document.location.toString())).searchParams
+    const name = params.get('name') ?? ''
+    const view = params.get('view') ?? ''
 
     log.info(`[VIEW] -> Query / ${view} / ${name}`)
 
     cfg.view = view
     cfg.name = name
 
-    if (cfg.kv.get('token')) {
+    if (authorized === 0) return null
+
+    if (cfg.kv.get('token') && authorized === 1) {
 
         if (view === 'file') return <File {...cfg} isDarkMode={isDarkMode} />
         if (view === 'vehicle') return <Vehicle {...cfg} isDarkMode={isDarkMode} />

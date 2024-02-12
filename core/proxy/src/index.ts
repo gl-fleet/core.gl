@@ -58,9 +58,6 @@ Run({
 
         /** 
          * The Sign endpoint must be authorized or set redis:false when initializing the host
-         * ----------------------------------------------------------------------------------
-         * User:    localhost:8010/core_proxy/sign?name=Tulgaew&role=admin&project=*&expiresIn=180d
-         * Vehicle: localhost:8010/core_proxy/sign?name=DR101&type=drill&project=Cullinan&expiresIn=180d
         **/
         API.on('sign', ({ query }: any) => jwt.sign(query, secret, { expiresIn: query.expiresIn ?? "14d" }))
 

@@ -62,12 +62,18 @@ export default (cfg: iArgs) => {
 
                 }
 
-                cfg.api.get('vehicle-query', { project, type, name })
-                    .then((obj: any) => update(obj))
-                    .catch((e) => {
-                        console.log(e)
-                        setStream({ loading: false, err: e.message, data: {} })
-                    })
+                cfg.api.get('vehicle-query', { type, name }).then((obj: any) => {
+
+                    console.log('Get', obj, name)
+                    update(obj)
+                    if (name) cfg.api.on(name, (obj: any) => update(obj))
+
+                }).catch((e) => {
+
+                    console.log(e)
+                    setStream({ loading: false, err: e.message, data: {} })
+
+                })
 
                 cfg.api.get('vehicle-tunnel', { project, type, name }).then((obj: any) => {
 
@@ -75,7 +81,7 @@ export default (cfg: iArgs) => {
 
                 }).catch((e) => setTunnel({ loading: false, err: e.message, data: {} }))
 
-                cfg.api.on(name, (obj: any) => update(obj))
+                // cfg.api.on(name, (obj: any) => update(obj))
 
             })
         })

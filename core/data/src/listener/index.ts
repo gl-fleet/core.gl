@@ -37,14 +37,32 @@ export class Listener {
             const { project, type, name } = query
             console.log(` * [Authorize]`, user)
             console.log(` * [Query]`, query)
+            console.log(` * [Object]`, this.obj)
 
             try {
 
-                if (typeof project === 'string' && typeof type === 'string' && typeof name === 'string') return this.obj[project][type][name]
+                if (user && user.proj) {
+
+                    if (typeof type === 'string' && typeof name === 'string') {
+                        if (user.proj === '*')
+                            for (const x in this.obj)
+                                if (this.obj[x][type][name])
+                                    return this.obj[x][type][name]
+                    }
+
+                    const data = this.obj[user.proj]
+                    return data ? { ...user, ...data } : { ...user }
+
+                }
+
+                return {}
+
+                /* if (typeof project === 'string' && typeof type === 'string' && typeof name === 'string') return this.obj[project][type][name]
                 if (typeof project === 'string' && typeof type === 'string') return this.obj[project][type]
                 if (typeof project === 'string' && project === '*') return this.obj
                 if (typeof project === 'string') return this.obj[project] ?? this.obj
-                return {}
+
+                return {} */
 
             } catch (err: any) { return {} }
 
@@ -65,7 +83,8 @@ export class Listener {
                 const data = { project, type, name, ...body, last: Date.now() }
                 this.obj[project][type][name] = data
 
-                local.emit('vehicle-stream', data)
+                local.emit('*', data) // channel * for admin
+                local.emit(project, data)
                 local.emit(name, data)
                 return 'success'
 
