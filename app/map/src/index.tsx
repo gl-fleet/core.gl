@@ -1,6 +1,6 @@
 import { React, Render } from 'uweb'
 import { Connection } from 'unet/web'
-import { KeyValue } from 'utils/web'
+import { parseJwt, KeyValue } from 'utils/web'
 import { EventEmitter } from "events"
 
 import { AddMeta, Persist } from './hooks/helper'
@@ -25,6 +25,11 @@ const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
 
         let prev = cfg.kv.get('token')
         cfg.kv.on('token', (next) => prev !== next && location.reload())
+
+        window.addEventListener("focus", () => {
+            cfg.proxy.connect()
+            cfg.api.connect()
+        })
 
     }, [])
 

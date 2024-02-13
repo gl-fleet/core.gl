@@ -1,12 +1,11 @@
 import { React, Render, Result } from 'uweb'
 import { Connection } from 'unet/web'
-import { Safe, Win, Doc, KeyValue, log } from 'utils/web'
+import { parseJwt, KeyValue, log } from 'utils/web'
 import { EventEmitter } from "events"
 
 import { AddMeta, Persist } from './hooks/helper'
 import Vehicle from './views/vehicle'
 import Settings from './settings'
-import { parseJwt } from './views/vehicle/helper'
 
 const { useState, useEffect } = React
 
@@ -34,6 +33,8 @@ const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
 
         if (body && body.project && (body.project === project || body.project === '*')) setAuthorized(1)
         else setAuthorized(2)
+
+        window.addEventListener("focus", () => cfg.api.connect())
 
         cfg.kv.on('token', (next) => prev !== next && location.reload())
 

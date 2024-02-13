@@ -2,7 +2,7 @@ import { React, Layout, Modal, Avatar, FloatButton, Badge, List } from 'uweb'
 import { VideoCameraOutlined } from '@ant-design/icons'
 
 import { Connection } from 'unet/web'
-import { KeyValue, moment } from 'utils/web'
+import { KeyValue, moment, parseJwt } from 'utils/web'
 
 const { useState, useRef, useEffect } = React
 
@@ -11,16 +11,26 @@ export default (cfg: iArgs) => {
     const [open, setOpen] = useState(false)
     const [status, setStatus] = useState<any>('processing')
     const [list, setList] = useState([])
+    const [show, setShow] = useState(false)
 
     useEffect(() => {
 
-        const api = new Connection({ name: 'core_fatigue', token: KeyValue('token') })
+        const token = cfg.kv.get('token') ?? ''
+        const body = parseJwt(token)
+
+        if (body && body.project && ['*', 'VMP'].includes(body.project)) {
+            setShow(true)
+        }
+
+        const api = new Connection({ name: 'core_fatigue', token })
         api.status((name) => setStatus(name))
         api.poll('select', {}, (err: any, data: any) => !err && setList(data ?? []))
 
+        window.addEventListener("focus", () => api.connect())
+
     }, [])
 
-    return <>
+    return show ? <>
 
         <Layout style={{ background: 'transparent', position: 'absolute', left: 16, top: 16, padding: 0, zIndex: 100 }}>
             <FloatButton.Group shape="circle" style={{ top: 80, zIndex: 10, height: 'fit-content' }}>
@@ -59,6 +69,6 @@ export default (cfg: iArgs) => {
 
         </Modal >
 
-    </>
+    </> : null
 
 }

@@ -69,7 +69,7 @@ export const UpdateStatus = ({ data }: any) => {
 
 }
 
-export const parseJwt = (token: string) => {
+/* export const parseJwt = (token: string) => { Merged into upack/utils
 
     try {
 
@@ -83,4 +83,4 @@ export const parseJwt = (token: string) => {
 
     } catch (err) { return null }
 
-}
+} */
