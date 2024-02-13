@@ -83,9 +83,14 @@ export class Listener {
                 const data = { project, type, name, ...body, last: Date.now() }
                 this.obj[project][type][name] = data
 
-                local.emit('*', data) // channel * for admin
-                local.emit(project, data)
-                local.emit(name, data)
+                // local.emit('*', data) // channel * for admin
+                // local.emit(project, data)
+                // local.emit(name, data)
+
+                local.emitBy('*', data, (user) => user.proj !== null)
+                local.emitBy(project, data, (user) => typeof user.proj === 'string' && user.proj === project)
+                local.emitBy(name, data, (user) => typeof user.proj === 'string' && user.proj === project)
+
                 return 'success'
 
             } else { res.status(403).end('Not authorized!') }

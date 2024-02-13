@@ -2,7 +2,7 @@ import { React, Layout, Modal, Avatar, FloatButton, Badge, List } from 'uweb'
 import { VideoCameraOutlined } from '@ant-design/icons'
 
 import { Connection } from 'unet/web'
-import { KeyValue, moment, parseJwt } from 'utils/web'
+import { moment, parseJwt } from 'utils/web'
 
 const { useState, useRef, useEffect } = React
 
