@@ -52,26 +52,19 @@ export default (cfg: iArgs) => {
 
             const vcs = new Vehicles(Maptalks)
 
-            api.get('vehicle-query', { project: '*' }).then((obj: any) => {
+            api.get('vehicle-query', {}).then((ls: any) => {
 
-                console.log(`[vehicle-query]`, obj)
+                console.log(`[vehicle-query]`, ls)
 
-                if (typeof obj === 'object') {
+                Array.isArray(ls) && ls.map((obj) => {
 
-                    api.on(obj.proj, (body: any) => vcs.live_update(body))
+                    cfg.api.on(obj.project, (update: any) => vcs.live_update(update))
 
-                    for (const project in obj) {
-                        if (typeof obj[project] === 'object') {
-                            for (const tpe in obj[project]) {
+                    obj.equipments.map((item: any) => {
+                        vcs.live_update(item)
+                    })
 
-                                const data = obj[project][tpe]
-                                vcs.live_update(data)
-
-                            }
-                        }
-                    }
-
-                }
+                })
 
             }).catch((err) => console.log(err))
 

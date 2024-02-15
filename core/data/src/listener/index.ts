@@ -5,6 +5,9 @@ import axios from 'axios'
 
 import { authorize, tEvent } from './helper'
 
+const iss = (s: any) => typeof s === 'string' && s !== ''
+const isn = (n: any) => typeof n === 'number' && isNaN(n) === false
+
 export class Listener {
 
     public local: Host
@@ -25,46 +28,50 @@ export class Listener {
 
         this.setup_pi_tunnel()
 
-        local.on('vehicle-tunnel', async ({ headers, query }) => {
+        local.on('vehicle-tunnel', async ({ query }) => {
 
             const { name } = query
             return await this.pi_get_device_info(name)
 
         })
 
-        local.on('vehicle-query', ({ headers, query, user }, res) => {
+        local.on('vehicle-query', ({ query, user }) => {
 
-            const { project, type, name } = query
-            console.log(` * [Authorize]`, user)
-            console.log(` * [Query]`, query)
-            console.log(` * [Object]`, this.obj)
+            console.log(` * [on:vehicle-query]`, user)
+            console.log(` * [on:vehicle-query]`, query)
+            console.log(` * [on:vehicle-query]`, this.obj)
 
-            try {
+            const project = user?.proj ?? ''
+            const { type, name }: any = query
+            const projects = Object.keys(this.obj)
 
-                if (user && user.proj) {
+            const normalize = (prj = '', obj: any = {}) => {
 
-                    if (typeof type === 'string' && typeof name === 'string') {
-                        if (user.proj === '*')
-                            for (const x in this.obj)
-                                if (this.obj[x][type][name])
-                                    return this.obj[x][type][name]
+                const arr: any = []
+
+                for (const _type in obj) {
+                    for (const _name in obj[_type]) {
+                        arr.push(obj[_type][_name])
                     }
-
-                    const data = this.obj[user.proj]
-                    return data ? { ...user, ...data } : { ...user }
-
                 }
 
-                return {}
+                return { project: prj, equipments: arr }
 
-                /* if (typeof project === 'string' && typeof type === 'string' && typeof name === 'string') return this.obj[project][type][name]
-                if (typeof project === 'string' && typeof type === 'string') return this.obj[project][type]
-                if (typeof project === 'string' && project === '*') return this.obj
-                if (typeof project === 'string') return this.obj[project] ?? this.obj
+            }
 
-                return {} */
+            if (iss(project) && iss(type) && iss(name)) return projects
+                .filter((proj) => [proj, '*'].includes(project) && this.obj[proj]?.[type]?.[name] !== undefined)
+                .map((key) => normalize(key, this.obj[key]))
 
-            } catch (err: any) { return {} }
+            if (iss(project) && iss(type)) return projects
+                .filter((proj) => [proj, '*'].includes(project) && this.obj[proj]?.[type] !== undefined)
+                .map((key) => normalize(key, this.obj[key]))
+
+            if (iss(project)) return projects
+                .filter((proj) => [proj, '*'].includes(project) && this.obj[proj] !== undefined)
+                .map((key) => normalize(key, this.obj[key]))
+
+            return []
 
         }, true)
 
@@ -72,24 +79,23 @@ export class Listener {
 
             const { project, type, name } = headers
 
-            log.warn(`[Stream] -> ${project} ${type} ${name}`)
-
             if (typeof project === 'string' && typeof type === 'string' && typeof name === 'string') {
+
+                log.warn(` * [emit:stream] -> ${project} ${type} ${name}`)
 
                 if (!this.obj.hasOwnProperty(project)) { this.obj[project] = {} }
                 if (!this.obj[project].hasOwnProperty(type)) { this.obj[project][type] = {} }
                 if (!this.obj[project][type].hasOwnProperty(name)) { this.obj[project][type][name] = {} }
 
                 const data = { project, type, name, ...body, last: Date.now() }
+
                 this.obj[project][type][name] = data
 
-                // local.emit('*', data) // channel * for admin
-                // local.emit(project, data)
-                // local.emit(name, data)
-
-                local.emitBy('*', data, (user) => user.proj !== null)
-                local.emitBy(project, data, (user) => typeof user.proj === 'string' && user.proj === project)
-                local.emitBy(name, data, (user) => typeof user.proj === 'string' && user.proj === project)
+                // local.emitBy('*', data, (user) => user.proj !== null)
+                // local.emitBy(project, data, (user) => typeof user.proj === 'string' && user.proj === project)
+                // local.emitBy(name, data, (user) => typeof user.proj === 'string' && user.proj === project)
+                local.emitBy(project, data, (user) => [project, '*'].includes(user.proj))
+                local.emitBy(name, data, (user) => [project, '*'].includes(user.proj))
 
                 return 'success'
 

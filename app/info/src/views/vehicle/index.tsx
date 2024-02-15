@@ -61,10 +61,17 @@ export default (cfg: iArgs) => {
 
                 }
 
-                cfg.api.get('vehicle-query', { type, name }).then((obj: any) => {
+                cfg.api.get('vehicle-query', { name, type }).then((ls: any) => {
 
-                    update(obj)
                     if (name) cfg.api.on(name, (obj: any) => update(obj))
+
+                    Array.isArray(ls) && ls.map((obj) => {
+
+                        obj.equipments.map((item: any) => {
+                            update(item)
+                        })
+
+                    })
 
                 }).catch((e) => {
 
