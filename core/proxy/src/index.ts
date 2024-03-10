@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { Core, Host } from 'unet'
-import { dateFormat, moment, Run, decodeENV, Sfy, log } from 'utils'
+import { moment, Run, decodeENV, log } from 'utils'
 import { Manage } from './pm2'
 
 const { name, version, mode, ports, secret } = decodeENV()
@@ -20,6 +20,7 @@ Run({
             auth: (req: any, res: any, next: any) => {
                 try {
 
+                    console.log(req.headers)
                     req.headers.verified = 'no'
                     const verify: any = jwt.verify(req.headers.authorization.split(' ')[1], secret)
                     if (typeof verify === 'object') req.headers = { ...req.headers, ...verify, verified: 'yes' }
@@ -62,7 +63,7 @@ Run({
         API.on('sign', ({ query }: any) => jwt.sign(query, secret, { expiresIn: query.expiresIn ?? "14d" }))
 
         const example = {
-            'vehicle': 'localhost:8010/core_proxy/sign?name=DR101&type=drill&project=Cullinan&expiresIn=180d',
+            'vehicle': 'localhost:8010/core_proxy/sign?name=DR101&type=drill&project=Cullinan&expiresIn=360d',
             'user': 'localhost:8010/core_proxy/sign?name=Tulgaew&role=level-5&project=*&expiresIn=180d',
             'roles': ['level-5', 'level-4', 'level-3', 'level-2', 'level-1'],
         }

@@ -119,12 +119,12 @@ export default (cfg: iArgs) => {
                     defaultActiveKey="1"
                     items={[
                         {
-                            label: <b><FolderOpenOutlined />Files</b>,
+                            label: <b><FolderOpenOutlined />{' '}Files</b>,
                             key: '1',
                             children: <Files {...cfg} />
                         },
                         {
-                            label: <b><SwapOutlined />Stream</b>,
+                            label: <b><SwapOutlined />{' '}Stream</b>,
                             key: '2',
                             children: <div>
                                 <ReactJson
@@ -135,7 +135,7 @@ export default (cfg: iArgs) => {
                             </div>
                         },
                         {
-                            label: <b><AndroidOutlined />Board</b>,
+                            label: <b><AndroidOutlined />{' '}Board</b>,
                             key: '3',
                             children: <div>
                                 <ReactJson
