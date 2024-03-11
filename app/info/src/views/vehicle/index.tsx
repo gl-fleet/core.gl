@@ -9,20 +9,8 @@ import { Style, getVehicle, UpdateStatus } from './helper'
 import StreamView from './stream'
 import Files from './files'
 
-const { useEffect, useState, useRef } = React
+const { useEffect, useState } = React
 const { Title, Text } = Typography
-
-const marks: any = {
-    0: '0°C',
-    26: '26°C',
-    37: '37°C',
-    100: {
-        style: {
-            color: '#f50',
-        },
-        label: <strong>100°C</strong>,
-    },
-}
 
 export default (cfg: iArgs) => {
 
@@ -103,6 +91,7 @@ export default (cfg: iArgs) => {
                 <Title level={4} style={{ position: 'absolute', top: 16, right: 24, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>{oget('***')(stream.data, 'data_activity', 'state')}</Title>
                 <div style={{ position: 'absolute', bottom: 16, right: 24, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>
                     <Space wrap>
+                        <Button type="dashed" ghost >{stream.data?.value?.screen ?? '0'}</Button>
                         <Tooltip title={tablet ? 'VNC: Tablet connected' : 'VNC: Tablet disconnected!'}>
                             <Button danger={!tablet} type="primary" ghost icon={<DesktopOutlined />} />
                         </Tooltip>
