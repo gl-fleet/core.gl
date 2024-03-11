@@ -91,7 +91,7 @@ export default (cfg: iArgs) => {
                 <Title level={4} style={{ position: 'absolute', top: 16, right: 24, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>{oget('***')(stream.data, 'data_activity', 'state')}</Title>
                 <div style={{ position: 'absolute', bottom: 16, right: 24, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>
                     <Space wrap>
-                        <Button type="dashed" ghost >{stream.data?.value?.screen ?? '0'}</Button>
+                        <Button type="dashed" ghost >SC: {stream.data?.value?.screen ?? '0'}</Button>
                         <Tooltip title={tablet ? 'VNC: Tablet connected' : 'VNC: Tablet disconnected!'}>
                             <Button danger={!tablet} type="primary" ghost icon={<DesktopOutlined />} />
                         </Tooltip>
