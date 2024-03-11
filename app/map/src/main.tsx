@@ -21,7 +21,7 @@ const Style = createGlobalStyle`
 
 `
 
-const { useEffect, useState, useRef } = React
+const { useEffect, useRef } = React
 
 export default (cfg: iArgs) => {
 
