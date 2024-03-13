@@ -7,7 +7,7 @@ import fs from 'fs'
 
 import { chunks, Responsive, Save } from '../helper'
 
-const { me } = decodeENV()
+const { me, replication_debug } = decodeENV()
 
 export class Chunk {
 
@@ -53,7 +53,7 @@ export class Chunk {
             channel: this.local,
             limit: 5,
             table: this.collection,
-            debug: false,
+            debug: replication_debug === 'true',
             authorize: true,
         })
 
@@ -128,10 +128,13 @@ export class Chunk {
 
     get_distinct = async (query: any) => {
         return await this.collection.findAll({
-            attributes: ['name', 'type', 'src', 'dst', 'createdAt', 'updatedAt', [Sequelize.fn('COUNT', Sequelize.col('offset')), 'count']],
-            where: { ...query, deletedAt: null },
-            order: [['updatedAt', 'DESC']],
-            group: 'name',
+            attributes: ['name', 'type', 'src', 'dst',
+                [Sequelize.fn('COUNT', Sequelize.col('offset')), 'count'],
+                [Sequelize.fn('MAX', Sequelize.col('createdAt')), 'createdAt'],
+                [Sequelize.fn('MAX', Sequelize.col('updatedAt')), 'updatedAt'],
+            ],
+            where: { ...query, deletedAt: null }, order: [['updatedAt', 'DESC']],
+            group: ['name', 'type', 'src', 'dst'],
         })
     }
 

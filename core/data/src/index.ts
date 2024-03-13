@@ -1,22 +1,27 @@
 import { Sequelize } from 'sequelize'
-import { Host, Connection } from 'unet'
-import { decodeENV, Collect, Safe, env, log } from 'utils'
+import { Host } from 'unet'
+import { decodeENV, Safe, env, log } from 'utils'
 
 import { Listener } from './listener'
 import { Persist } from './persist'
 
-const { name, version, mode, me, db_name, db_user, db_pass } = decodeENV()
+const { name, version, mode, db_name, db_user, db_pass } = decodeENV()
 log.success(`"${env.npm_package_name}" <${version}> module is running on "${process.pid}" / [${mode}] 🚀🚀🚀\n`)
 
-console.log(decodeENV())
-
 const cf: any = {
-    local: new Host({ name, port: 8040 }),
+    local: new Host({ name, port: 8040, timeout: 15000 }),
     // sequelize: new Sequelize({ dialect: 'sqlite', storage: `../../${me}_${name}.sqlite`, logging: false }),
     sequelize: new Sequelize(db_name, db_user, db_pass, {
-        host: '139.59.115.158',
+        host: mode === 'development' ? '139.59.115.158' : 'localhost',
         dialect: 'postgres',
-        pool: { max: 16, min: 4, acquire: 30000, idle: 15000 }
+        pool: { max: 16, min: 4, acquire: 30000, idle: 15000 },
+        logging: (sql, timing: any) => {
+
+            // const context = `${timing.type} ${timing.model}`
+            // console.log(timing)
+            // console.log(context + '\n')
+            // log.warn(`[SQL]: ${sql.slice(21, 96)}...`)
+        },
     }),
 }
 
