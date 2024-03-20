@@ -1,9 +1,9 @@
-import { Host, Connection, ReplicaMaster, ReplicaSlave } from 'unet'
-import { decodeENV, Uid, Now, Sfy, Loop, Safe, moment, dateFormat, log, Delay } from 'utils'
+import { Host, ReplicaMaster } from 'unet'
+import { decodeENV, Uid, Now, Sfy, moment, dateFormat } from 'utils'
 import { DataTypes, Model, ModelStatic } from 'sequelize'
 import { Sequelize, Op } from 'sequelize'
 
-import { Responsive } from '../helper'
+import { Responsive } from './utils'
 
 const { me } = decodeENV()
 
@@ -43,20 +43,6 @@ export class Event {
 
         }, { indexes: [{ unique: false, fields: ['type', 'src', 'dst', 'updatedAt'] }] })
 
-        new ReplicaMaster({
-            me: me,
-            name: this.name,
-            table: this.collection,
-            channel: this.local,
-            limit: 25,
-            debug: false,
-            authorize: true,
-            onBeforeSave: (item, auth) => ({
-                proj: auth.proj,
-                ...item,
-            })
-        })
-
     }
 
     table_serve = () => {
@@ -66,19 +52,6 @@ export class Event {
         this.local.on(`del-${this.name}`, async (req: any) => await this.del(req.body))
 
         this.local.on(`get-${this.name}-latest`, async (req) => this.auth(req) && await this.get_latest())
-
-        const sub = [10 /** Days **/, 13 /** Hours **/, 16 /** Minutes **/]
-        this.local.on('test', async () => this.collection.findAll({
-            attributes: [
-                'data',
-                'updatedAt',
-                [Sequelize.literal(`SUBSTRING(updatedAt, 1, ${sub[1]})`), 'updatedIn']
-            ],
-            where: { src: 'SV101', deletedAt: null },
-            order: [['updatedAt', 'ASC']],
-            group: ['updatedIn'],
-            limit: 12,
-        }))
 
     }
 

@@ -1,13 +1,13 @@
-import { Host, Connection, ReplicaMaster, ReplicaSlave } from 'unet'
-import { decodeENV, Uid, Now, Sfy, Jfy } from 'utils'
+import { Host } from 'unet'
+import { decodeENV, Uid, Now, Jfy } from 'utils'
 import { DataTypes, Model, ModelStatic } from 'sequelize'
 import { Sequelize } from 'sequelize'
 import ogr2ogr from 'ogr2ogr'
 import fs from 'fs'
 
-import { chunks, Responsive, Save } from '../helper'
+import { chunks, Responsive, Save } from './utils'
 
-const { me, replication_debug } = decodeENV()
+const { me } = decodeENV()
 
 export class Chunk {
 
@@ -46,16 +46,6 @@ export class Chunk {
             deletedAt: { type: DataTypes.STRING, defaultValue: null },
 
         }, { indexes: [{ unique: false, fields: ['type', 'src', 'dst', 'updatedAt'] }] })
-
-        new ReplicaMaster({
-            me: me,
-            name: this.name,
-            channel: this.local,
-            limit: 5,
-            table: this.collection,
-            debug: replication_debug === 'true',
-            authorize: true,
-        })
 
     }
 
