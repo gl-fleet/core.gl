@@ -26,10 +26,10 @@ Safe(async () => {
     new Event(cf)
     new Chunk(cf)
 
-    const replica = new rMaster({ api: cf.host, sequel: cf.sequelize })
+    const replica = new rMaster({ api: cf.local, sequel: cf.sequelize })
 
-    replica.cb = (...n: any) => {
-        console.log(n)
+    replica.cb = (...e: any) => {
+        console.log(`[M] Trigger:    ${e}`)
     }
 
     await cf.sequelize.sync({ force: false })

@@ -57,6 +57,7 @@ export class Chunk {
 
         this.local.on(`get-${this.name}-merged`, async ({ query }: any) => await this.get_merged(query))
         this.local.on(`get-${this.name}-distinct`, async ({ query }) => await this.get_distinct(query))
+
         this.local.on("dxf-geojson", this.upload_dxf)
         this.local.on("csv-geojson", this.upload_csv)
         this.local.on("json-upload", this.upload_json)
