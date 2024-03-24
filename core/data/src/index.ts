@@ -28,9 +28,7 @@ Safe(async () => {
 
     const replica = new rMaster({ api: cf.local, sequel: cf.sequelize })
 
-    replica.cb = (...e: any) => {
-        console.log(`[M] Trigger:    ${e}`)
-    }
+    // replica.cb = (...e: any) => console.log(`[M] Trigger:    ${e}`)
 
     await cf.sequelize.sync({ force: false })
 
