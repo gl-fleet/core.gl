@@ -1,13 +1,13 @@
 import { React, Render } from 'uweb'
 import { Connection } from 'unet/web'
-import { parseJwt, KeyValue } from 'utils/web'
+import { KeyValue } from 'utils/web'
 import { EventEmitter } from "events"
 
 import { AddMeta, Persist } from './hooks/helper'
 import Main from './main'
 import Settings from './settings'
 
-const { useState, useEffect } = React
+const { useEffect } = React
 
 AddMeta()
 
