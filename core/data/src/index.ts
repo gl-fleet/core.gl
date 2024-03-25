@@ -10,7 +10,7 @@ const { name, version, mode, db_name, db_user, db_pass } = decodeENV()
 log.success(`"${env.npm_package_name}" <${version}> module is running on "${process.pid}" / [${mode}] 🚀🚀🚀\n`)
 
 const cf: any = {
-    local: new Host({ name, port: 8040, timeout: 15000 }),
+    local: new Host({ name, port: 8040, timeout: 10000 }),
     sequelize: new Sequelize(db_name, db_user, db_pass, {
         dialect: 'postgres',
         host: mode === 'development' ? '139.59.115.158' : 'localhost',
@@ -28,8 +28,8 @@ Safe(async () => {
 
     const replica = new rMaster({ api: cf.local, sequel: cf.sequelize })
 
-    // replica.cb = (...e: any) => console.log(`[M] Trigger:    ${e}`)
+    replica.cb = (...e: any) => console.log(`[M] Trigger:    ${e}`)
 
-    await cf.sequelize.sync({ force: false })
+    await cf.sequelize.sync({ force: false, alter: true })
 
 })
