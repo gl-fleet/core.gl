@@ -1,9 +1,7 @@
-import { Host, ReplicaMaster } from 'unet'
-import { decodeENV, Uid, Now, Sfy, moment, dateFormat } from 'utils'
+import { Host } from 'unet'
+import { decodeENV, Uid, Now, Sfy } from 'utils'
 import { DataTypes, Model, ModelStatic } from 'sequelize'
 import { Sequelize, Op } from 'sequelize'
-
-import { Responsive } from './utils'
 
 const { me } = decodeENV()
 
@@ -46,86 +44,23 @@ export class Event {
 
     table_serve = () => {
 
-        this.local.on(`get-${this.name}`, async (req: any) => await this.get(req.query))
-        this.local.on(`set-${this.name}`, async (req: any) => await this.set(req.body))
-        this.local.on(`del-${this.name}`, async (req: any) => await this.del(req.body))
-
-        this.local.on(`get-${this.name}-latest`, async (req) => this.auth(req) && await this.get_latest())
+        this.local.on(`get-${this.name}-status`, async (req: any) => await this.getStatus(req.query))
 
     }
 
     /*** *** *** @___Table_Queries___ *** *** ***/
 
-    auth = ({ headers }: any) => {
+    getStatus = async ({ id = '', updatedAt = '', limit = 10 }) => await this.collection.findAll({
 
-        const { verified } = headers
-        if (typeof verified === 'string' && verified === 'yes') return true
-        throw new Error('Not Authorized!')
-
-    }
-
-    get = async (args: any) => {
-
-        const { options } = args
-        delete args['options']
-
-        return await this.collection.findAll({
-            where: { ...args, deletedAt: null },
-            order: [['updatedAt', 'ASC']],
-            ...options
-        })
-
-    }
-
-    set = async (args: any) => {
-
-        const { options } = args
-        delete args['options']
-
-        if (args.id) { /** gonna update **/
-
-            const [updatedRows] = await this.collection.update({ ...args, updatedAt: Now() }, {
-                where: { id: args.id, src: me }, ...options, individualHooks: true
-            })
-
-            if (updatedRows > 0) return `${updatedRows} ${updatedRows > 1 ? 'rows' : 'row'} updated!`
-            else throw new Error(`Permission denied!`)
-
-        } else {
-
-            const [instance] = await this.collection.upsert({ ...args, data: Sfy(args.data) }, { ...options })
-            return `${instance.id} is created!`
-
-        }
-
-    }
-
-    del = async ({ id }: { id: string }) => {
-
-        const [updatedRows] = await this.collection.update({ updatedAt: Now(), deletedAt: Now() }, { where: { id: id, src: me }, individualHooks: true })
-        if (updatedRows > 0) return `${updatedRows} ${updatedRows > 1 ? 'rows' : 'row'} deleted!`
-        else throw new Error(`Permission denied!`)
-
-    }
-
-    event = async (cb: any, delay: number = 250) => {
-
-        const { shake, call } = new Responsive()
-        this.collection.afterCreate(() => { shake() })
-        this.collection.afterUpdate(() => { shake() })
-        this.collection.afterUpsert(() => { shake() })
-        call(cb, delay)
-
-    }
-
-    get_latest = async () => await this.collection.findAll({
-
-        attributes: ['type', 'name', 'src', 'data', [Sequelize.fn('MAX', Sequelize.col('updatedAt')), 'updatedAt']],
         where: {
-            updatedAt: { [Op.gte]: moment().add(-7, 'days').format(dateFormat) },
+            type: 'status',
+            dst: 'master',
+            [Op.or]: [{ updatedAt: { [Op.gt]: updatedAt } }, { id: { [Op.gt]: id }, updatedAt: { [Op.eq]: updatedAt } }],
             deletedAt: null,
         },
-        group: ["src"],
+        order: [['updatedAt', 'ASC'], ['id', 'ASC']],
+        limit: limit,
+        raw: true,
 
     })
 

@@ -1,16 +1,19 @@
 import { Sequelize } from 'sequelize'
-import { Host, rMaster } from 'unet'
+import { Host, Connection } from 'unet'
 import { decodeENV, Safe, env, log } from 'utils'
 
-import { Event } from './events'
-import { Chunk } from './chunks'
+import { Enums } from './enums'
+
+import { Locations } from './locations'
+import { Coverages } from './coverages'
 
 const { name, version, mode, db_name, db_user, db_pass } = decodeENV()
 
 log.success(`"${env.npm_package_name}" <${version}> module is running on "${process.pid}" / [${mode}] 🚀🚀🚀\n`)
 
-const cf: any = {
-    local: new Host({ name, port: 8040, timeout: 10000 }),
+const cf = {
+    local: new Host({ name, port: 8050, timeout: 10000 }),
+    core_data: new Connection({ name: 'core_data' }),
     sequelize: new Sequelize(db_name, db_user, db_pass, {
         dialect: 'postgres',
         host: mode === 'development' ? '139.59.115.158' : 'localhost',
@@ -23,12 +26,20 @@ Safe(async () => {
 
     await cf.sequelize.authenticate()
 
-    new Event(cf)
-    new Chunk(cf)
+    const enums = new Enums(cf)
+    const locations = new Locations(cf)
+    const coverages = new Coverages(cf)
 
-    const replica = new rMaster({ api: cf.local, sequel: cf.sequelize })
+    /* Following tables are generated from events and chunks */
 
-    replica.cb = (table: string, src: any) => cf.local.emit('collect', { table, src })
+    const gps_current = {}
+    const gps_history = {}
+    const gps_activity = {} /** This requires JOB **/
+
+    // const coverages = {}
+    const shapes = {}
+    const states = {}
+    const files = {}
 
     await cf.sequelize.sync({ force: false, alter: true })
 
