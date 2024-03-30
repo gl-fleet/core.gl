@@ -23,6 +23,7 @@ export default (cfg: iArgs) => {
         const project = params.get('project')
         const type = params.get('type')
         const name = params.get('name')
+        const key = `${project}.${type}.${name}`
         let vehicle: Vehicle
 
         const map = new MapView({
@@ -48,6 +49,25 @@ export default (cfg: iArgs) => {
                     vehicle && vehicle.update(data_gps)
 
                 }
+
+                console.log(key)
+                cfg.core_collect?.on(key, (location) => {
+
+                    const { data } = location
+                    const [_g1, _g2, _gps, _gsm, _rtcm] = data.split('|')
+                    const g1 = _g1.split(',')
+                    const g2 = _g2.split(',')
+                    const gps = _gps.split(',')
+                    const gsm = _gsm.split(',')
+                    const [rtcm, activity, tablet] = _rtcm.split(',')
+
+                    console.log(g1, g2)
+                    console.log(gps)
+                    console.log(gsm)
+                    console.log(rtcm, activity, tablet)
+                    console.log(``)
+
+                })
 
                 cfg.api.get('vehicle-query', { name, type }).then((ls: any) => {
 

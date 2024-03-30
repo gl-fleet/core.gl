@@ -13,7 +13,7 @@ export class Coverages {
     _ = {
         days: 7,
         size: 4,
-        limit: 50,
+        limit: 100,
     }
 
     constructor({ local, core_data, sequelize }: {
@@ -103,6 +103,7 @@ export class Coverages {
     executer = async () => {
 
         /** ** Data pulling **  **/
+        const alias = `[${this.name}.executer]`
         const enums = this.sequelize.models['enums']
 
         const { value = ',' }: any = (await enums.findOne({ where: { type: 'collect', name: this.name, deletedAt: null }, raw: true }) ?? {})
@@ -119,21 +120,25 @@ export class Coverages {
             try {
 
                 const parsed: any = Jfy(x.data)
-                const { data, data_gps1, data_gps2, data_gps, data_gsm, data_rtcm, data_activity } = parsed
-                const [proj, type, name, expire] = data
+                const { data, data_gps1, data_gps, data_gsm } = parsed
+                const [proj, type] = data
                 const { utm } = data_gps
                 const [est, nrt] = utm
 
-                /** Indexing ['proj', 'type', 'est', 'nrt'] **/
-                const es = Math.round(est / this._.size)
-                const nr = Math.round(nrt / this._.size)
-                const index = `${proj}_${type}_${es}_${nr}`
+                if (true /** Exca Truck [ Drill Dozer Grader Vehicle ] ... **/) {
 
-                /** Satellites | Network | Precision | Speed | Elevation **/
-                const inject = `${data_gps1[2]}|${data_gsm.quality}|${data_gps1[3]}|${data_gps1[5]}|${utm[2]}`
-                obj[index] = { proj, type, est: es, nrt: nr, data: inject }
+                    /** Indexing ['proj', 'type', 'est', 'nrt'] **/
+                    const es = Math.round(est / this._.size)
+                    const nr = Math.round(nrt / this._.size)
+                    const index = `${proj}_${type}_${es}_${nr}`
 
-            } catch (err) { }
+                    /** Satellites | Network | Precision | Speed | Elevation **/
+                    const inject = `${data_gps1[2]}|${data_gsm.quality}|${data_gps1[3]}|${data_gps1[5]}|${utm[2]}`
+                    obj[index] = { proj, type, est: es, nrt: nr, data: inject }
+
+                }
+
+            } catch (err: any) { log.warn(`${alias} In the Loop / ${err.message}`) }
 
         }
 

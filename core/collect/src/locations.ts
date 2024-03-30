@@ -12,7 +12,7 @@ export class Locations {
 
     _ = {
         days: 7,
-        limit: 50,
+        limit: 100,
     }
 
     constructor({ local, core_data, sequelize }: {
@@ -47,7 +47,7 @@ export class Locations {
             elevation: { type: DataTypes.FLOAT, defaultValue: 0 },
             speed: { type: DataTypes.FLOAT, defaultValue: 0 },
             heading: { type: DataTypes.FLOAT, defaultValue: 0 },
-            activity: { type: DataTypes.STRING, defaultValue: '' },
+            data: { type: DataTypes.STRING, defaultValue: '' },
 
             createdAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
@@ -85,6 +85,7 @@ export class Locations {
     executer = async () => {
 
         /** ** Data pulling **  **/
+        const alias = `[${this.name}.executer]`
         const enums = this.sequelize.models['enums']
 
         const { value = ',' }: any = (await enums.findOne({ where: { type: 'collect', name: this.name, deletedAt: null }, raw: true }) ?? {})
@@ -95,6 +96,7 @@ export class Locations {
 
         /** ** Data aggregating **  **/
         const points: any = []
+        const last_position: any = {}
 
         for (const x of rows) {
 
@@ -102,19 +104,41 @@ export class Locations {
 
                 const { createdAt, updatedAt } = x
                 const parsed: any = Jfy(x.data)
-                const { data, data_gps1, data_gps, data_activity } = parsed
-                const [proj, type, name] = data
+                const { value, data, data_gps, data_gps1, data_gps2, data_gsm, data_rtcm, data_activity, inj_clients } = parsed
                 const { utm } = data_gps
+                const [proj, type, name] = data
                 const [east, north, elevation] = utm
 
-                points.push({ proj, type, name, east, north, elevation, speed: data_gps1[5], heading: data_gps.head, activity: data_activity?.state ?? '?', createdAt, updatedAt })
+                const current_work = () => {
+                    if (value && value.dig_plan) return `${value.dig_plan?.dir ?? ''},${value.dig_plan?.dis ?? ''}`
+                    if (value && value.dig_plan) return `${value.dig_plan?.dir ?? ''},${value.dig_plan?.dis ?? ''}`
+                }
 
-            } catch (err) { }
+                if (true /** Exca Truck [ Drill Dozer Grader Vehicle ] ... **/) {
+
+                    const inject = [
+                        `${data_gps1[1]},${data_gps1[2]}`,
+                        `${data_gps2[1]},${data_gps2[2]}`,
+                        `${data_gps.prec2d},${data_gps.prec3d}`,
+                        `${data_gsm.state},${data_gsm.quality},${data_gsm.operator}`,
+                        `${data_rtcm.state ?? ''},${data_activity.state ?? ''},${inj_clients.length ?? 0}`,
+                        current_work()
+                    ].join('|')
+
+                    const payload = { proj, type, name, east, north, elevation, speed: data_gps1[5], heading: data_gps.head, data: inject, createdAt, updatedAt }
+                    last_position[`${proj}.${type}.${name}`] = payload
+                    points.push(payload)
+
+                }
+
+            } catch (err: any) { log.warn(`${alias} In the Loop / ${err.message}`) }
 
         }
 
         /** ** Data saving **  **/
         if (rows.length > 0) {
+
+            for (const x in last_position) this.local.emit(x, last_position[x])
 
             for (const x of points) await this.collection.upsert({ ...x })
 

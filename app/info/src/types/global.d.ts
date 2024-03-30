@@ -10,6 +10,7 @@ declare global {
         event: EventEmitter
         kv: Persist,
         api: Connection
+        core_collect?: Connection
         view: string
         name: string
 

@@ -15,6 +15,7 @@ const cfg: iArgs = {
     event: new EventEmitter(),
     kv: new Persist(),
     api: new Connection({ name: 'core_data', timeout: 10000, token: KeyValue('token') }),
+    core_collect: new Connection({ name: 'core_collect', timeout: 10000, token: KeyValue('token') }),
     isDarkMode: true,
     view: '',
     name: '',
