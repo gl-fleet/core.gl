@@ -25,26 +25,26 @@ export const Style = createGlobalStyle`
 
 export default ({ loading, err, data }: any) => {
 
-    const gsm = oget(0)(data, 'data_gsm', 'state')
-    const gsm_value = oget(0)(data, 'data_gsm', 'quality')
+    const gsm = oget('-')(data, 'gsm', 'state')
+    const gsm_value = oget(0)(data, 'gsm', 'perc')
     const gsm_perc = Number(((gsm_value * 100) / 100).toFixed(1))
     const gsm_color = ColorR2G(gsm_perc, [20, 40, 60, 80, 100])
 
-    const gps_value = oget(99)(data, 'data_gps', 'prec3d')
+    const gps_value = oget(99)(data, 'accuracy', '_3d')
     const gps_perc = Number((((12.5 - gps_value) * 100) / 12.5).toFixed(1))
     const gps_color = ColorG2R(gps_value, [2.5, 5, 7.5, 10, 12.5])
 
-    const gps1 = oget([0, 0, 0])(data, 'data_gps1')[0]
-    const gps1_value = oget([0, 0, 0])(data, 'data_gps1')[2]
+    const gps1 = oget('')(data, 'g1', 'isrtk')
+    const gps1_value = oget(0)(data, 'g1', 'sats')
     const gps1_perc = Number(((gps1_value * 100) / 30).toFixed(1))
     const gps1_color = ColorR2G(gps1_value, [18, 21, 24, 27, 30])
 
-    const gps2 = oget([0, 0, 0])(data, 'data_gps2')[0]
-    const gps2_value = oget([0, 0, 0])(data, 'data_gps2')[2]
+    const gps2 = oget('')(data, 'g2', 'isrtk')
+    const gps2_value = oget(0)(data, 'g2', 'sats')
     const gps2_perc = Number(((gps2_value * 100) / 30).toFixed(1))
     const gps2_color = ColorR2G(gps2_value, [18, 21, 24, 27, 30])
 
-    const rtcm = oget('-')(data, 'data_rtcm', 'state')
+    const rtcm = oget('')(data, 'rtcm')
     const rtcm_perc = rtcm === 'success' ? 100 : 0
     const rtcm_color = ColorR2G(rtcm_perc, [20, 40, 60, 80, 100])
 
@@ -57,7 +57,7 @@ export default ({ loading, err, data }: any) => {
 
             <Space wrap style={{ border: '1px dashed #1668dc', padding: '6px 16px', borderRadius: 8 }}>
                 <Progress type="dashboard" percent={gsm_perc} strokeColor={gsm_color} size={size} strokeWidth={width} format={() => `Network: ${gsm} / ${gsm_value}%`} />
-                <Progress type="dashboard" percent={gps_perc} strokeColor={gps_color} size={size} strokeWidth={width} format={() => `Accuracy: ${gps_value}(cm)`} />
+                <Progress type="dashboard" percent={gps_perc} strokeColor={gps_color} size={size} strokeWidth={width} format={() => `Accuracy: ${gps_value}cm`} />
                 <Progress type="dashboard" percent={gps1_perc} strokeColor={gps1_color} size={size} strokeWidth={width} format={() => `GPS1: ${gps1} / ${gps1_value}(sats)`} />
                 <Progress type="dashboard" percent={gps2_perc} strokeColor={gps2_color} size={size} strokeWidth={width} format={() => `GPS2: ${gps2} / ${gps2_value}(sats)`} />
                 <Progress type="dashboard" percent={rtcm_perc} strokeColor={rtcm_color} size={size} strokeWidth={width} format={() => `RTCM: ${rtcm}`} />

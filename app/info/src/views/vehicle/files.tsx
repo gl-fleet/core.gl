@@ -48,14 +48,14 @@ export default (cfg: iArgs) => {
 
     const fileList = () => setList(() => {
 
-        cfg.api.poll('get-chunks-distinct', { dst: cfg.name }, (e: any, data: []) => setList({ loading: false, data: data ?? [] }))
+        cfg.core_data.poll('get-chunks-distinct', { dst: cfg.name }, (e: any, data: []) => setList({ loading: false, data: data ?? [] }))
         return { loading: true, data: [] }
 
     })
 
     const fileDelete = (args: any) => {
         console.log('delete', args)
-        cfg.api.set('del-chunks', { type: args.type, name: args.name, dst: args.dst })
+        cfg.core_data.set('del-chunks', { type: args.type, name: args.name, dst: args.dst })
             .then((e) => message.success(`${e ?? 'Success'}`))
             .catch((e) => message.error(e.message))
             .finally(() => fileList())
@@ -124,7 +124,7 @@ export default (cfg: iArgs) => {
             }
 
             setLoading(true)
-            cfg.api.set('set-chunks', payload)
+            cfg.core_data.set('set-chunks', payload)
                 .then(e => success())
                 .catch(e => { message.error('Please try again!') })
                 .finally(() => setLoading(false))

@@ -39,7 +39,7 @@ export class Vehicles {
 
     open_window = (key: string, { project, type, name }: any) => {
 
-        const width = screen.width, height = screen.height, popw = 720, poph = 720
+        const width = screen.width, height = screen.height, popw = 720, poph = 720 + 27
         window.open(`/core_info/?view=vehicle&key=${type}&project=${project}&type=${type}&name=${name}`, type, `top=${(height / 2) - (poph / 2) - 24},left=${window.screenX + (width / 2) - (popw / 2)},width=${popw},height=${poph}`)
 
     }

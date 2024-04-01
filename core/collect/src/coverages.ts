@@ -122,7 +122,7 @@ export class Coverages {
                 const parsed: any = Jfy(x.data)
                 const { data, data_gps1, data_gps, data_gsm } = parsed
                 const [proj, type] = data
-                const { utm } = data_gps
+                const { gps, utm } = data_gps
                 const [est, nrt] = utm
 
                 if (true /** Exca Truck [ Drill Dozer Grader Vehicle ] ... **/) {
@@ -133,7 +133,7 @@ export class Coverages {
                     const index = `${proj}_${type}_${es}_${nr}`
 
                     /** Satellites | Network | Precision | Speed | Elevation **/
-                    const inject = `${data_gps1[2]}|${data_gsm.quality}|${data_gps1[3]}|${data_gps1[5]}|${utm[2]}`
+                    const inject = `${gps[0]},${gps[1]}|${data_gps1[2]}|${data_gsm.quality}|${data_gps1[3]}|${data_gps1[5]}|${utm[2]}`
                     obj[index] = { proj, type, est: es, nrt: nr, data: inject }
 
                 }

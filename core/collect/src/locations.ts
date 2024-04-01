@@ -68,12 +68,13 @@ export class Locations {
     table_serve = () => {
 
         this.local.on(`get-${this.name}`, async (req: any) => await this.get(req.query))
+        this.local.on(`get-${this.name}-last`, async (req: any) => await this.get_last(req.query))
         this.local.on(`set-${this.name}`, async (req: any) => await this.set(req.query), true, 4)
 
     }
 
     /*** *** *** @___Table_Queries___ *** *** ***/
-
+    get_last = async (query: any) => await this.collection.findOne({ where: { ...query, deletedAt: null }, order: [['updatedAt', 'DESC']] })
     get = async (query: any) => await this.collection.findAll({ where: { ...query, deletedAt: null }, order: [['updatedAt', 'ASC']] })
     set = async (query: any) => await this.collection.upsert({ ...query, updatedAt: Now() }, { returning: true, raw: true })
 
@@ -105,24 +106,27 @@ export class Locations {
                 const { createdAt, updatedAt } = x
                 const parsed: any = Jfy(x.data)
                 const { value, data, data_gps, data_gps1, data_gps2, data_gsm, data_rtcm, data_activity, inj_clients } = parsed
-                const { utm } = data_gps
+                const { gps, utm } = data_gps
                 const [proj, type, name] = data
                 const [east, north, elevation] = utm
 
                 const current_work = () => {
-                    if (value && value.dig_plan) return `${value.dig_plan?.dir ?? ''},${value.dig_plan?.dis ?? ''}`
-                    if (value && value.dig_plan) return `${value.dig_plan?.dir ?? ''},${value.dig_plan?.dis ?? ''}`
+                    /** Need more coding here [...] **/
+                    if (value && value.dig_plan) return `${value.screen},${value.dig_plan?.dir ?? ''},${value.dig_plan?.dis ?? ''}`
+                    if (value && value.shot_plan) return `${value.screen},${value.shot_plan?.dir ?? ''},${value.shot_plan?.d2 ?? ''}`
+                    return `${value.screen},${'-'},${'-'}`
                 }
 
                 if (true /** Exca Truck [ Drill Dozer Grader Vehicle ] ... **/) {
 
                     const inject = [
+                        `${gps[0]},${gps[1]}`,
                         `${data_gps1[1]},${data_gps1[2]}`,
                         `${data_gps2[1]},${data_gps2[2]}`,
                         `${data_gps.prec2d},${data_gps.prec3d}`,
-                        `${data_gsm.state},${data_gsm.quality},${data_gsm.operator}`,
-                        `${data_rtcm.state ?? ''},${data_activity.state ?? ''},${inj_clients.length ?? 0}`,
-                        current_work()
+                        `${data_gsm?.state ?? ''},${data_gsm.quality},${data_gsm.operator},${value.rx},${value.tx},${value.pw}`,
+                        `${data_rtcm?.state ?? ''},${data_activity?.state ?? ''},${inj_clients.length ?? 0}`,
+                        current_work(),
                     ].join('|')
 
                     const payload = { proj, type, name, east, north, elevation, speed: data_gps1[5], heading: data_gps.head, data: inject, createdAt, updatedAt }

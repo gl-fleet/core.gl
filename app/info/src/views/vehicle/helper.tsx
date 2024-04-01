@@ -45,16 +45,16 @@ export const UpdateStatus = ({ data }: any) => {
 
     const [danger, setDanger] = useState(false)
     const last = useRef(0)
-    last.current = oget(0)(data, 'last')
+    last.current = oget(0)(data, 'updatedAt')
 
     useEffect(() => {
 
         Loop(() => {
 
             const delay = Date.now() - last.current
-            setDanger(delay > 5000 ? true : false)
+            setDanger(delay >= 10 * 1000 ? true : false)
 
-        }, 500)
+        }, 1000)
 
     }, [])
 
@@ -69,18 +69,65 @@ export const UpdateStatus = ({ data }: any) => {
 
 }
 
-/* export const parseJwt = (token: string) => { Merged into upack/utils
+export const parseLocation = (location: any) => {
+
+    const e = {
+        project: '',
+        type: '',
+        name: '',
+        g1: { isrtk: '', sats: 0 },
+        g2: { isrtk: '', sats: 0 },
+        gps: [0, 0, 0],
+        utm: [0, 0, 0],
+        speed: 0,
+        head: 0,
+        accuracy: { _2d: 0, _3d: 0 },
+        gsm: { state: '', perc: 0, operator: '' },
+        val: { screen: 0, type: '', value: '' },
+        rtcm: '',
+        activity: '',
+        tablet: 0,
+        network_usage: ``,
+        throttled: '',
+        updatedAt: 0,
+    }
 
     try {
 
-        var base64Url = token.split('.')[1]
-        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
-        var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-        }).join(''))
+        const { data } = location
+        const [_g, _g1, _g2, _gps, _gsm, _rtcm, _val] = data.split('|')
+        const g = _g.split(',')
+        const g1 = _g1.split(',')
+        const g2 = _g2.split(',')
+        const gps = _gps.split(',')
+        const gsm = _gsm.split(',')
+        const [rtcm, activity, tablet] = _rtcm.split(',')
+        const val = _val.split(',')
 
-        return JSON.parse(jsonPayload) ?? null
+        e.g1.isrtk = g1[0]; e.g1.sats = Number(g1[1]);
+        e.g2.isrtk = g2[0]; e.g2.sats = Number(g2[1]);
+        e.accuracy._2d = Number(gps[0]); e.accuracy._3d = Number(gps[1]);
+        e.gsm.state = gsm[0]; e.gsm.perc = Number(gsm[1]); e.gsm.operator = gsm[2];
+        e.val.screen = Number(val[0] ?? 0); e.val.type = val[1], e.val.value = val[2];
 
-    } catch (err) { return null }
+        e.rtcm = rtcm
+        e.activity = activity
+        e.tablet = Number(tablet)
 
-} */
+        e.gps = [Number(g[0]), Number(g[1]), 0]
+        e.utm = [Number(location.east), Number(location.north), Number(location.elevation)]
+        e.head = Number(location.heading)
+        e.speed = Number(location.speed)
+
+        e.project = location.proj
+        e.type = location.type
+        e.name = location.name
+        e.throttled = gsm[5]
+        e.network_usage = `RX: ${gsm[3]} kbps TX: ${gsm[4]} kbps`
+        e.updatedAt = moment(location.updatedAt).valueOf()
+
+        return e
+
+    } catch (err) { return e }
+
+}

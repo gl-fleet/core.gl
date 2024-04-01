@@ -1,11 +1,10 @@
-import { React, Layout, Tabs, Row, Col, Space, Typography, Button, Tooltip, Slider } from 'uweb'
+import { React, Layout, Tabs, Row, Col, Space, Typography, Button, Tooltip } from 'uweb'
+import { FolderOpenOutlined, SwapOutlined, AndroidOutlined, DesktopOutlined } from '@ant-design/icons'
 import { MapView } from 'uweb/maptalks'
-import { Vehicle } from 'uweb/utils'
-import { oget, log } from 'utils/web'
-import { FolderOpenOutlined, SwapOutlined, AndroidOutlined, DesktopOutlined, CodeOutlined } from '@ant-design/icons'
 import ReactJson from 'react-json-view'
+import { oget } from 'utils/web'
 
-import { Style, getVehicle, UpdateStatus } from './helper'
+import { parseLocation, Style, getVehicle, UpdateStatus } from './helper'
 import StreamView from './stream'
 import Files from './files'
 
@@ -20,15 +19,14 @@ export default (cfg: iArgs) => {
     useEffect(() => {
 
         const params = (new URL(document.location.toString())).searchParams
-        const project = params.get('project')
+        const proj = params.get('project')
         const type = params.get('type')
         const name = params.get('name')
-        const key = `${project}.${type}.${name}`
-        let vehicle: Vehicle
+        const key = `${proj}.${type}.${name}`
 
         const map = new MapView({
             containerId: 'render_vhc',
-            zoom: 19.5,
+            zoom: 20, // 19.5,
             devicePixelRatio: 1,
             isDarkMode: cfg.isDarkMode,
             urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
@@ -36,70 +34,34 @@ export default (cfg: iArgs) => {
         })
 
         map.onReady(() => {
-            getVehicle(map, type ?? "").then((VHC) => {
 
-                vehicle = VHC
+            getVehicle(map, type ?? "").then((vehicle) => {
 
-                const update = (obj: any) => {
+                const update = (location: any) => {
 
+                    const obj: any = parseLocation(location)
                     setStream({ loading: false, err: "", data: obj })
-                    const { data_gps } = obj
-                    const { gps } = data_gps
-                    map.map && map.map.setCenter(gps)
-                    vehicle && vehicle.update(data_gps)
+                    map.map && map.map.setCenter(obj.gps)
+                    vehicle && vehicle.update(obj)
 
                 }
 
-                console.log(key)
-                cfg.core_collect?.on(key, (location) => {
+                cfg.core_collect.on(key, (location) => update(location))
+                cfg.core_collect.get('get-locations-last', { proj, type, name })
+                    .then((location) => update(location))
+                    .catch((error) => console.error(error))
 
-                    const { data } = location
-                    const [_g1, _g2, _gps, _gsm, _rtcm] = data.split('|')
-                    const g1 = _g1.split(',')
-                    const g2 = _g2.split(',')
-                    const gps = _gps.split(',')
-                    const gsm = _gsm.split(',')
-                    const [rtcm, activity, tablet] = _rtcm.split(',')
-
-                    console.log(g1, g2)
-                    console.log(gps)
-                    console.log(gsm)
-                    console.log(rtcm, activity, tablet)
-                    console.log(``)
-
-                })
-
-                cfg.api.get('vehicle-query', { name, type }).then((ls: any) => {
-
-                    if (name) cfg.api.on(name, (obj: any) => update(obj))
-
-                    Array.isArray(ls) && ls.map((obj) => {
-
-                        obj.equipments.map((item: any) => {
-                            update(item)
-                        })
-
-                    })
-
-                }).catch((e) => {
-
-                    console.log(e)
-                    setStream({ loading: false, err: e.message, data: {} })
-
-                })
-
-                cfg.api.get('vehicle-tunnel', { project, type, name }).then((obj: any) => {
+                /* Pulls data from PiTunnel
+                cfg.core_data.get('vehicle-tunnel', { project, type, name }).then((obj: any) => {
 
                     setTunnel({ loading: false, err: "", data: obj })
 
-                }).catch((e) => setTunnel({ loading: false, err: e.message, data: {} }))
+                }).catch((e) => setTunnel({ loading: false, err: e.message, data: {} })) */
 
             })
         })
 
     }, [])
-
-    const tablet = oget([undefined])(stream, 'data', 'inj_clients')[0] === undefined ? false : true
 
     return <Layout style={{ padding: 16 }}>
         <Row gutter={[16, 16]} id="main">
@@ -107,19 +69,32 @@ export default (cfg: iArgs) => {
             <Style color={cfg.isDarkMode ? '#000' : '#f5f5f5'} />
 
             <Col id="stream_view" span={24} style={{ position: 'relative' }}>
-                <Title level={4} style={{ position: 'absolute', top: 16, left: 24, zIndex: 100, margin: 0 }}>{stream.data.project} / {stream.data.name}</Title>
-                <Title level={4} style={{ position: 'absolute', top: 16, right: 24, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>{oget('***')(stream.data, 'data_activity', 'state')}</Title>
+                <Title level={5} style={{ position: 'absolute', top: 16, left: 24, zIndex: 100, margin: 0 }}>
+                    <span>{stream.data.project} / {stream.data.type} / {stream.data.name}</span>
+                    <p style={{ color: '#1668dc', fontSize: 12, fontWeight: 800, marginTop: 8 }}>{oget('***')(stream.data, 'gsm', 'operator')}</p>
+                    <p style={{ color: '#1668dc', fontSize: 12, fontWeight: 800, marginTop: 8 }}>{oget('***')(stream.data, 'network_usage')}</p>
+                </Title>
+                <Title level={5} style={{ position: 'absolute', top: 16, right: 24, zIndex: 100, margin: 0 }}>
+                    <span style={{ textTransform: 'capitalize' }}>{oget('***')(stream.data, 'activity')}</span>
+                    <span> {oget('***')(stream.data, 'speed')}km/h</span>
+
+                    {oget(0)(stream.data, 'val', 'screen') > 1 ? (
+                        <p style={{ color: '#1668dc', fontSize: 12, fontWeight: 800, marginTop: 8 }}>
+                            Indicating a space of [{oget('***')(stream.data, 'val', 'value')}] to [{oget('***')(stream.data, 'val', 'type')}]
+                        </p>
+                    ) : null}
+
+                </Title>
                 <div style={{ position: 'absolute', bottom: 16, right: 24, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>
                     <Space wrap>
-                        <Button type="dashed" ghost >SC: {stream.data?.value?.screen ?? '0'}</Button>
-                        <Tooltip title={tablet ? 'VNC: Tablet connected' : 'VNC: Tablet disconnected!'}>
-                            <Button danger={!tablet} type="primary" ghost icon={<DesktopOutlined />} />
+                        <Tooltip title={stream.data.tablet ? 'VNC: Tablet connected' : 'VNC: Tablet disconnected!'}>
+                            <Button danger={!stream.data.tablet} type="primary" ghost icon={<DesktopOutlined />} />
                         </Tooltip>
                         <UpdateStatus data={stream.data} />
                     </Space>
                 </div>
                 <StreamView {...stream} />
-                <div id='render_vhc' style={{ boxShadow: '0px 0px 2px rgba(0,0,0,0.25)', position: 'relative', height: 198, width: '100%', borderRadius: 8, overflow: 'hidden' }}></div>
+                <div id='render_vhc' style={{ boxShadow: '0px 0px 2px rgba(0,0,0,0.25)', position: 'relative', height: 198 + 27, width: '100%', borderRadius: 8, overflow: 'hidden' }}></div>
             </Col>
 
             <Col span={24} style={{ overflowX: 'hidden' }}>

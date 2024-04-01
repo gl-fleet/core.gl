@@ -14,7 +14,7 @@ AddMeta()
 const cfg: iArgs = {
     event: new EventEmitter(),
     kv: new Persist(),
-    api: new Connection({ name: 'core_data', timeout: 10000, token: KeyValue('token') }),
+    core_data: new Connection({ name: 'core_data', timeout: 10000, token: KeyValue('token') }),
     core_collect: new Connection({ name: 'core_collect', timeout: 10000, token: KeyValue('token') }),
     isDarkMode: true,
     view: '',
@@ -35,7 +35,8 @@ const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
         if (body && body.project && (body.project === project || body.project === '*')) setAuthorized(1)
         else setAuthorized(2)
 
-        window.addEventListener("focus", () => cfg.api.connect())
+        window.addEventListener("focus", () => cfg.core_data.connect())
+        window.addEventListener("focus", () => cfg.core_collect.connect())
 
         cfg.kv.on('token', (next) => prev !== next && location.reload())
 
