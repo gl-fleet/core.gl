@@ -14,8 +14,9 @@ AddMeta()
 const cfg: iArgs = {
     kv: new Persist(),
     event: new EventEmitter(),
-    proxy: new Connection({ name: 'core_proxy', token: KeyValue('token') }),
-    api: new Connection({ name: 'core_data', token: KeyValue('token') }),
+    core_proxy: new Connection({ name: 'core_proxy', token: KeyValue('token') }),
+    core_data: new Connection({ name: 'core_data', token: KeyValue('token') }),
+    core_collect: new Connection({ name: 'core_collect', token: KeyValue('token'), timeout: 15000 }),
     isDarkMode: true,
 }
 
@@ -27,8 +28,9 @@ const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
         cfg.kv.on('token', (next) => prev !== next && location.reload())
 
         window.addEventListener("focus", () => {
-            cfg.proxy.connect()
-            cfg.api.connect()
+            cfg.core_proxy.connect()
+            cfg.core_data.connect()
+            cfg.core_collect.connect()
         })
 
     }, [])

@@ -14,7 +14,6 @@ const { Title, Text } = Typography
 export default (cfg: iArgs) => {
 
     const [stream, setStream] = useState<any>({ loading: true, err: "", data: {} })
-    const [tunnel, setTunnel] = useState<any>({ loading: true, err: "", data: {} })
 
     useEffect(() => {
 
@@ -26,7 +25,7 @@ export default (cfg: iArgs) => {
 
         const map = new MapView({
             containerId: 'render_vhc',
-            zoom: 20, // 19.5,
+            zoom: 19.5,
             devicePixelRatio: 1,
             isDarkMode: cfg.isDarkMode,
             urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
@@ -51,13 +50,6 @@ export default (cfg: iArgs) => {
                     .then((location) => update(location))
                     .catch((error) => console.error(error))
 
-                /* Pulls data from PiTunnel
-                cfg.core_data.get('vehicle-tunnel', { project, type, name }).then((obj: any) => {
-
-                    setTunnel({ loading: false, err: "", data: obj })
-
-                }).catch((e) => setTunnel({ loading: false, err: e.message, data: {} })) */
-
             })
         })
 
@@ -69,22 +61,25 @@ export default (cfg: iArgs) => {
             <Style color={cfg.isDarkMode ? '#000' : '#f5f5f5'} />
 
             <Col id="stream_view" span={24} style={{ position: 'relative' }}>
+
                 <Title level={5} style={{ position: 'absolute', top: 16, left: 24, zIndex: 100, margin: 0 }}>
                     <span>{stream.data.project} / {stream.data.type} / {stream.data.name}</span>
-                    <p style={{ color: '#1668dc', fontSize: 12, fontWeight: 800, marginTop: 8 }}>{oget('***')(stream.data, 'gsm', 'operator')}</p>
-                    <p style={{ color: '#1668dc', fontSize: 12, fontWeight: 800, marginTop: 8 }}>{oget('***')(stream.data, 'network_usage')}</p>
+                    <p style={{ color: '#1668dc', fontSize: 10, fontWeight: 800, margin: '4px 0px' }}>{oget('***')(stream.data, 'gsm', 'operator')}</p>
+                    <p style={{ color: '#1668dc', fontSize: 10, fontWeight: 800, margin: '4px 0px' }}>{oget('***')(stream.data, 'network_usage')}</p>
                 </Title>
+
                 <Title level={5} style={{ position: 'absolute', top: 16, right: 24, zIndex: 100, margin: 0 }}>
+                    <span>{Number(oget('0')(stream.data, 'speed')).toFixed(1)}km/h </span>
                     <span style={{ textTransform: 'capitalize' }}>{oget('***')(stream.data, 'activity')}</span>
-                    <span> {oget('***')(stream.data, 'speed')}km/h</span>
 
                     {oget(0)(stream.data, 'val', 'screen') > 1 ? (
-                        <p style={{ color: '#1668dc', fontSize: 12, fontWeight: 800, marginTop: 8 }}>
+                        <p style={{ color: '#1668dc', fontSize: 10, fontWeight: 800, margin: '4px 0px' }}>
                             Indicating a space of [{oget('***')(stream.data, 'val', 'value')}] to [{oget('***')(stream.data, 'val', 'type')}]
                         </p>
                     ) : null}
 
                 </Title>
+
                 <div style={{ position: 'absolute', bottom: 16, right: 24, zIndex: 100, margin: 0, textTransform: 'capitalize' }}>
                     <Space wrap>
                         <Tooltip title={stream.data.tablet ? 'VNC: Tablet connected' : 'VNC: Tablet disconnected!'}>
@@ -93,8 +88,11 @@ export default (cfg: iArgs) => {
                         <UpdateStatus data={stream.data} />
                     </Space>
                 </div>
+
                 <StreamView {...stream} />
+
                 <div id='render_vhc' style={{ boxShadow: '0px 0px 2px rgba(0,0,0,0.25)', position: 'relative', height: 198 + 27, width: '100%', borderRadius: 8, overflow: 'hidden' }}></div>
+
             </Col>
 
             <Col span={24} style={{ overflowX: 'hidden' }}>
@@ -113,17 +111,6 @@ export default (cfg: iArgs) => {
                             children: <div>
                                 <ReactJson
                                     src={stream}
-                                    theme={cfg.isDarkMode ? "twilight" : "bright:inverted"}
-                                    style={{ background: 'transparent' }}
-                                />
-                            </div>
-                        },
-                        {
-                            label: <b><AndroidOutlined />{' '}Board</b>,
-                            key: '3',
-                            children: <div>
-                                <ReactJson
-                                    src={tunnel}
                                     theme={cfg.isDarkMode ? "twilight" : "bright:inverted"}
                                     style={{ background: 'transparent' }}
                                 />

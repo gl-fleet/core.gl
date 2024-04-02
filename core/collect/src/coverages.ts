@@ -133,7 +133,7 @@ export class Coverages {
                     const index = `${proj}_${type}_${es}_${nr}`
 
                     /** Satellites | Network | Precision | Speed | Elevation **/
-                    const inject = `${gps[0]},${gps[1]}|${data_gps1[2]}|${data_gsm.quality}|${data_gps1[3]}|${data_gps1[5]}|${utm[2]}`
+                    const inject = `${gps[0]},${gps[1]}|${data_gps1[2]}|${data_gsm?.quality ?? ''}|${data_gps1[3]}|${data_gps1[5]}|${utm[2]}`
                     obj[index] = { proj, type, est: es, nrt: nr, data: inject }
 
                 }

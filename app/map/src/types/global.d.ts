@@ -9,8 +9,9 @@ declare global {
         isDarkMode: boolean
         event: EventEmitter
         kv: Persist,
-        api: Connection
-        proxy: Connection
+        core_proxy: Connection
+        core_data: Connection
+        core_collect: Connection
 
     }
 

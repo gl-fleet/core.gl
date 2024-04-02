@@ -3,7 +3,7 @@ export const AddMeta = () => {
 
     const meta = document.createElement('meta')
     meta.name = "viewport"
-    meta.content = "width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=0.75, minimum-scale=0.75"
+    meta.content = "width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=0.70, minimum-scale=0.70"
     document.getElementsByTagName('head')[0].appendChild(meta)
 
 }

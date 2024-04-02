@@ -44,27 +44,27 @@ export class Vehicles {
 
     }
 
-    update_vehicle = (key: string, { data_gps }: any) => {
+    update_vehicle = (key: string, { gps }: any) => {
 
         const t = this.obj[key]?.vehicle
         if (typeof t !== 'undefined') {
-            t.update({ ...data_gps })
+            t.update({ ...gps })
         }
 
     }
 
-    update_marker = (key: string, { name, data_gps, data_activity }: any) => {
+    update_marker = (key: string, { name, gps, activity }: any) => {
 
         const t = this.obj[key]?.marker
 
         if (typeof t !== 'undefined') {
 
             let color = '#000'
-            color = data_activity.state.indexOf('speed') !== -1 ? 'blue' : color
-            color = data_activity.state.indexOf('moving') !== -1 ? 'green' : color
-            color = data_activity.state.indexOf('stopped') !== -1 ? 'orange' : color
+            color = activity.indexOf('speed') !== -1 ? 'blue' : color
+            color = activity.indexOf('moving') !== -1 ? 'green' : color
+            color = activity.indexOf('stopped') !== -1 ? 'orange' : color
 
-            t.setCoordinates(data_gps.gps)
+            t.setCoordinates(gps)
             t.setProperties({ name: name, altitude: 12 })
             t.updateSymbol({ textFill: '#fff', textHaloFill: color })
 
@@ -123,7 +123,7 @@ export class Vehicles {
 
     live_update = (body: any) => {
 
-        const { project, type, name, data_activity, data_gps } = body
+        const { project, type, name } = body
         const key = `${project}_${type}_${name}`
         const exists = this.obj.hasOwnProperty(key)
 

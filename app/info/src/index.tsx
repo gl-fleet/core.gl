@@ -72,8 +72,6 @@ const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
 
 }
 
-const settings = ({ isDarkMode }: { isDarkMode: boolean }) => {
-    return <Settings {...cfg} isDarkMode={isDarkMode} />
-}
+const settings = ({ isDarkMode }: { isDarkMode: boolean }) => <Settings {...cfg} isDarkMode={isDarkMode} />
 
 Render(main, settings, { maxWidth: '100%' })

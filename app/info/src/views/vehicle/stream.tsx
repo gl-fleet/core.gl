@@ -3,8 +3,6 @@ import { ColorR2G, ColorG2R } from 'uweb/utils'
 import { oget } from 'utils/web'
 import { createGlobalStyle } from 'styled-components'
 
-const { useEffect, useState, useRef } = React
-
 export const Style = createGlobalStyle`
     .maptalks-attribution {
         display: none;

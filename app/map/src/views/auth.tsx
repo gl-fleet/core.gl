@@ -19,7 +19,7 @@ const Style = createGlobalStyle`
 
 export default (cfg: iArgs) => {
 
-    const { event, proxy, kv } = cfg
+    const { core_proxy, kv } = cfg
 
     const token: any = useRef(kv.get('token'))
     const [did, setDid] = useState(false)
@@ -30,7 +30,7 @@ export default (cfg: iArgs) => {
     const signIn = (idx: number = 0) => {
 
         handler(null, setSign)
-        proxy.get('verify', { token: String(token.current) }).then(e => {
+        core_proxy.get('verify', { token: String(token.current) }).then(e => {
             setReloading(idx === 0)
             handler(e, setSign)
         }).catch(e => { handler(e, setSign) })

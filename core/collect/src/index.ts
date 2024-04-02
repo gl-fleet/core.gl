@@ -13,7 +13,7 @@ log.success(`"${env.npm_package_name}" <${version}> module is running on "${proc
 
 const cf = {
     local: new Host({ name, port: 8050, timeout: 10000 }),
-    core_data: new Connection({ name: 'core_data', proxy: 'http://127.0.0.1:8040' }),
+    core_data: new Connection({ name: 'core_data', proxy: 'http://127.0.0.1:8040', timeout: 15000 }),
     sequelize: new Sequelize(db_name, db_user, db_pass, {
         dialect: 'postgres',
         host: mode === 'development' ? '139.59.115.158' : 'localhost',

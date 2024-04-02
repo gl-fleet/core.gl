@@ -68,15 +68,24 @@ export class Locations {
     table_serve = () => {
 
         this.local.on(`get-${this.name}`, async (req: any) => await this.get(req.query))
-        this.local.on(`get-${this.name}-last`, async (req: any) => await this.get_last(req.query))
         this.local.on(`set-${this.name}`, async (req: any) => await this.set(req.query), true, 4)
+
+        this.local.on(`get-${this.name}-last`, async (req: any) => await this.get_last(req.query))
+        this.local.on(`get-${this.name}-all-last`, async ({ query, user }: any) => await this.get_all_last(query, user), true, 2)
 
     }
 
     /*** *** *** @___Table_Queries___ *** *** ***/
-    get_last = async (query: any) => await this.collection.findOne({ where: { ...query, deletedAt: null }, order: [['updatedAt', 'DESC']] })
     get = async (query: any) => await this.collection.findAll({ where: { ...query, deletedAt: null }, order: [['updatedAt', 'ASC']] })
     set = async (query: any) => await this.collection.upsert({ ...query, updatedAt: Now() }, { returning: true, raw: true })
+
+    get_last = async (query: any) => await this.collection.findOne({ where: { ...query, deletedAt: null }, order: [['updatedAt', 'DESC']] })
+    get_all_last = async (query: any, { proj }: any) => await this.collection.findAll({
+        attributes: [Sequelize.literal('DISTINCT ON("name") "name"'), "updatedAt", "proj", "type", "data"],
+        where: proj === '*' ? { deletedAt: null } : { proj, deletedAt: null },
+        order: ['name', ['updatedAt', 'DESC'], ['id', 'DESC']],
+        raw: true,
+    })
 
     /*** *** *** @___Table_Jobs___ *** *** ***/
 
@@ -124,7 +133,7 @@ export class Locations {
                         `${data_gps1[1]},${data_gps1[2]}`,
                         `${data_gps2[1]},${data_gps2[2]}`,
                         `${data_gps.prec2d},${data_gps.prec3d}`,
-                        `${data_gsm?.state ?? ''},${data_gsm.quality},${data_gsm.operator},${value.rx},${value.tx},${value.pw}`,
+                        `${data_gsm?.state ?? ''},${data_gsm?.quality ?? ''},${data_gsm?.operator ?? ''},${value.rx},${value.tx},${value.pw}`,
                         `${data_rtcm?.state ?? ''},${data_activity?.state ?? ''},${inj_clients.length ?? 0}`,
                         current_work(),
                     ].join('|')

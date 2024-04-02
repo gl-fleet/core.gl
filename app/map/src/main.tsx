@@ -1,9 +1,10 @@
 import { React, Row, Col, notification, message } from 'uweb'
-import { Delay, Loop, Safe } from 'utils/web'
 import { createGlobalStyle } from 'styled-components'
+import { Safe } from 'utils/web'
 
 import { mapHook } from './hooks/map'
 import { Vehicles } from './hooks/vehicle'
+import { parseLocation } from './hooks/helper'
 
 import { DistanceTool } from './tools/distance'
 import { AreaTool } from './tools/area'
@@ -25,7 +26,7 @@ const { useEffect, useRef } = React
 
 export default (cfg: iArgs) => {
 
-    const { isDarkMode, event, api, kv } = cfg
+    const { isDarkMode, event, core_collect, kv } = cfg
     const [messageApi, contextHolderMessage] = message.useMessage()
     const [notifApi, contextHolderNotification] = notification.useNotification()
     const [isMapReady, Maptalks] = mapHook({ containerId: 'render_0', isDarkMode, conf: {} })
@@ -52,21 +53,15 @@ export default (cfg: iArgs) => {
 
             const vcs = new Vehicles(Maptalks)
 
-            api.get('vehicle-query', {}).then((ls: any) => {
+            const locations = (ls: any) => ls.forEach((location: any) => {
 
-                console.log(`[vehicle-query]`, ls)
+                const obj = parseLocation(location)
+                vcs.live_update(obj)
+                cfg.core_collect.on(obj.name, (loc) => vcs.live_update(parseLocation(loc)))
 
-                Array.isArray(ls) && ls.map((obj) => {
+            })
 
-                    cfg.api.on(obj.project, (update: any) => vcs.live_update(update))
-
-                    obj.equipments.map((item: any) => {
-                        vcs.live_update(item)
-                    })
-
-                })
-
-            }).catch((err) => console.log(err))
+            cfg.core_collect.get('get-locations-all-last', {}).then(locations).catch(console.error)
 
         })
 
