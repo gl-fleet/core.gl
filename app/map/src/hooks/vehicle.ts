@@ -4,7 +4,7 @@ import { Loop, log } from 'utils/web'
 
 export const getVehicle = (Maptalks: MapView, type: string): Promise<Vehicle> => new Promise((resolve, reject) => {
 
-    log.info(`[Vehicles] -> Get Vehicle / ${type}`)
+    log.info(`[Vehicles] -> Get Vehicle / ${type} [LOAD]`)
 
     type === 'vehicle' && Toyota({ size: 50, x: 0, y: 0, z: 0 })
         .then((Truck) => resolve(new Vehicle({ Truck, Maptalks })))
@@ -44,12 +44,10 @@ export class Vehicles {
 
     }
 
-    update_vehicle = (key: string, { gps }: any) => {
+    update_vehicle = (key: string, loc: any) => {
 
         const t = this.obj[key]?.vehicle
-        if (typeof t !== 'undefined') {
-            t.update({ ...gps })
-        }
+        if (typeof t !== 'undefined') t.update(loc)
 
     }
 
@@ -128,9 +126,11 @@ export class Vehicles {
         const exists = this.obj.hasOwnProperty(key)
 
         if (!exists) {
+
             this.obj[key] = {}
             this.create_vehicle(key, { project, type, name })
             this.create_marker(key, { project, type, name })
+
         }
 
         this.update_vehicle(key, body)
