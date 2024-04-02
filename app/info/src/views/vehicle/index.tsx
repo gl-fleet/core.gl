@@ -62,7 +62,7 @@ export default (cfg: iArgs) => {
 
             <Col id="stream_view" span={24} style={{ position: 'relative' }}>
 
-                <Title level={5} style={{ position: 'absolute', top: 16, left: 24, zIndex: 100, margin: 0 }}>
+                <Title level={5} style={{ position: 'absolute', top: 16, left: 24, zIndex: 100, margin: 0, border: 'none' }}>
                     <span>{stream.data.project} / {stream.data.type} / {stream.data.name}</span>
                     <p style={{ color: '#1668dc', fontSize: 10, fontWeight: 800, margin: '4px 0px' }}>{oget('***')(stream.data, 'gsm', 'operator')}</p>
                     <p style={{ color: '#1668dc', fontSize: 10, fontWeight: 800, margin: '4px 0px' }}>{oget('***')(stream.data, 'network_usage')}</p>

@@ -56,8 +56,14 @@ export default (cfg: iArgs) => {
             const locations = (ls: any) => ls.forEach((location: any) => {
 
                 const obj = parseLocation(location)
-                vcs.live_update(obj)
-                cfg.core_collect.on(obj.name, (loc) => vcs.live_update(parseLocation(loc)))
+
+                if (obj.project && obj.type && obj.name) {
+
+                    vcs.live_update(obj)
+                    const key = `${obj.project}.${obj.type}.${obj.name}`
+                    cfg.core_collect.on(key, (loc) => vcs.live_update(parseLocation(loc)))
+
+                }
 
             })
 

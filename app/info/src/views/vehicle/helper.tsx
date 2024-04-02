@@ -52,7 +52,7 @@ export const UpdateStatus = ({ data }: any) => {
         Loop(() => {
 
             const delay = Date.now() - last.current
-            setDanger(delay >= 10 * 1000 ? true : false)
+            setDanger(delay >= 15 * 1000 ? true : false)
 
         }, 1000)
 
