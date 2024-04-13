@@ -102,8 +102,6 @@ export class Event {
             raw: true,
         })
 
-        console.log(items[0])
-
         return items.filter((e: any) => e.type === 'status' && e.dst === 'master')
 
     }
