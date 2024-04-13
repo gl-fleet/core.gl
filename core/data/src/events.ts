@@ -65,8 +65,8 @@ export class Event {
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             deletedAt: { type: DataTypes.STRING, defaultValue: null },
 
-        }, { indexes })
-        // }, { indexes: [{ unique: false, fields: ['type', 'src', 'dst', 'updatedAt'] }] })
+            // }, { indexes })
+        }, { indexes: [{ unique: false, fields: ['type', 'src', 'dst', 'updatedAt'] }] })
 
     }
 
@@ -83,7 +83,11 @@ export class Event {
         where: {
             type: 'status',
             dst: 'master',
-            [Op.or]: [{ updatedAt: { [Op.gt]: updatedAt } }, { id: { [Op.gt]: id }, updatedAt: { [Op.eq]: updatedAt } }],
+            updatedAt: { [Op.gte]: updatedAt }, /** Just for using index **/
+            [Op.or]: [
+                { updatedAt: { [Op.gt]: updatedAt } },
+                { id: { [Op.gt]: id }, updatedAt: { [Op.eq]: updatedAt } }
+            ],
             deletedAt: null,
         },
         order: [['updatedAt', 'ASC'], ['id', 'ASC']],
