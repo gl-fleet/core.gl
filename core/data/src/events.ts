@@ -84,22 +84,28 @@ export class Event {
 
     /*** *** *** @___Table_Queries___ *** *** ***/
 
-    getStatus = async ({ id = '', updatedAt = '', limit = 10 }) => await this.collection.findAll({
+    getStatus = async ({ id = '', updatedAt = '', limit = 10 }) => {
 
-        where: {
-            type: 'status',
-            dst: 'master',
-            updatedAt: { [Op.gte]: updatedAt }, /** Just for using index **/
-            [Op.or]: [
-                { updatedAt: { [Op.gt]: updatedAt } },
-                { id: { [Op.gt]: id }, updatedAt: { [Op.eq]: updatedAt } }
-            ],
-            deletedAt: null,
-        },
-        order: [['updatedAt', 'ASC'], ['id', 'ASC']],
-        limit: limit,
-        raw: true,
+        const items = await this.collection.findAll({
+            where: {
+                // type: 'status',
+                // dst: 'master',
+                updatedAt: { [Op.gte]: updatedAt }, /** Just for using index **/
+                [Op.or]: [
+                    { updatedAt: { [Op.gt]: updatedAt } },
+                    { id: { [Op.gt]: id }, updatedAt: { [Op.eq]: updatedAt } }
+                ],
+                deletedAt: null,
+            },
+            order: [['updatedAt', 'ASC'], ['id', 'ASC']],
+            limit: limit,
+            raw: true,
+        })
 
-    })
+        console.log(items[0])
+
+        return items.filter((e: any) => e.type === 'status' && e.dst === 'master')
+
+    }
 
 }
