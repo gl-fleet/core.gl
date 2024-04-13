@@ -103,6 +103,7 @@ export class Coverages {
     executer = async () => {
 
         /** ** Data pulling **  **/
+        const start = Date.now()
         const alias = `[${this.name}.executer]`
         const enums = this.sequelize.models['enums']
 
