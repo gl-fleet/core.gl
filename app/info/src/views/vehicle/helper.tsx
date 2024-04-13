@@ -43,7 +43,7 @@ export const getVehicle = (Maptalks: MapView, type: string): Promise<Vehicle> =>
 
 export const UpdateStatus = ({ data }: any) => {
 
-    const [danger, setDanger] = useState(false)
+    const [danger, setDanger] = useState(0)
     const last = useRef(0)
     last.current = oget(0)(data, 'updatedAt')
 
@@ -52,18 +52,18 @@ export const UpdateStatus = ({ data }: any) => {
         Loop(() => {
 
             const delay = Date.now() - last.current
-            setDanger(delay >= 15 * 1000 ? true : false)
+            setDanger(delay > 60000 ? 1 : delay >= 30000 ? 0.5 : 0)
 
         }, 1000)
 
     }, [])
 
-    if (last.current === 0) return <Button danger={danger} disabled={true} type='dashed' icon={<CloudSyncOutlined />}>
-        <Style filter={danger ? 'grayscale(1)' : 'grayscale(0)'} />
+    if (last.current === 0) return <Button danger={danger !== 0} disabled={true} type='dashed' icon={<CloudSyncOutlined />}>
+        <Style filter={`grayscale(${danger})`} />
         {'...'}
     </Button>
-    else return <Button danger={danger} ghost disabled={false} type='primary' icon={<CloudSyncOutlined />}>
-        <Style filter={danger ? 'grayscale(1)' : 'grayscale(0)'} />
+    else return <Button danger={danger !== 0} ghost disabled={false} type='primary' icon={<CloudSyncOutlined />}>
+        <Style filter={`grayscale(${danger})`} />
         {moment(last.current).format('HH:mm:ss.SSS')}
     </Button>
 

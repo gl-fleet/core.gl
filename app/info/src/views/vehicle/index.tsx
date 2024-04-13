@@ -45,10 +45,13 @@ export default (cfg: iArgs) => {
 
                 }
 
-                cfg.core_collect.on(key, (location) => update(location))
-                cfg.core_collect.get('get-locations-last', { proj, type, name })
+                const get_initial_location = () => cfg.core_collect.get('get-locations-last', { proj, type, name })
                     .then((location) => update(location))
                     .catch((error) => console.error(error))
+
+                get_initial_location()
+                cfg.core_collect.on(key, (location) => update(location))
+                cfg.core_collect.cio.on("connect", () => get_initial_location())
 
             })
         })
