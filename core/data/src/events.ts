@@ -26,6 +26,33 @@ export class Event {
 
     table_build = () => {
 
+        const indexes = [
+            {
+                unique: false,
+                name: 'Type_index',
+                using: 'BTREE',
+                fields: ['type'],
+            },
+            {
+                unique: false,
+                name: 'Source_index',
+                using: 'BTREE',
+                fields: ['src'],
+            },
+            {
+                unique: false,
+                name: 'Destination_index',
+                using: 'BTREE',
+                fields: ['dst'],
+            },
+            {
+                unique: false,
+                name: 'UpdatedAt_index',
+                using: 'BTREE',
+                fields: ['updatedAt'],
+            },
+        ]
+
         this.collection = this.sequelize.define(this.name, {
 
             id: { primaryKey: true, type: DataTypes.STRING, defaultValue: () => Uid() },
@@ -38,7 +65,8 @@ export class Event {
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             deletedAt: { type: DataTypes.STRING, defaultValue: null },
 
-        }, { indexes: [{ unique: false, fields: ['type', 'src', 'dst', 'updatedAt'] }] })
+        }, { indexes })
+        // }, { indexes: [{ unique: false, fields: ['type', 'src', 'dst', 'updatedAt'] }] })
 
     }
 
