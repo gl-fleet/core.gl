@@ -65,8 +65,8 @@ export class Event {
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             deletedAt: { type: DataTypes.STRING, defaultValue: null },
 
-            // }, { indexes })
-        }, { indexes: [{ unique: false, fields: ['type', 'src', 'dst', 'updatedAt'] }] })
+        }, { indexes })
+        // }, { indexes: [{ unique: false, fields: ['type', 'src', 'dst', 'updatedAt'] }] })
 
     }
 
