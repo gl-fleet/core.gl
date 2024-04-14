@@ -79,7 +79,7 @@ export class Event {
 
                 ulog(key, 'req', `Colloct pulling`, `cloud`, `db`)
                 const rows = await this.getStatus(req.query)
-                ulog(key, 'req', `Found ${rows?.length} items`, `db`, `cloud`)
+                ulog(key, 'then', `Found ${rows?.length} items`, `db`, `cloud`)
                 return rows
 
             } catch (err: any) {
