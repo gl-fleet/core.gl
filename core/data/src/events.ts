@@ -1,5 +1,5 @@
 import { Host } from 'unet'
-import { decodeENV, Uid, Now, Sfy } from 'utils'
+import { decodeENV, Uid, Now, ulog, ushort } from 'utils'
 import { DataTypes, Model, ModelStatic } from 'sequelize'
 import { Sequelize, Op } from 'sequelize'
 
@@ -73,10 +73,21 @@ export class Event {
 
         this.local.on(`get-${this.name}-status`, async (req: any) => {
 
-            const start = Date.now()
-            const rows = await this.getStatus(req.query)
-            console.info(`[M] Get_items:  COLLECT.PULL -> ${rows?.length} - (${Date.now() - start}ms)`)
-            return rows
+            const key = `GET:STATUS:${ushort()}`
+
+            try {
+
+                ulog(key, 'req', `Colloct pulling`, `cloud`, `db`)
+                const rows = await this.getStatus(req.query)
+                ulog(key, 'req', `Found ${rows?.length} items`, `db`, `cloud`)
+                return rows
+
+            } catch (err: any) {
+
+                ulog(key, 'catch', err.message, 'cloud', 'vehicle')
+                return []
+
+            }
 
         })
 
