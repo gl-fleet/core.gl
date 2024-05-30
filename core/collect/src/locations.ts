@@ -58,25 +58,25 @@ export class Locations {
             indexes: [
                 {
                     unique: false,
-                    name: 'Proj_index',
+                    name: `${this.name}_proj_index`,
                     using: 'BTREE',
                     fields: ['proj'],
                 },
                 {
                     unique: false,
-                    name: 'Type_index',
+                    name: `${this.name}_type_index`,
                     using: 'BTREE',
                     fields: ['type'],
                 },
                 {
                     unique: false,
-                    name: 'Name_index',
+                    name: `${this.name}_name_index`,
                     using: 'BTREE',
                     fields: ['name'],
                 },
                 {
                     unique: false,
-                    name: 'UpdatedAt_index',
+                    name: `${this.name}_updatedat_index`,
                     using: 'BTREE',
                     fields: ['updatedAt'],
                 },
