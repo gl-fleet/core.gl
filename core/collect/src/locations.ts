@@ -53,8 +53,8 @@ export class Locations {
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             deletedAt: { type: DataTypes.STRING, defaultValue: null },
 
-            // }, { indexes: [{ unique: true, fields: ['proj', 'type', 'name', 'updatedAt'] }] })
-        }, {
+        }, { indexes: [{ unique: true, fields: ['proj', 'type', 'name', 'updatedAt'] }] })
+        /* }, {
             indexes: [
                 {
                     unique: false,
@@ -81,7 +81,7 @@ export class Locations {
                     fields: ['updatedAt'],
                 },
             ]
-        })
+        }) */
 
     }
 
