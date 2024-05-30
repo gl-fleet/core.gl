@@ -53,7 +53,35 @@ export class Locations {
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             deletedAt: { type: DataTypes.STRING, defaultValue: null },
 
-        }, { indexes: [{ unique: true, fields: ['proj', 'type', 'name', 'updatedAt'] }] })
+            // }, { indexes: [{ unique: true, fields: ['proj', 'type', 'name', 'updatedAt'] }] })
+        }, {
+            indexes: [
+                {
+                    unique: false,
+                    name: 'Proj_index',
+                    using: 'BTREE',
+                    fields: ['proj'],
+                },
+                {
+                    unique: false,
+                    name: 'Type_index',
+                    using: 'BTREE',
+                    fields: ['type'],
+                },
+                {
+                    unique: false,
+                    name: 'Name_index',
+                    using: 'BTREE',
+                    fields: ['name'],
+                },
+                {
+                    unique: false,
+                    name: 'UpdatedAt_index',
+                    using: 'BTREE',
+                    fields: ['updatedAt'],
+                },
+            ]
+        })
 
     }
 
