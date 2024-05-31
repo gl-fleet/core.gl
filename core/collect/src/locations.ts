@@ -1,5 +1,5 @@
 import { Host, Connection } from 'unet'
-import { Sequelize, DataTypes, Model, ModelStatic } from 'sequelize'
+import { Sequelize, DataTypes, Model, ModelStatic, Op } from 'sequelize'
 import { AsyncWait, Jfy, Now, Uid, Safe, Loop, dateFormat, moment, log } from 'utils'
 
 export class Locations {
@@ -110,7 +110,14 @@ export class Locations {
     get_last = async (query: any) => await this.collection.findOne({ where: { ...query, deletedAt: null }, order: [['updatedAt', 'DESC']] })
     get_all_last = async (query: any, { proj }: any) => await this.collection.findAll({
         attributes: [Sequelize.literal('DISTINCT ON("name") "name"'), "updatedAt", "proj", "type", "data"],
-        where: proj === '*' ? { deletedAt: null } : { proj, deletedAt: null },
+        where: proj === '*' ? {
+            updatedAt: { [Op.gte]: moment().add(-14, 'days').format(dateFormat) },
+            deletedAt: null
+        } : {
+            proj,
+            updatedAt: { [Op.gte]: moment().add(-14, 'days').format(dateFormat) },
+            deletedAt: null
+        },
         order: ['name', ['updatedAt', 'DESC'], ['id', 'DESC']],
         raw: true,
     })
