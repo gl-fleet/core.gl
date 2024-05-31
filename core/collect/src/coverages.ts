@@ -49,30 +49,30 @@ export class Coverages {
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             deletedAt: { type: DataTypes.STRING, defaultValue: null },
 
-        // }, { indexes: [{ unique: true, fields: ['proj', 'type', 'est', 'nrt'] }] })
+            // }, { indexes: [{ unique: true, fields: ['proj', 'type', 'est', 'nrt'] }] })
         }, {
             indexes: [
                 {
                     unique: false,
-                    name: 'Proj_index',
+                    name: `${this.name}_proj_index`,
                     using: 'BTREE',
                     fields: ['proj'],
                 },
                 {
                     unique: false,
-                    name: 'Type_index',
+                    name: `${this.name}_type_index`,
                     using: 'BTREE',
                     fields: ['type'],
                 },
                 {
                     unique: false,
-                    name: 'Est_index',
+                    name: `${this.name}_est_index`,
                     using: 'BTREE',
                     fields: ['est'],
                 },
                 {
                     unique: false,
-                    name: 'Nrt_index',
+                    name: `${this.name}_nrt_index`,
                     using: 'BTREE',
                     fields: ['nrt'],
                 },
