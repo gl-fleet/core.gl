@@ -111,11 +111,11 @@ export class Locations {
     get_all_last = async (query: any, { proj }: any) => await this.collection.findAll({
         attributes: [Sequelize.literal('DISTINCT ON("name") "name"'), "updatedAt", "proj", "type", "data"],
         where: proj === '*' ? {
-            updatedAt: { [Op.gte]: moment().add(-14, 'days').format(dateFormat) },
+            updatedAt: { [Op.gte]: moment().add(-314, 'days').format(dateFormat) },
             deletedAt: null
         } : {
-            proj,
-            updatedAt: { [Op.gte]: moment().add(-14, 'days').format(dateFormat) },
+            updatedAt: { [Op.gte]: moment().add(-314, 'days').format(dateFormat) },
+            proj: proj,
             deletedAt: null
         },
         order: ['name', ['updatedAt', 'DESC'], ['id', 'DESC']],
