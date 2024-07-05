@@ -123,7 +123,7 @@ export class Locations {
         raw: true,
     })
 
-    get_all_last_v2 = async (query: any, { proj, days = 7 }: any) => await this.collection.query(`
+    get_all_last_v2 = async (query: any, { proj, days = 7 }: any) => await this.sequelize.query(`
         SELECT *
         FROM public.locations
         WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND (name, "updatedAt") in (
