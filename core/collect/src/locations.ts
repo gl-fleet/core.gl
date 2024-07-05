@@ -129,7 +129,7 @@ export class Locations {
         WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND (name, "updatedAt") in (
             SELECT name, MAX("updatedAt") 
             FROM public.locations
-            WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND "proj" = '${proj}' AND "deletedAt" is null
+            WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND ${proj === '*' ? `"proj" is not null` : `"proj" = '${proj}'`} AND "deletedAt" is null
             GROUP BY "name"
         )`, {
         type: QueryTypes.SELECT,
