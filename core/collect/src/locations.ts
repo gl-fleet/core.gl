@@ -123,15 +123,15 @@ export class Locations {
         raw: true,
     })
 
-    get_all_last_v2 = async (query: any, { proj }: any) => await this.collection.query(`
+    get_all_last_v2 = async (query: any, { proj, days = 7 }: any) => await this.collection.query(`
         SELECT *
         FROM public.locations
-        WHERE "updatedAt" > '${moment().add(-14, 'days').format(dateFormat)}' AND (name, "updatedAt") in (
+        WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND (name, "updatedAt") in (
             SELECT name, MAX("updatedAt") 
             FROM public.locations
-            WHERE "updatedAt" > '${moment().add(-14, 'days').format(dateFormat)}' AND "proj" = '${proj}' AND "deletedAt" is null
+            WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND "proj" = '${proj}' AND "deletedAt" is null
             GROUP BY "name"
-        )`)
+        )`, { raw: true })
 
     /*** *** *** @___Table_Jobs___ *** *** ***/
 
