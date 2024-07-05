@@ -1,5 +1,5 @@
 import { Host, Connection } from 'unet'
-import { Sequelize, DataTypes, Model, ModelStatic, Op } from 'sequelize'
+import { Sequelize, DataTypes, Model, ModelStatic, Op, QueryTypes } from 'sequelize'
 import { AsyncWait, Jfy, Now, Uid, Safe, Loop, dateFormat, moment, log } from 'utils'
 
 export class Locations {
@@ -131,7 +131,9 @@ export class Locations {
             FROM public.locations
             WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND "proj" = '${proj}' AND "deletedAt" is null
             GROUP BY "name"
-        )`, { raw: true })
+        )`, {
+        type: QueryTypes.SELECT,
+    })
 
     /*** *** *** @___Table_Jobs___ *** *** ***/
 
