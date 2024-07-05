@@ -129,7 +129,7 @@ export class Locations {
         WHERE "updatedAt" > '${moment().add(-14, 'days').format(dateFormat)}' AND (name, "updatedAt") in (
             SELECT name, MAX("updatedAt") 
             FROM public.locations
-            WHERE "updatedAt" > '${moment().add(-14, 'days').format(dateFormat)}'
+            WHERE "updatedAt" > '${moment().add(-14, 'days').format(dateFormat)}' AND "proj" = '${proj}' AND "deletedAt" is null
             GROUP BY "name"
         )`)
 
