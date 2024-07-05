@@ -100,6 +100,7 @@ export class Locations {
 
         this.local.on(`get-${this.name}-last`, async (req: any) => await this.get_last(req.query))
         this.local.on(`get-${this.name}-all-last`, async ({ query, user }: any) => await this.get_all_last(query, user), true, 2)
+        this.local.on(`get-${this.name}-all-last-v2`, async ({ query, user }: any) => await this.get_all_last_v2(query, user), true, 2)
 
     }
 
@@ -121,6 +122,16 @@ export class Locations {
         order: ['name', ['updatedAt', 'DESC'], ['id', 'DESC']],
         raw: true,
     })
+
+    get_all_last_v2 = async (query: any, { proj }: any) => await this.collection.query(`
+        SELECT *
+        FROM public.locations
+        WHERE "updatedAt" > '${moment().add(-14, 'days').format(dateFormat)}' AND (name, "updatedAt") in (
+            SELECT name, MAX("updatedAt") 
+            FROM public.locations
+            WHERE "updatedAt" > '${moment().add(-14, 'days').format(dateFormat)}'
+            GROUP BY "name"
+        )`)
 
     /*** *** *** @___Table_Jobs___ *** *** ***/
 
