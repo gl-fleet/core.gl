@@ -28,7 +28,8 @@ export default (cfg: iArgs) => {
             zoom: 19.5,
             devicePixelRatio: 1,
             isDarkMode: cfg.isDarkMode,
-            urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
+            // urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
+            urlTemplate: `https://tile.openstreetmap.org/{z}/{x}/{y}.png`,
             stats: null,
         })
 
