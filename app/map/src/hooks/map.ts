@@ -8,7 +8,7 @@ export const CanvasFixer = () => {
     // Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true warnings
     // const ct: any = cv.getContext('2d')  // Gives warning
     // const ct: any = cv.getContext('2d', { willReadFrequently: true }) // Same here
-    const ct: any = cv.getContext('2d') 
+    const ct: any = cv.getContext('2d')
 
     if (ct) {
 
@@ -53,7 +53,8 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
             isDarkMode,
             simulate: false,
             doubleClickZoom: lowReso,
-            urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
+            // urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
+            urlTemplate: `https://tile.openstreetmap.org/{z}/{x}/{y}.png`,
             fps: 60,
             ...conf,
         })
