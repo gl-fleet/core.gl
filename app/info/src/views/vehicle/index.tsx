@@ -25,7 +25,7 @@ export default (cfg: iArgs) => {
 
         const map = new MapView({
             containerId: 'render_vhc',
-            zoom: 18,
+            zoom: 19,
             devicePixelRatio: 1,
             isDarkMode: cfg.isDarkMode,
             // urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
