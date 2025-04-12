@@ -71,11 +71,13 @@ export class Vehicles {
 
     }
 
-    create_vehicle = (key: string, { project, type, name }: any) => {
+    create_vehicle = (key: string, { project, type, name }: any, body: any) => {
 
         const proc = (e: any) => {
 
             this.obj[key].vehicle = e
+            this.update_vehicle(key, body)
+
             e.on((ename: string, arg: any) => {
                 ename === 'mouse' && arg === 'dblclick' && this.open_window(key, { project, type, name })
             })
@@ -131,7 +133,7 @@ export class Vehicles {
         if (!exists) {
 
             this.obj[key] = {}
-            this.create_vehicle(key, { project, type, name })
+            this.create_vehicle(key, { project, type, name }, body)
             this.create_marker(key, { project, type, name })
 
         }

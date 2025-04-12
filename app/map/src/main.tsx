@@ -13,6 +13,7 @@ import { GeometryTool } from './tools/geometry'
 import Menu from './views/menu'
 import Auth from './views/auth'
 import Fatigue from './views/fatigue'
+import Search from './views/search'
 
 const Style = createGlobalStyle`
 
@@ -88,6 +89,7 @@ export default (cfg: iArgs) => {
         <Auth {...cfg} />
         <Fatigue {...cfg} />
         <Menu {...cfg} />
+        <Search {...cfg} Maptalks={Maptalks} />
 
         <Col id='render_0' span={24} style={{ height: '100%' }} />
 
