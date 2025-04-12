@@ -1,6 +1,6 @@
 import { React, Row, Col, notification, message } from 'uweb'
 import { createGlobalStyle } from 'styled-components'
-import { Safe } from 'utils/web'
+import { AsyncWait, Safe } from 'utils/web'
 
 import { mapHook } from './hooks/map'
 import { Vehicles } from './hooks/vehicle'
@@ -53,21 +53,26 @@ export default (cfg: iArgs) => {
 
             const vcs = new Vehicles(Maptalks)
 
-            const locations = (ls: any) => ls.forEach((location: any) => {
+            const locations = async (ls: any) => {
 
-                const obj = parseLocation(location)
+                for (const location of ls) {
 
-                if (obj.project && obj.type && obj.name) {
+                    await AsyncWait(250)
+                    const obj = parseLocation(location)
 
-                    vcs.live_update(obj)
-                    const key = `${obj.project}.${obj.type}.${obj.name}`
-                    cfg.core_collect.on(key, (loc) => vcs.live_update(parseLocation(loc)))
+                    if (obj.project && obj.type && obj.name) {
+
+                        vcs.live_update(obj)
+                        const key = `${obj.project}.${obj.type}.${obj.name}`
+                        cfg.core_collect.on(key, (loc) => vcs.live_update(parseLocation(loc)))
+
+                    }
 
                 }
 
-            })
+            }
 
-            cfg.core_collect.get('get-locations-all-last', {}).then(locations).catch(console.error)
+            cfg.core_collect.get('get-locations-all-last-v2', {}).then(locations).catch(console.error)
 
         })
 

@@ -108,7 +108,20 @@ export class Locations {
     get = async (query: any) => await this.collection.findAll({ where: { ...query, deletedAt: null }, order: [['updatedAt', 'ASC']] })
     set = async (query: any) => await this.collection.upsert({ ...query, updatedAt: Now() }, { returning: true, raw: true })
 
-    get_last = async (query: any) => await this.collection.findOne({ where: { ...query, deletedAt: null }, order: [['updatedAt', 'DESC']] })
+    get_last = async (query: any) => {
+
+        const result = await this.collection.findOne({
+            where: {
+                ...query, deletedAt: null,
+            },
+            // order: [['updatedAt', 'ASC']], taking a long ...
+            raw: true,
+        })
+
+        return result
+
+    }
+
     get_all_last = async (query: any, { proj }: any) => await this.collection.findAll({
         attributes: [Sequelize.literal('DISTINCT ON("name") "name"'), "updatedAt", "proj", "type", "data"],
         where: proj === '*' ? {

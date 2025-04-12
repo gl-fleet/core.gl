@@ -28,6 +28,7 @@ export class Vehicles {
     public maptalks
     public cfg = {
         last_update: 0,
+        is_loading: false,
     }
 
     constructor(Maptalks: MapView) {
@@ -81,7 +82,9 @@ export class Vehicles {
 
         }
 
-        getVehicle(this.maptalks, type).then(proc).catch(e => { })
+        getVehicle(this.maptalks, type).then(proc).catch(e => { }).finally(() => {
+            this.cfg.is_loading = false
+        })
 
     }
 
