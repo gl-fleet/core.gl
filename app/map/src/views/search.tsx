@@ -82,7 +82,7 @@ export default (cfg: iArgs | any) => {
             showSearch={true}
             placeholder="Select a vehicle"
             onDropdownVisibleChange={onDropdownChanges}
-            filterOption={(input, option: any) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+            filterOption={(input: any, option: any) => (option?.value ?? '').toLowerCase().includes(input.toLowerCase())}
             onSelect={(n, { data }) => {
 
                 const { east: x, north: y } = data
