@@ -53,8 +53,9 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
             isDarkMode,
             simulate: false,
             doubleClickZoom: lowReso,
-            urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
-            // urlTemplate: `https://tile.openstreetmap.org/{z}/{x}/{y}.png`,
+            // urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
+            urlTemplate: `https://tile.openstreetmap.org/{z}/{x}/{y}.png`,
+            // urlTemplate: 'https://api.maptiler.com/maps/outdoor/{z}/{x}/{y}.png',
             fps: 60,
             ...conf,
         })

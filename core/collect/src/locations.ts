@@ -112,9 +112,10 @@ export class Locations {
 
         const result = await this.collection.findOne({
             where: {
-                ...query, deletedAt: null,
+                ...query,
+                deletedAt: null,
             },
-            // order: [['updatedAt', 'ASC']], taking a long ...
+            order: [['updatedAt', 'DESC']],
             raw: true,
         })
 

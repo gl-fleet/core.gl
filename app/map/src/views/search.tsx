@@ -43,7 +43,6 @@ export default (cfg: iArgs | any) => {
                     }
 
                     for (const n of obj[x]) {
-                        console.log(n)
                         s.options.push({
                             value: n.name,
                             label: <div>
