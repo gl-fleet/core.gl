@@ -1,4 +1,4 @@
-import { React, Typography, Space, Button, Select } from 'uweb'
+import { React, Typography, Space, Button, Select, Input } from 'uweb'
 import { MapView, maptalks } from 'uweb/maptalks'
 import { CloseCircleOutlined } from '@ant-design/icons'
 const { Paragraph } = Typography
@@ -117,19 +117,34 @@ export class GeometryTool {
 
         this.tool.on('drawend', ({ geometry }: any) => {
 
-            console.log(geometry.toJSON())
             this.layer.addGeometry(geometry)
             geometry.startEdit()
 
+            setInterval(() => {
+                console.log(geometry.toJSON().feature.geometry)
+            }, 2500)
+
             this.notif.success({
+                style: { zIndex: 10 },
                 key: geometry.type,
                 message: `${geometry.type}`,
                 placement: 'bottom',
                 duration: 0,
                 description:
-                    <Space direction="vertical" style={{ padding: 0, margin: 0, width: '100%' }}>
-                        <Select style={{ width: '100%' }} />
-                        <Select style={{ width: '100%' }} />
+                    <Space direction="vertical" style={{ padding: 0, margin: 0, width: '100%', zIndex: 2051 }}>
+                        <Select
+                            defaultValue="lucy"
+                            style={{ width: '100%', zIndex: 2052 }}
+                            dropdownStyle={{ zIndex: 2052 }}
+                            // onChange={handleChange}
+                            options={[
+                                { value: 'jack', label: 'Jack' },
+                                { value: 'lucy', label: 'Lucy' },
+                                { value: 'Yiminghe', label: 'yiminghe' },
+                                { value: 'disabled', label: 'Disabled', disabled: true },
+                            ]}
+                        />
+                        <Input placeholder="Basic usage" />
                     </Space>,
                 btn:
                     <Space>
