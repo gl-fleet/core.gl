@@ -114,11 +114,8 @@ export class Vehicles {
 
         this.obj[key].marker = marker
 
-        if (screen.width > 640) {
-            marker.on('dblclick', () => this.open_window(key, { project, type, name }))
-        } else {
-            marker.on('click', () => this.open_window(key, { project, type, name }))
-        }
+        if (screen.width > 640) marker.on('dblclick', () => this.open_window(key, { project, type, name }))
+        else marker.on('click', () => this.open_window(key, { project, type, name }))
 
         Loop(() => (Date.now() - this.cfg.last_update >= 5000) && marker.updateSymbol({ textFill: '#fff', textHaloFill: 'red' }), 2500)
 
