@@ -1,11 +1,15 @@
 {
   "name": "org",
-  "version": "0.0.124",
+  "version": "0.0.125",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "pm2 list && MODE=development nx run-many -t _serve",
-    "serve": "MODE=production nx run-many -t _serve",
+    "start": "pm2 list && MODE=development yarn run_0 && yarn run_1 && yarn run_2 && yarn run_3",
+    "serve": "pm2 list && MODE=production yarn run_0 && yarn run_1 && yarn run_2 && yarn run_3",
+    "run_0": "sleep 1 && nx run-many -t _serve --projects=core_proxy",
+    "run_1": "sleep 1 && nx run-many -t _serve --projects=core_data,core_collect",
+    "run_2": "sleep 1 && nx run-many -t _serve --projects=core_rtcm,core_fatigue",
+    "run_3": "sleep 1 && nx run-many -t _serve --projects=core_map,core_info",
     "build": "nx run-many -t build",
     "clear": "nx run-many -t clear",
     "stop": "nx run-many -t _stop",
@@ -24,7 +28,7 @@
     "ucan": "upacks/ucan#1.0.4",
     "unet": "upacks/unet#1.4.8",
     "utils": "upacks/utils#1.2.2",
-    "uweb": "upacks/uweb#1.2.0"
+    "uweb": "upacks/uweb#1.2.1"
   },
   "devDependencies": {
     "nx": "16.7.4"
