@@ -7,15 +7,15 @@ export const getVehicle = (Maptalks: MapView, type: string): Promise<Vehicle> =>
     log.info(`[Vehicles] -> Get Vehicle / ${type} [LOAD]`)
 
     type === 'vehicle' && Toyota({ size: 50, x: 0, y: 0, z: 0 })
-        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks })))
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 5 })))
         .catch((err) => reject(err))
 
     type === 'drill' && Drill({ size: 50, x: 0, y: 0, z: 0 })
-        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks })))
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 5 })))
         .catch((err) => reject(err))
 
     type === 'dozer' && Dozer({ size: 50, x: 0, y: 0, z: 0 })
-        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks })))
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 5 })))
         .catch((err) => reject(err))
 
 })

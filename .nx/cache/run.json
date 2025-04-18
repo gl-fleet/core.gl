@@ -1,0 +1,32 @@
+{
+  "run": {
+    "command": "nx run-many -t _serve --projects=core_map,core_info",
+    "startTime": "2025-04-18T07:52:22.079Z",
+    "endTime": "2025-04-18T07:52:22.596Z",
+    "inner": false
+  },
+  "tasks": [
+    {
+      "taskId": "core_info:_serve",
+      "target": "_serve",
+      "projectName": "core_info",
+      "hash": "6109164356502324658",
+      "startTime": "2025-04-18T07:52:22.090Z",
+      "endTime": "2025-04-18T07:52:22.588Z",
+      "params": "",
+      "cacheStatus": "cache-miss",
+      "status": 0
+    },
+    {
+      "taskId": "core_map:_serve",
+      "target": "_serve",
+      "projectName": "core_map",
+      "hash": "5508230629662966524",
+      "startTime": "2025-04-18T07:52:22.090Z",
+      "endTime": "2025-04-18T07:52:22.594Z",
+      "params": "",
+      "cacheStatus": "cache-miss",
+      "status": 0
+    }
+  ]
+}

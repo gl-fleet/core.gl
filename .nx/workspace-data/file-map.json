@@ -1,0 +1,397 @@
+{
+  "version": "6.0",
+  "nxVersion": "20.8.0",
+  "pathMappings": {},
+  "nxJsonPlugins": [],
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeSourceFiles": false
+    }
+  },
+  "fileMap": {
+    "nonProjectFiles": [
+      {
+        "file": "nx.json",
+        "hash": "3554509016123724948"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "10531870527289307312"
+      },
+      {
+        "file": "LICENSE",
+        "hash": "3943469149506274560"
+      },
+      {
+        "file": "README.md",
+        "hash": "12443496234374140416"
+      },
+      {
+        "file": "yarn.lock",
+        "hash": "14856468865462887767"
+      },
+      {
+        "file": "package.json",
+        "hash": "18288440947333438934"
+      }
+    ],
+    "projectFileMap": {
+      "core_map": [
+        {
+          "file": "app/map/ecosystem.config.js",
+          "hash": "15063148860488215116"
+        },
+        {
+          "file": "app/map/package.json",
+          "hash": "11478833537761631855",
+          "deps": [
+            "npm:@types/react",
+            "npm:events",
+            "npm:react-json-view",
+            "npm:styled-components"
+          ]
+        },
+        {
+          "file": "app/map/public/car-mini.glb",
+          "hash": "502917943695532500"
+        },
+        {
+          "file": "app/map/public/car.glb",
+          "hash": "4575329912202868162"
+        },
+        {
+          "file": "app/map/public/dozer-mini.glb",
+          "hash": "7161139964025341467"
+        },
+        {
+          "file": "app/map/public/drill-mini.glb",
+          "hash": "5438505522394253778"
+        },
+        {
+          "file": "app/map/public/dump-mini.glb",
+          "hash": "3442136862887508162"
+        },
+        {
+          "file": "app/map/public/exca-mini.glb",
+          "hash": "15275857943706153809"
+        },
+        {
+          "file": "app/map/public/truck-mini.glb",
+          "hash": "14422407455649697758"
+        },
+        {
+          "file": "app/map/src/hooks/helper.ts",
+          "hash": "14340177048693191189"
+        },
+        {
+          "file": "app/map/src/hooks/map.ts",
+          "hash": "1195968773609315194"
+        },
+        {
+          "file": "app/map/src/hooks/utils.ts",
+          "hash": "5209026349633361073"
+        },
+        {
+          "file": "app/map/src/hooks/vehicle.ts",
+          "hash": "10267910133519011132"
+        },
+        {
+          "file": "app/map/src/index.tsx",
+          "hash": "3784639971679453839"
+        },
+        {
+          "file": "app/map/src/main.tsx",
+          "hash": "10470318104680571714"
+        },
+        {
+          "file": "app/map/src/settings.tsx",
+          "hash": "3035821608217058629"
+        },
+        {
+          "file": "app/map/src/tools/area.tsx",
+          "hash": "5033793083662099655"
+        },
+        {
+          "file": "app/map/src/tools/distance.tsx",
+          "hash": "11241195738556199483"
+        },
+        {
+          "file": "app/map/src/tools/geometry.tsx",
+          "hash": "4392740328137760007"
+        },
+        {
+          "file": "app/map/src/types/declare.d.ts",
+          "hash": "12298493937311939028"
+        },
+        {
+          "file": "app/map/src/types/global.d.ts",
+          "hash": "13329467471549249919"
+        },
+        {
+          "file": "app/map/src/views/auth.tsx",
+          "hash": "1124295087741511463"
+        },
+        {
+          "file": "app/map/src/views/fatigue.tsx",
+          "hash": "9156512621160790301"
+        },
+        {
+          "file": "app/map/src/views/menu.tsx",
+          "hash": "9098584661021085954"
+        },
+        {
+          "file": "app/map/src/views/rtcm.tsx",
+          "hash": "1882438959685628738"
+        },
+        {
+          "file": "app/map/src/views/search.tsx",
+          "hash": "18218853673981806543"
+        },
+        {
+          "file": "app/map/tsconfig.json",
+          "hash": "18246736641051706308"
+        }
+      ],
+      "core_info": [
+        {
+          "file": "app/info/ecosystem.config.js",
+          "hash": "15063148860488215116"
+        },
+        {
+          "file": "app/info/package.json",
+          "hash": "15306818502537848200",
+          "deps": [
+            "npm:events",
+            "npm:react-json-view",
+            "npm:styled-components"
+          ]
+        },
+        {
+          "file": "app/info/public/car-mini.glb",
+          "hash": "502917943695532500"
+        },
+        {
+          "file": "app/info/public/car.glb",
+          "hash": "4575329912202868162"
+        },
+        {
+          "file": "app/info/public/dozer-mini.glb",
+          "hash": "7161139964025341467"
+        },
+        {
+          "file": "app/info/public/drill-mini.glb",
+          "hash": "5438505522394253778"
+        },
+        {
+          "file": "app/info/public/dump-mini.glb",
+          "hash": "3442136862887508162"
+        },
+        {
+          "file": "app/info/public/exca-mini.glb",
+          "hash": "15275857943706153809"
+        },
+        {
+          "file": "app/info/public/truck-mini.glb",
+          "hash": "14422407455649697758"
+        },
+        {
+          "file": "app/info/src/hooks/helper.ts",
+          "hash": "16724214522699516008"
+        },
+        {
+          "file": "app/info/src/hooks/map.ts",
+          "hash": "6238567397974317104"
+        },
+        {
+          "file": "app/info/src/index.tsx",
+          "hash": "3122922388001965037"
+        },
+        {
+          "file": "app/info/src/settings.tsx",
+          "hash": "18344092273816515597"
+        },
+        {
+          "file": "app/info/src/types/declare.d.ts",
+          "hash": "12298493937311939028"
+        },
+        {
+          "file": "app/info/src/types/global.d.ts",
+          "hash": "7839983134337829271"
+        },
+        {
+          "file": "app/info/src/views/vehicle/files.tsx",
+          "hash": "715259373336917202"
+        },
+        {
+          "file": "app/info/src/views/vehicle/helper.tsx",
+          "hash": "16718362904167614466"
+        },
+        {
+          "file": "app/info/src/views/vehicle/index.tsx",
+          "hash": "3179626617440388947"
+        },
+        {
+          "file": "app/info/src/views/vehicle/stream.tsx",
+          "hash": "10502941045814232809"
+        },
+        {
+          "file": "app/info/tsconfig.json",
+          "hash": "18246736641051706308"
+        }
+      ],
+      "core_collect": [
+        {
+          "file": "core/collect/ecosystem.config.js",
+          "hash": "8302072219304202100"
+        },
+        {
+          "file": "core/collect/package.json",
+          "hash": "4423132700704197364",
+          "deps": [
+            "npm:@types/multer",
+            "npm:multer",
+            "npm:ogr2ogr",
+            "npm:pg",
+            "npm:pg-hstore",
+            "npm:sequelize",
+            "npm:sqlite3"
+          ]
+        },
+        {
+          "file": "core/collect/src/coverages.ts",
+          "hash": "12789239937021203625"
+        },
+        {
+          "file": "core/collect/src/enums.ts",
+          "hash": "92495778600231472"
+        },
+        {
+          "file": "core/collect/src/index.ts",
+          "hash": "13665513021846580282"
+        },
+        {
+          "file": "core/collect/src/locations.ts",
+          "hash": "14406325543869448201"
+        },
+        {
+          "file": "core/collect/tsconfig.json",
+          "hash": "2947262057851387052"
+        }
+      ],
+      "core_proxy": [
+        {
+          "file": "core/proxy/ecosystem.config.js",
+          "hash": "7372504402414498715"
+        },
+        {
+          "file": "core/proxy/package.json",
+          "hash": "10114717943982890530",
+          "deps": [
+            "npm:@types/jsonwebtoken",
+            "npm:jsonwebtoken",
+            "npm:pm2"
+          ]
+        },
+        {
+          "file": "core/proxy/src/index.ts",
+          "hash": "18366459101740233602"
+        },
+        {
+          "file": "core/proxy/src/pm2.ts",
+          "hash": "10439626477393118239"
+        },
+        {
+          "file": "core/proxy/tsconfig.json",
+          "hash": "2947262057851387052"
+        }
+      ],
+      "core_rtcm": [
+        {
+          "file": "api/rtcm/ecosystem.config.js",
+          "hash": "7328594623715692442"
+        },
+        {
+          "file": "api/rtcm/package.json",
+          "hash": "11930797347445802099"
+        },
+        {
+          "file": "api/rtcm/src/bridge.ts",
+          "hash": "6522937993516606385"
+        },
+        {
+          "file": "api/rtcm/src/index.ts",
+          "hash": "17282793537201199132"
+        },
+        {
+          "file": "api/rtcm/tsconfig.json",
+          "hash": "2947262057851387052"
+        }
+      ],
+      "core_fatigue": [
+        {
+          "file": "api/fatigue/ecosystem.config.js",
+          "hash": "9979724135183827059"
+        },
+        {
+          "file": "api/fatigue/package.json",
+          "hash": "4669511714409575461",
+          "deps": [
+            "npm:jimp",
+            "npm:node-cache"
+          ]
+        },
+        {
+          "file": "api/fatigue/src/index.ts",
+          "hash": "18354601935872870925"
+        },
+        {
+          "file": "api/fatigue/tsconfig.json",
+          "hash": "2947262057851387052"
+        }
+      ],
+      "core_data": [
+        {
+          "file": "core/data/ecosystem.config.js",
+          "hash": "16333629036496786847"
+        },
+        {
+          "file": "core/data/file/file",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "core/data/package.json",
+          "hash": "723131211576847249",
+          "deps": [
+            "npm:@types/multer",
+            "npm:multer",
+            "npm:ogr2ogr",
+            "npm:pg",
+            "npm:pg-hstore",
+            "npm:sequelize",
+            "npm:sqlite3"
+          ]
+        },
+        {
+          "file": "core/data/src/chunks.ts",
+          "hash": "12383892241956187661"
+        },
+        {
+          "file": "core/data/src/events.ts",
+          "hash": "15470796543032397662"
+        },
+        {
+          "file": "core/data/src/index.ts",
+          "hash": "5973519533661158795"
+        },
+        {
+          "file": "core/data/src/utils.ts",
+          "hash": "1064208626131803431"
+        },
+        {
+          "file": "core/data/tsconfig.json",
+          "hash": "2947262057851387052"
+        }
+      ]
+    }
+  }
+}
