@@ -23,13 +23,18 @@ export default (cfg: iArgs) => {
         const name = params.get('name')
         const key = `${proj}.${type}.${name}`
 
+        const types = {
+            'topo': 'https://api.maptiler.com/maps/topo-v2/{z}/{x}/{y}.png?key=l4hWJmvvmISSL7tpiPUZ',
+            'satellite': 'https://api.maptiler.com/maps/satellite/256/{z}/{x}/{y}.jpg?key=l4hWJmvvmISSL7tpiPUZ',
+            'openstreet': 'https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=l4hWJmvvmISSL7tpiPUZ',
+        }
+
         const map = new MapView({
             containerId: 'render_vhc',
             zoom: 20,
             devicePixelRatio: 1,
             isDarkMode: cfg.isDarkMode,
-            // urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
-            urlTemplate: `https://tile.openstreetmap.org/{z}/{x}/{y}.png`,
+            urlTemplate: types.topo,
             stats: null,
         })
 

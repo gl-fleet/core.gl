@@ -45,6 +45,12 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
 
         const lowReso = document.documentElement.clientWidth < 1024
 
+        const types = {
+            'topo': 'https://api.maptiler.com/maps/topo-v2/{z}/{x}/{y}.png?key=l4hWJmvvmISSL7tpiPUZ',
+            'satellite': 'https://api.maptiler.com/maps/satellite/256/{z}/{x}/{y}.jpg?key=l4hWJmvvmISSL7tpiPUZ',
+            'openstreet': 'https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=l4hWJmvvmISSL7tpiPUZ',
+        }
+
         ref.current = new MapView({
             zoom: 16, lat: 43.67338010130343, lon: 105.52008346330428,
             minZoom: 14,
@@ -53,9 +59,7 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
             isDarkMode,
             simulate: false,
             doubleClickZoom: lowReso,
-            // urlTemplate: `https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png`,
-            urlTemplate: `https://tile.openstreetmap.org/{z}/{x}/{y}.png`,
-            // urlTemplate: 'https://api.maptiler.com/maps/outdoor/{z}/{x}/{y}.png',
+            urlTemplate: types.satellite,
             fps: 60,
             ...conf,
         })
