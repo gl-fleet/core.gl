@@ -52,7 +52,7 @@ export const UpdateStatus = ({ data }: any) => {
         Loop(() => {
 
             const delay = Date.now() - last.current
-            setDanger(delay > 60000 ? 1 : delay >= 30000 ? 0.5 : 0)
+            setDanger(delay > 30000 ? 1 : delay >= 15000 ? 0.5 : 0)
 
         }, 1000)
 

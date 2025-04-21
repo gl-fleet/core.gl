@@ -30,11 +30,35 @@ export class Vehicles {
         last_update: 0,
         is_loading: false,
     }
+    public state: any = {}
 
     constructor(Maptalks: MapView) {
 
         this.maptalks = Maptalks
         this.layer = new maptalks.VectorLayer('vector', { enableAltitude: true }).addTo(this.maptalks.map)
+
+        setInterval(() => {
+
+            for (const x in this.state) {
+
+                const _marker = this.obj[x]?.marker
+                const _vehicle = this.obj[x]?.vehicle
+
+                if ((Date.now() - this.state[x].updated_at) > 15000) {
+
+                    _vehicle.setColor('#FF0000')
+                    _marker.updateSymbol({ textFill: '#fff', textHaloFill: '#FF0000' })
+
+                } else {
+
+                    _vehicle.setColor('#00FF00')
+                    _marker.updateSymbol({ textFill: '#fff', textHaloFill: '#00FF00' })
+
+                }
+
+            }
+
+        }, 1000)
 
     }
 
@@ -58,14 +82,14 @@ export class Vehicles {
 
         if (typeof t !== 'undefined') {
 
-            let color = '#000'
+            /* let color = '#000'
             color = activity.indexOf('speed') !== -1 ? 'blue' : color
             color = activity.indexOf('moving') !== -1 ? 'green' : color
-            color = activity.indexOf('stopped') !== -1 ? 'orange' : color
+            color = activity.indexOf('stopped') !== -1 ? 'orange' : color */
 
             t.setCoordinates(gps)
             t.setProperties({ name: name, altitude: 12 })
-            t.updateSymbol({ textFill: '#fff', textHaloFill: color })
+            // t.updateSymbol({ textFill: '#fff', textHaloFill: color })
 
         }
 
@@ -77,9 +101,24 @@ export class Vehicles {
 
             this.obj[key].vehicle = e
             this.update_vehicle(key, body)
+            e.animate("Take 001", { loop: true, speed: 0.5 })
+
+            this.state[key] = {
+                updated_at: 0,
+                activity: body.activity,
+            }
 
             e.on((ename: string, arg: any) => {
+
                 ename === 'mouse' && arg === 'dblclick' && this.open_window(key, { project, type, name })
+
+                if (ename === 'position-map' && arg.gps && arg.gps.x) {
+
+                    this.update_marker(key, { ...body, gps: [arg.gps.x, arg.gps.y, arg.gps.z] })
+                    this.state[key].updated_at = Date.now()
+
+                }
+
             })
 
         }
@@ -94,7 +133,7 @@ export class Vehicles {
 
         const marker = new maptalks.Marker([0, 0], {
             'properties': { 'name': name, 'altitude': 50 },
-            'symbol': {
+            'symbol': <any>{
                 'textFaceName': 'sans-serif',
                 'textName': '{name}',
                 'textWeight': 'bold', //'bold', 'bolder'
@@ -136,7 +175,7 @@ export class Vehicles {
         }
 
         this.update_vehicle(key, body)
-        this.update_marker(key, body)
+        // this.update_marker(key, body)
 
         this.cfg.last_update = Date.now()
 

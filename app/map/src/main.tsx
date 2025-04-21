@@ -1,6 +1,7 @@
 import { React, Row, Col, notification, message } from 'uweb'
 import { createGlobalStyle } from 'styled-components'
 import { AsyncWait, Safe } from 'utils/web'
+import { LoadRequiredFiles } from 'uweb/utils'
 
 import { mapHook } from './hooks/map'
 import { Vehicles } from './hooks/vehicle'
@@ -32,6 +33,8 @@ export default (cfg: iArgs) => {
     const [notifApi, contextHolderNotification] = notification.useNotification()
     const [isMapReady, Maptalks] = mapHook({ containerId: 'render_0', isDarkMode, conf: {} })
 
+    const [equipments, setEquipments] = React.useState([])
+
     useEffect(() => {
 
         event.on('message', ({ type, message }) => messageApi.open({ type, content: message }))
@@ -50,11 +53,13 @@ export default (cfg: iArgs) => {
 
         }, 'Setup_Tools')
 
-        Safe(async () => {
+        LoadRequiredFiles(async () => {
 
             const vcs = new Vehicles(Maptalks)
 
             const locations = async (ls: any) => {
+
+                setEquipments(ls)
 
                 for (const location of ls) {
 
@@ -89,7 +94,7 @@ export default (cfg: iArgs) => {
         <Auth {...cfg} />
         <Fatigue {...cfg} />
         <Menu {...cfg} />
-        <Search {...cfg} Maptalks={Maptalks} />
+        {equipments.length > 0 ? <Search {...cfg} Maptalks={Maptalks} equipments={equipments} /> : null}
 
         <Col id='render_0' span={24} style={{ height: '100%' }} />
 

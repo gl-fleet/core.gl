@@ -3,6 +3,7 @@ import { FolderOpenOutlined, SwapOutlined, AndroidOutlined, DesktopOutlined } fr
 import { MapView } from 'uweb/maptalks'
 import ReactJson from 'react-json-view'
 import { oget } from 'utils/web'
+import { LoadRequiredFiles } from 'uweb/utils'
 
 import { parseLocation, Style, getVehicle, UpdateStatus } from './helper'
 import StreamView from './stream'
@@ -31,35 +32,43 @@ export default (cfg: iArgs) => {
 
         const map = new MapView({
             containerId: 'render_vhc',
-            zoom: 20,
+            zoom: 19,
             devicePixelRatio: 1,
             isDarkMode: cfg.isDarkMode,
-            urlTemplate: types.topo,
+            urlTemplate: types.satellite,
             stats: null,
         })
 
         map.onReady(() => {
 
-            getVehicle(map, type ?? "").then((vehicle) => {
+            LoadRequiredFiles(() => {
 
-                const update = (location: any) => {
+                getVehicle(map, type ?? "").then((vehicle) => {
 
-                    const obj: any = parseLocation(location)
-                    setStream({ loading: false, err: "", data: obj })
-                    map.map && map.map.setCenter(obj.gps)
-                    vehicle && vehicle.update(obj)
+                    const update = (location: any) => {
 
-                }
+                        const obj: any = parseLocation(location)
+                        setStream({ loading: false, err: "", data: obj })
 
-                const get_initial_location = () => cfg.core_collect.get('get-locations-last', { proj, type, name })
-                    .then((location) => update(location))
-                    .catch((error) => console.error(error))
+                        map.map.setCenter(obj.gps)
 
-                get_initial_location()
-                cfg.core_collect.on(key, (location) => update(location))
-                cfg.core_collect.cio.on("connect", () => get_initial_location())
+                        vehicle.update(obj)
+                        vehicle.animate("Take 001", { loop: true, speed: 0.5 })
+
+                    }
+
+                    const get_initial_location = () => cfg.core_collect.get('get-locations-last', { proj, type, name })
+                        .then((location) => update(location))
+                        .catch((error) => console.error(error))
+
+                    get_initial_location()
+                    cfg.core_collect.on(key, (location) => update(location))
+                    cfg.core_collect.cio.on("connect", () => get_initial_location())
+
+                })
 
             })
+
         })
 
     }, [])
