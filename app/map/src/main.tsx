@@ -33,8 +33,6 @@ export default (cfg: iArgs) => {
     const [notifApi, contextHolderNotification] = notification.useNotification()
     const [isMapReady, Maptalks] = mapHook({ containerId: 'render_0', isDarkMode, conf: {} })
 
-    const [equipments, setEquipments] = React.useState([])
-
     useEffect(() => {
 
         event.on('message', ({ type, message }) => messageApi.open({ type, content: message }))
@@ -58,8 +56,6 @@ export default (cfg: iArgs) => {
             const vcs = new Vehicles(Maptalks)
 
             const locations = async (ls: any) => {
-
-                setEquipments(ls)
 
                 for (const location of ls) {
 
@@ -94,7 +90,7 @@ export default (cfg: iArgs) => {
         <Auth {...cfg} />
         <Fatigue {...cfg} />
         <Menu {...cfg} />
-        {equipments.length > 0 ? <Search {...cfg} Maptalks={Maptalks} equipments={equipments} /> : null}
+        <Search {...cfg} Maptalks={Maptalks} />
 
         <Col id='render_0' span={24} style={{ height: '100%' }} />
 

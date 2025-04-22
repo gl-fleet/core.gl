@@ -10,55 +10,61 @@ const Style = createGlobalStyle``
 
 export default (cfg: iArgs | any) => {
 
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [vehicles, setVehicles] = useState([])
 
     useEffect(() => {
 
-        const ls = cfg.equipments
-        if (ls.length > 0) {
+        return () => { }
 
-            setLoading(false)
+    }, [])
 
-            const obj: any = {}
-            const arr: any = []
+    const onDropdownChanges = (e: boolean) => {
 
-            for (const x of ls) {
-                if (!obj.hasOwnProperty(x.type)) obj[x.type] = []
-                obj[x.type].push(x)
-            }
+        if (e) {
 
-            for (const x in obj) {
+            setLoading(true)
+            cfg.core_collect.get('get-locations-all-last-v2', {}).then((ls: any) => {
 
-                let s: any = {
-                    label: <span style={{ textTransform: 'capitalize' }}>{x}</span>,
-                    title: x,
-                    options: [],
+                const obj: any = {}
+                const arr: any = []
+
+                for (const x of ls) {
+                    if (!obj.hasOwnProperty(x.type)) obj[x.type] = []
+                    obj[x.type].push(x)
                 }
 
-                for (const n of obj[x]) {
-                    s.options.push({
-                        value: n.name,
-                        label: <div>
-                            <span style={{ textTransform: 'uppercase' }}>{`${n.name}`}</span>
-                            {' '}
-                            <span style={{ textTransform: 'capitalize' }}>({n.proj})</span>
-                        </div>,
-                        data: n,
-                    })
+                for (const x in obj) {
+
+                    let s: any = {
+                        label: <span style={{ textTransform: 'capitalize' }}>{x}</span>,
+                        title: x,
+                        options: [],
+                    }
+
+                    for (const n of obj[x]) {
+                        s.options.push({
+                            value: n.name,
+                            label: <div>
+                                <span style={{ textTransform: 'uppercase' }}>{`${n.name}`}</span>
+                                {' '}
+                                <span style={{ textTransform: 'capitalize' }}>({n.proj})</span>
+                            </div>,
+                            data: n,
+                        })
+                    }
+
+                    arr.push(s)
+
                 }
 
-                arr.push(s)
+                setVehicles(arr)
 
-            }
-
-            setVehicles(arr)
+            }).catch(console.error).finally(() => setLoading(false))
 
         }
 
-    }, [cfg.equipments])
-
-    const onDropdownChanges = (e: boolean) => { }
+    }
 
     return <>
         <Style />

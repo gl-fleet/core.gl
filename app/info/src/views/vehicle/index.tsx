@@ -35,7 +35,7 @@ export default (cfg: iArgs) => {
             zoom: 19,
             devicePixelRatio: 1,
             isDarkMode: cfg.isDarkMode,
-            urlTemplate: types.satellite,
+            urlTemplate: types.topo,
             stats: null,
         })
 
@@ -45,12 +45,21 @@ export default (cfg: iArgs) => {
 
                 getVehicle(map, type ?? "").then((vehicle) => {
 
+                    vehicle.on((ename: string, arg: any) => {
+
+                        if (ename === 'position-map' && arg.gps && arg.gps.x) {
+
+                            map.map.setCenter(arg.gps)
+
+                        }
+
+                    })
+
                     const update = (location: any) => {
 
                         const obj: any = parseLocation(location)
                         setStream({ loading: false, err: "", data: obj })
 
-                        map.map.setCenter(obj.gps)
 
                         vehicle.update(obj)
                         vehicle.animate("Take 001", { loop: true, speed: 0.5 })
