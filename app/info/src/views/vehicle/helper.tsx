@@ -27,16 +27,19 @@ export const getVehicle = (Maptalks: MapView, type: string): Promise<Vehicle> =>
 
     log.info(`[Vehicles] -> Get Vehicle / ${type}`)
 
+    const fps = 60
+    const buffer = true
+
     type === 'vehicle' && Toyota({ size: 50, x: 0, y: 0, z: 0 })
-        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 10 })))
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps, buffer })))
         .catch((err) => reject(err))
 
     type === 'drill' && Drill({ size: 50, x: 0, y: 0, z: 0 })
-        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 10 })))
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps, buffer })))
         .catch((err) => reject(err))
 
     type === 'dozer' && Dozer({ size: 50, x: 0, y: 0, z: 0 })
-        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 10 })))
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps, buffer })))
         .catch((err) => reject(err))
 
 })

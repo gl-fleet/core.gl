@@ -1,21 +1,24 @@
 import { Vehicle, Toyota, Drill, Dozer } from 'uweb/utils'
 import { MapView, maptalks } from 'uweb/maptalks'
-import { Loop, log } from 'utils/web'
+import { log } from 'utils/web'
 
 export const getVehicle = (Maptalks: MapView, type: string): Promise<Vehicle> => new Promise((resolve, reject) => {
 
     log.info(`[Vehicles] -> Get Vehicle / ${type} [LOAD]`)
 
+    const fps = 60
+    const buffer = true
+
     type === 'vehicle' && Toyota({ size: 50, x: 0, y: 0, z: 0 })
-        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 10 })))
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps, buffer })))
         .catch((err) => reject(err))
 
     type === 'drill' && Drill({ size: 50, x: 0, y: 0, z: 0 })
-        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 10 })))
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps, buffer })))
         .catch((err) => reject(err))
 
     type === 'dozer' && Dozer({ size: 50, x: 0, y: 0, z: 0 })
-        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 10 })))
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps, buffer })))
         .catch((err) => reject(err))
 
 })
