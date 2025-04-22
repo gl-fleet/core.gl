@@ -7,15 +7,15 @@ export const getVehicle = (Maptalks: MapView, type: string): Promise<Vehicle> =>
     log.info(`[Vehicles] -> Get Vehicle / ${type} [LOAD]`)
 
     type === 'vehicle' && Toyota({ size: 50, x: 0, y: 0, z: 0 })
-        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 4 })))
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 10 })))
         .catch((err) => reject(err))
 
     type === 'drill' && Drill({ size: 50, x: 0, y: 0, z: 0 })
-        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 4 })))
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 10 })))
         .catch((err) => reject(err))
 
     type === 'dozer' && Dozer({ size: 50, x: 0, y: 0, z: 0 })
-        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 4 })))
+        .then((Truck) => resolve(new Vehicle({ Truck, Maptalks, fps: 10 })))
         .catch((err) => reject(err))
 
 })
@@ -43,8 +43,14 @@ export class Vehicles {
 
                 const _marker = this.obj[x]?.marker
                 const _vehicle = this.obj[x]?.vehicle
+                const updated_at = this.state[x].updated_at ?? 0
 
-                if ((Date.now() - this.state[x].updated_at) > 15000) {
+                if (updated_at <= 1) {
+
+                    _vehicle.setColor('#000')
+                    _marker.updateSymbol({ textFill: '#fff', textHaloFill: '#000' })
+
+                } else if ((Date.now() - updated_at) > 15000) {
 
                     _vehicle.setColor('#FF0000')
                     _marker.updateSymbol({ textFill: '#fff', textHaloFill: '#FF0000' })
@@ -100,7 +106,7 @@ export class Vehicles {
         const proc = (e: any) => {
 
             this.obj[key].vehicle = e
-            this.update_vehicle(key, body)
+
             e.animate("Take 001", { loop: true, speed: 0.5 })
 
             this.state[key] = {
@@ -115,11 +121,13 @@ export class Vehicles {
                 if (ename === 'position-map' && arg.gps && arg.gps.x) {
 
                     this.update_marker(key, { ...body, gps: [arg.gps.x, arg.gps.y, arg.gps.z] })
-                    this.state[key].updated_at = Date.now()
+                    this.state[key].updated_at = this.state[key].updated_at === 0 ? 1 : Date.now()
 
                 }
 
             })
+
+            this.update_vehicle(key, body)
 
         }
 
@@ -156,7 +164,7 @@ export class Vehicles {
         if (screen.width > 640) marker.on('dblclick', () => this.open_window(key, { project, type, name }))
         else marker.on('click', () => this.open_window(key, { project, type, name }))
 
-        Loop(() => (Date.now() - this.cfg.last_update >= 5000) && marker.updateSymbol({ textFill: '#fff', textHaloFill: 'red' }), 2500)
+        // Loop(() => (Date.now() - this.cfg.last_update >= 5000) && marker.updateSymbol({ textFill: '#fff', textHaloFill: 'red' }), 2500)
 
     }
 
