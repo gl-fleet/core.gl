@@ -59,7 +59,7 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
             isDarkMode,
             simulate: false,
             doubleClickZoom: lowReso,
-            urlTemplate: types.satellite,
+            urlTemplate: types.topo,
             fps: 60,
             ...conf,
         })
