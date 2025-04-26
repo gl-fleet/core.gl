@@ -24,11 +24,11 @@ const Style = createGlobalStyle`
 
 `
 
-const { useEffect, useRef } = React
+const { useEffect } = React
 
 export default (cfg: iArgs) => {
 
-    const { isDarkMode, event, core_collect, kv } = cfg
+    const { isDarkMode, event } = cfg
     const [messageApi, contextHolderMessage] = message.useMessage()
     const [notifApi, contextHolderNotification] = notification.useNotification()
     const [isMapReady, Maptalks] = mapHook({ containerId: 'render_0', isDarkMode, conf: {} })
@@ -64,9 +64,17 @@ export default (cfg: iArgs) => {
 
                     if (obj.project && obj.type && obj.name) {
 
-                        vcs.live_update(obj)
                         const key = `${obj.project}.${obj.type}.${obj.name}`
-                        cfg.core_collect.on(key, (loc) => vcs.live_update(parseLocation(loc)))
+
+                        event.emit('location-initial', obj)
+                        vcs.live_update(obj)
+
+                        cfg.core_collect.on(key, (loc) => {
+
+                            event.emit('location-update', loc)
+                            vcs.live_update(parseLocation(loc))
+
+                        })
 
                     }
 
@@ -88,9 +96,9 @@ export default (cfg: iArgs) => {
         {contextHolderNotification}
 
         <Auth {...cfg} />
-        <Fatigue {...cfg} />
         <Menu {...cfg} />
-        <Search {...cfg} Maptalks={Maptalks} />
+        <Fatigue {...cfg} />
+        <Search {...cfg} MapView={Maptalks} />
 
         <Col id='render_0' span={24} style={{ height: '100%' }} />
 

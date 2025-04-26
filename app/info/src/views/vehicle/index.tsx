@@ -45,13 +45,11 @@ export default (cfg: iArgs) => {
 
                 getVehicle(map, type ?? "").then((vehicle) => {
 
+                    vehicle.animate("Take 001", { loop: true, speed: 0.5 })
+
                     vehicle.on((ename: string, arg: any) => {
 
-                        if (ename === 'position-map' && arg.gps && arg.gps.x) {
-
-                            map.map.setCenter(arg.gps)
-
-                        }
+                        ename === 'position-map' && arg.gps && arg.gps.x && map.map.setCenter(arg.gps)
 
                     })
 
@@ -59,10 +57,7 @@ export default (cfg: iArgs) => {
 
                         const obj: any = parseLocation(location)
                         setStream({ loading: false, err: "", data: obj })
-
-
                         vehicle.update(obj)
-                        vehicle.animate("Take 001", { loop: true, speed: 0.5 })
 
                     }
 
