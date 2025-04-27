@@ -62,7 +62,7 @@ export default (cfg: iArgs) => {
 
                     }
 
-                    const get_initial_location = () => cfg.core_collect.get('get-locations-last', { proj, type, name })
+                    const get_initial_location = () => cfg.core_collect.get('get-locations-last', { name })
                         .then((location) => update(location))
                         .catch((error) => console.error(error))
 

@@ -112,6 +112,7 @@ export class Locations {
 
         const result = await this.collection.findOne({
             where: {
+                updatedAt: { [Op.gte]: moment().add(-30, 'days').format(dateFormat) },
                 ...query,
                 deletedAt: null,
             },
@@ -126,10 +127,10 @@ export class Locations {
     get_all_last = async (query: any, { proj }: any) => await this.collection.findAll({
         attributes: [Sequelize.literal('DISTINCT ON("name") "name"'), "updatedAt", "proj", "type", "data"],
         where: proj === '*' ? {
-            updatedAt: { [Op.gte]: moment().add(-314, 'days').format(dateFormat) },
+            updatedAt: { [Op.gte]: moment().add(-90, 'days').format(dateFormat) },
             deletedAt: null
         } : {
-            updatedAt: { [Op.gte]: moment().add(-314, 'days').format(dateFormat) },
+            updatedAt: { [Op.gte]: moment().add(-90, 'days').format(dateFormat) },
             proj: proj,
             deletedAt: null
         },
@@ -137,7 +138,7 @@ export class Locations {
         raw: true,
     })
 
-    get_all_last_v2 = async (query: any, { proj, days = 7 }: any) => await this.sequelize.query(`
+    get_all_last_v2 = async (query: any, { proj, days = 30 }: any) => await this.sequelize.query(`
         SELECT *
         FROM public.locations
         WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND (name, "updatedAt") in (
