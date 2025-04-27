@@ -15,7 +15,11 @@ const cf: any = {
         dialect: 'postgres',
         host: mode === 'development' ? '139.59.115.158' : 'localhost',
         pool: { max: 16, min: 4, acquire: 30000, idle: 15000 },
-        logging: (sql, timing: any) => { },
+        logging: false,
+        /* logging: (sql, timing: any) => {
+            console.log('***')
+            console.log(sql)
+        }, */
     }),
 }
 
@@ -26,9 +30,34 @@ Safe(async () => {
     new Event(cf)
     new Chunk(cf)
 
-    const replica = new rMaster({ api: cf.local, sequel: cf.sequelize })
+    setTimeout(async () => {
 
-    replica.cb = (table: string, src: any) => cf.local.emit('collect', { table, src })
+        return null
+
+        const item = await cf.sequelize.models['events'].findOne({
+            where: { src: 'SV102' },
+            order: [[cf.sequelize.literal(`"events"."updatedAt", "events"."id" DESC`)]],
+            // order: [[cf.sequelize.literal(cf.sequelize.col('updatedAt'), cf.sequelize.col('id')), 'DESC']],
+            limit: 1,
+            raw: true,
+        })
+
+        console.log('********************************************')
+        console.log(item)
+
+    })
+
+    const replica = new rMaster({
+        api: cf.local,
+        sequel: cf.sequelize,
+        // log: true, /** Enable replica logs **/
+    })
+
+    replica.cb = (table: string, src: any) => {
+
+        cf.local.emit('collect', { table, src })
+
+    }
 
     await cf.sequelize.sync({ force: false, alter: true })
 
