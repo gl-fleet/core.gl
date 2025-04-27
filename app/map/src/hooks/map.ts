@@ -46,7 +46,8 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
         const lowReso = document.documentElement.clientWidth < 1024
 
         const types = {
-            'topo': 'https://api.maptiler.com/maps/topo-v2/{z}/{x}/{y}.png?key=l4hWJmvvmISSL7tpiPUZ',
+            'free': 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+            'topo': 'https://api.maptiler.com/maps/topo-v2/{z}/{x}/{y}.png?key=fM6kwMjQVVdkhE21oKJh',
             'satellite': 'https://api.maptiler.com/maps/satellite/256/{z}/{x}/{y}.jpg?key=l4hWJmvvmISSL7tpiPUZ',
             'openstreet': 'https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=l4hWJmvvmISSL7tpiPUZ',
         }
@@ -59,7 +60,7 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
             isDarkMode,
             simulate: false,
             doubleClickZoom: lowReso,
-            urlTemplate: types.topo,
+            urlTemplate: types.free,
             fps: 60,
             ...conf,
         })

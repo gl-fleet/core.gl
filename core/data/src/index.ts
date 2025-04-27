@@ -30,22 +30,7 @@ Safe(async () => {
     new Event(cf)
     new Chunk(cf)
 
-    setTimeout(async () => {
-
-        return null
-
-        const item = await cf.sequelize.models['events'].findOne({
-            where: { src: 'SV102' },
-            order: [[cf.sequelize.literal(`"events"."updatedAt", "events"."id" DESC`)]],
-            // order: [[cf.sequelize.literal(cf.sequelize.col('updatedAt'), cf.sequelize.col('id')), 'DESC']],
-            limit: 1,
-            raw: true,
-        })
-
-        console.log('********************************************')
-        console.log(item)
-
-    })
+    // order: [[cf.sequelize.literal(`"events"."updatedAt", "events"."id" DESC`)]]
 
     const replica = new rMaster({
         api: cf.local,

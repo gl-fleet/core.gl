@@ -25,6 +25,7 @@ export default (cfg: iArgs) => {
         const key = `${proj}.${type}.${name}`
 
         const types = {
+            'free': 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
             'topo': 'https://api.maptiler.com/maps/topo-v2/{z}/{x}/{y}.png?key=l4hWJmvvmISSL7tpiPUZ',
             'satellite': 'https://api.maptiler.com/maps/satellite/256/{z}/{x}/{y}.jpg?key=l4hWJmvvmISSL7tpiPUZ',
             'openstreet': 'https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=l4hWJmvvmISSL7tpiPUZ',
@@ -35,7 +36,7 @@ export default (cfg: iArgs) => {
             zoom: 19,
             devicePixelRatio: 1,
             isDarkMode: cfg.isDarkMode,
-            urlTemplate: types.topo,
+            urlTemplate: types.free,
             stats: null,
         })
 
