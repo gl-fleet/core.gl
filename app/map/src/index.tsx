@@ -28,9 +28,11 @@ const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
         cfg.kv.on('token', (next) => prev !== next && location.reload())
 
         window.addEventListener("focus", () => {
+
             cfg.core_proxy.connect()
             cfg.core_data.connect()
             cfg.core_collect.connect()
+
         })
 
     }, [])

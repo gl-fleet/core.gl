@@ -82,7 +82,9 @@ export default (cfg: iArgs) => {
 
             }
 
+            // window.addEventListener("focus", () => {
             cfg.core_collect.get('get-locations-all-last-v2', {}).then(locations).catch(console.error)
+            // })
 
         })
 

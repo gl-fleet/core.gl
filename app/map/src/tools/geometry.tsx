@@ -3,6 +3,140 @@ import { MapView, maptalks } from 'uweb/maptalks'
 import { CloseCircleOutlined } from '@ant-design/icons'
 const { Paragraph } = Typography
 
+const poly = {
+    "type": "Feature",
+    "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [
+                    105.51444676041994,
+                    43.67618398282544
+                ],
+                [
+                    105.51399058886133,
+                    43.675323982674186
+                ],
+                [
+                    105.51234754279724,
+                    43.67437063476913
+                ],
+                [
+                    105.5121658443074,
+                    43.6742296201883
+                ],
+                [
+                    105.51229060616768,
+                    43.67372474020418
+                ],
+                [
+                    105.51273410846632,
+                    43.67330350336383
+                ],
+                [
+                    105.51390295402707,
+                    43.67211569944896
+                ],
+                [
+                    105.51480089910795,
+                    43.67145680889911
+                ],
+                [
+                    105.51444676041994,
+                    43.67618398282544
+                ]
+            ]
+        ]
+    },
+    "properties": null
+}
+
+const rect = {
+    "type": "Feature",
+    "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [
+                    105.51824845839818,
+                    43.674347031232735
+                ],
+                [
+                    105.52187398324259,
+                    43.674347031232735
+                ],
+                [
+                    105.52172819387212,
+                    43.67211569944896
+                ],
+                [
+                    105.51839786986484,
+                    43.67211569944896
+                ],
+                [
+                    105.51824845839818,
+                    43.674347031232735
+                ]
+            ]
+        ]
+    },
+    "properties": null
+}
+
+const line = {
+    "type": "Feature",
+    "geometry": {
+        "type": "LineString",
+        "coordinates": [
+            [
+                105.51396647363293,
+                43.67621085763154
+            ],
+            [
+                105.52256361257322,
+                43.67618398282544
+            ],
+            [
+                105.52334339491927,
+                43.67573454486251
+            ],
+            [
+                105.52381011546572,
+                43.67519807212345
+            ],
+            [
+                105.52557140949314,
+                43.67330350336383
+            ],
+            [
+                105.52356108467343,
+                43.67283201020061
+            ],
+            [
+                105.52322545667498,
+                43.67266471198577
+            ],
+            [
+                105.52317309411083,
+                43.67051322900205
+            ],
+            [
+                105.52064491403978,
+                43.67039172611124
+            ],
+            [
+                105.51941471352617,
+                43.67015243908674
+            ],
+            [
+                105.5172230991431,
+                43.66990141958943
+            ]
+        ]
+    },
+    "properties": null
+}
+
 export class GeometryTool {
 
     Maptalks: MapView
@@ -58,16 +192,16 @@ export class GeometryTool {
 
     setup = () => {
 
-        this.tool = new maptalks.DrawTool({
+        const no_type: any = maptalks
+        this.tool = new no_type.DrawTool({
 
             mode: 'LineString',
-
             'language': 'en-US',
             'symbol': {
-                'lineColor': '#1bbc9b',
+                'lineColor': '#2B65EC',
                 'lineWidth': 2,
-                'polygonFill': '#fff',
-                'polygonOpacity': 0.3
+                // 'polygonFill': '#2B65EC',
+                // 'polygonOpacity': 0.3
             },
             'vertexSymbol': {
                 'markerType': 'ellipse',
@@ -113,16 +247,29 @@ export class GeometryTool {
 
         }).addTo(this.Maptalks.map).disable()
 
-        this.layer = new maptalks.VectorLayer('geometry').addTo(this.Maptalks.map)
+        this.layer = new maptalks.VectorLayer('geometry')
+        this.Maptalks.map.addLayer(this.layer)
+        this.layer.bringToBack()
+
+        const _poly = maptalks.GeoJSON.toGeometry(poly)
+        _poly.updateSymbol({ 'lineColor': '#2B65EC', 'lineWidth': 2 });
+        this.layer.addGeometry(_poly)
+
+        const _rect = maptalks.GeoJSON.toGeometry(rect)
+        _rect.updateSymbol({ 'lineColor': 'orange', 'lineWidth': 2 });
+        this.layer.addGeometry(_rect)
+
+        const _line = maptalks.GeoJSON.toGeometry(line)
+        _line.updateSymbol({ 'lineColor': 'red', 'lineWidth': 2 });
+        this.layer.addGeometry(_line)
 
         this.tool.on('drawend', ({ geometry }: any) => {
 
-            this.layer.addGeometry(geometry)
-            geometry.startEdit()
+            console.log(geometry.toGeoJSON())
 
-            setInterval(() => {
-                console.log(geometry.toJSON().feature.geometry)
-            }, 2500)
+            this.layer.addGeometry(geometry)
+
+            geometry.startEdit()
 
             this.notif.success({
                 style: { zIndex: 10 },
@@ -150,7 +297,7 @@ export class GeometryTool {
                     <Space>
                         <Button type="link" size="small" onClick={() => {
                             geometry.endEdit()
-                            console.log(geometry.toJSON()) /** Confirmed: Geometry object updated **/
+                            // console.log(geometry.toGeoJSON()) /** Confirmed: Geometry object updated **/
                         }}>Prepare</Button>
                         <Button type="link" size="small" onClick={() => this.notif.destroy(geometry.type)}>Close</Button>
                         <Button disabled type="primary" size="small" onClick={() => this.notif.destroy(geometry.type)}>Save</Button>
