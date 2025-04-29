@@ -144,6 +144,7 @@ export class GeometryTool {
     tool: any
     layer: any
     notif: any
+    geometry: any
 
     constructor(Maptalks: MapView, cfg: iArgs, message: any, notif: any) {
 
@@ -169,6 +170,7 @@ export class GeometryTool {
         event.on(`${als}.enable`, (value: string = 'LineString') => {
 
             event.emit('tools.close', true)
+            this.geometry = value
 
             message.open({
                 key: als,
@@ -265,10 +267,8 @@ export class GeometryTool {
 
         this.tool.on('drawend', ({ geometry }: any) => {
 
-            console.log(geometry.toGeoJSON())
-
+            let name = ''
             this.layer.addGeometry(geometry)
-
             geometry.startEdit()
 
             this.notif.success({
@@ -278,29 +278,42 @@ export class GeometryTool {
                 placement: 'bottom',
                 duration: 0,
                 description:
-                    <Space direction="vertical" style={{ padding: 0, margin: 0, width: '100%', zIndex: 2051 }}>
+                    <Space direction="vertical" style={{ padding: 0, margin: 0, marginTop: 16, width: '100%', zIndex: 2051 }}>
                         <Select
-                            defaultValue="lucy"
+                            disabled={true}
+                            defaultValue={this.geometry}
                             style={{ width: '100%', zIndex: 2052 }}
                             dropdownStyle={{ zIndex: 2052 }}
-                            // onChange={handleChange}
                             options={[
-                                { value: 'jack', label: 'Jack' },
-                                { value: 'lucy', label: 'Lucy' },
-                                { value: 'Yiminghe', label: 'yiminghe' },
-                                { value: 'disabled', label: 'Disabled', disabled: true },
+                                { value: 'LineString', label: 'Path' },
+                                { value: 'Polygon', label: 'Boundary' },
+                                { value: 'Circle', label: 'Circle' },
+                                { value: 'Rectangle', label: 'Rectangle' },
                             ]}
                         />
-                        <Input placeholder="Basic usage" />
+                        <Input placeholder="Name" onChange={(e) => { name = e.target.value }} />
                     </Space>,
                 btn:
                     <Space>
                         <Button type="link" size="small" onClick={() => {
-                            geometry.endEdit()
-                            // console.log(geometry.toGeoJSON()) /** Confirmed: Geometry object updated **/
-                        }}>Prepare</Button>
-                        <Button type="link" size="small" onClick={() => this.notif.destroy(geometry.type)}>Close</Button>
-                        <Button disabled type="primary" size="small" onClick={() => this.notif.destroy(geometry.type)}>Save</Button>
+
+                            this.layer.removeGeometry(geometry)
+                            this.notif.destroy(geometry.type)
+                        }
+
+                        }>Close</Button>
+                        <Button type="primary" size="small" onClick={() => {
+
+                            if (typeof name === 'string' && name.length > 0) {
+
+                                geometry.endEdit()
+                                const geoJSON = { name, ...geometry.toGeoJSON() }
+                                console.log(geoJSON)
+                                this.notif.destroy(geometry.type)
+
+                            }
+
+                        }}>Save</Button>
                     </Space>,
             })
 

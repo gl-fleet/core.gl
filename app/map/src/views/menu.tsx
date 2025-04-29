@@ -79,10 +79,10 @@ export default (cfg: iArgs) => {
             label: 'Draw',
             icon: <HighlightOutlined />,
             children: [
-                { key: 'line', label: 'Line', onClick: () => event.emit('geometry.tool.enable', 'LineString') },
-                { key: 'poly', label: 'Poligon', onClick: () => event.emit('geometry.tool.enable', 'Polygon') },
-                { key: 'circ', label: 'Circle', onClick: () => event.emit('geometry.tool.enable', 'Circle') },
-                { key: 'rect', label: 'Rectangle', onClick: () => event.emit('geometry.tool.enable', 'Rectangle') },
+                { key: 'LineString', label: 'Path', onClick: () => event.emit('geometry.tool.enable', 'LineString') },
+                { key: 'Polygon', label: 'Boundary', onClick: () => event.emit('geometry.tool.enable', 'Polygon') },
+                { key: 'Circle', label: 'Circle', onClick: () => event.emit('geometry.tool.enable', 'Circle') },
+                { key: 'Rectangle', label: 'Rectangle', onClick: () => event.emit('geometry.tool.enable', 'Rectangle') },
             ]
         }
     ]
