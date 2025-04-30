@@ -18,9 +18,7 @@ const cf = {
         dialect: 'postgres',
         host: mode === 'development' ? '139.59.115.158' : 'localhost',
         pool: { max: 16, min: 4, acquire: 30000, idle: 15000 },
-        logging: (sql, timing: any) => {
-            console.log(sql)
-        },
+        logging: (sql, timing: any) => { },
     }),
 }
 
