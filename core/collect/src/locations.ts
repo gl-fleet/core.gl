@@ -152,16 +152,6 @@ export class Locations {
 
         return proj === '*' ? result : result.filter((e: any) => e.proj === proj)
 
-        return await this.sequelize.query(`
-            SELECT *
-            FROM public.locations
-            WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND (name, "updatedAt") in (
-                SELECT name, MAX("updatedAt") 
-                FROM public.locations
-                WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND ${proj === '*' ? `"proj" is not null` : `"proj" = '${proj}'`} AND "deletedAt" is null
-                GROUP BY "name"
-            )`, { type: QueryTypes.SELECT })
-
     }
 
     /*** *** *** @___Table_Jobs___ *** *** ***/
@@ -228,7 +218,12 @@ export class Locations {
         /** ** Data saving **  **/
         if (rows.length > 0) {
 
-            for (const x in last_position) this.local.emit(x, last_position[x])
+            for (const x in last_position) {
+
+                this.local.emit(x, last_position[x])
+                await enums.upsert({ type: 'location.now', name: x, value: JSON.stringify(last_position[x]), updatedAt: Now() })
+
+            }
 
             for (const x of points) await this.collection.upsert({ ...x })
 

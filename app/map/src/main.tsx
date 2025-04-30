@@ -66,12 +66,10 @@ export default (cfg: iArgs) => {
 
                         const key = `${obj.project}.${obj.type}.${obj.name}`
 
-                        event.emit('location-initial', obj)
                         vcs.live_update(obj)
 
                         cfg.core_collect.on(key, (loc) => {
 
-                            event.emit('location-update', loc)
                             vcs.live_update(parseLocation(loc))
 
                         })
@@ -82,9 +80,7 @@ export default (cfg: iArgs) => {
 
             }
 
-            // window.addEventListener("focus", () => {
             cfg.core_collect.get('get-locations-all-last-v2', {}).then(locations).catch(console.error)
-            // })
 
         })
 
@@ -100,7 +96,7 @@ export default (cfg: iArgs) => {
         <Auth {...cfg} />
         <Menu {...cfg} />
         <Fatigue {...cfg} />
-        <Search {...cfg} MapView={Maptalks} />
+        <Search {...cfg} Maptalks={Maptalks} />
 
         <Col id='render_0' span={24} style={{ height: '100%' }} />
 

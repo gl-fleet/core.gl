@@ -30,7 +30,7 @@ export class Enums {
 
             type: { type: DataTypes.STRING, defaultValue: '' },
             name: { type: DataTypes.STRING, defaultValue: '' },
-            value: { type: DataTypes.STRING, defaultValue: '' },
+            value: { type: DataTypes.TEXT, defaultValue: '' },
 
             createdAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
