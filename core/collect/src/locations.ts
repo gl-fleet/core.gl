@@ -138,17 +138,31 @@ export class Locations {
         raw: true,
     })
 
-    get_all_last_v2 = async (query: any, { proj, days = 30 }: any) => await this.sequelize.query(`
-        SELECT *
-        FROM public.locations
-        WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND (name, "updatedAt") in (
-            SELECT name, MAX("updatedAt") 
+    get_all_last_v2 = async (query: any, { proj, days = 14 }: any) => {
+
+        const result = await this.sequelize.query(`
+            SELECT *
             FROM public.locations
-            WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND ${proj === '*' ? `"proj" is not null` : `"proj" = '${proj}'`} AND "deletedAt" is null
-            GROUP BY "name"
-        )`, {
-        type: QueryTypes.SELECT,
-    })
+            WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND (name, "updatedAt") in (
+                SELECT name, MAX("updatedAt") 
+                FROM public.locations
+                WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}'
+                GROUP BY "name"
+            )`, { type: QueryTypes.SELECT })
+
+        return proj === '*' ? result : result.filter((e: any) => e.proj === proj)
+
+        return await this.sequelize.query(`
+            SELECT *
+            FROM public.locations
+            WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND (name, "updatedAt") in (
+                SELECT name, MAX("updatedAt") 
+                FROM public.locations
+                WHERE "updatedAt" > '${moment().add(-days, 'days').format(dateFormat)}' AND ${proj === '*' ? `"proj" is not null` : `"proj" = '${proj}'`} AND "deletedAt" is null
+                GROUP BY "name"
+            )`, { type: QueryTypes.SELECT })
+
+    }
 
     /*** *** *** @___Table_Jobs___ *** *** ***/
 
