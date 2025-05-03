@@ -24,14 +24,18 @@ export default (cfg: iArgs | any) => {
         if (e) {
 
             setLoading(true)
-            cfg.core_collect.get('get-locations-all-last-v2', {}).then((ls: any) => {
+
+            cfg.core_collect.get("get-enums", { type: 'location.now' }).then((ls: any) => {
 
                 const obj: any = {}
                 const arr: any = []
 
                 for (const x of ls) {
-                    if (!obj.hasOwnProperty(x.type)) obj[x.type] = []
-                    obj[x.type].push(x)
+
+                    const parsed = JSON.parse(x.value)
+                    if (!obj.hasOwnProperty(parsed.type)) obj[parsed.type] = []
+                    obj[parsed.type].push(parsed)
+
                 }
 
                 for (const x in obj) {

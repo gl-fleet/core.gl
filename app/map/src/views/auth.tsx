@@ -88,7 +88,7 @@ export default (cfg: iArgs) => {
     else return <div>
 
         <Layout style={{ background: 'transparent', position: 'absolute', left: 16, top: 16, padding: 0, zIndex: 100 }}>
-            <FloatButton.Group shape="circle" style={{ top: 24, zIndex: 10, height: 180 }}>
+            <FloatButton.Group shape="circle" style={{ justifyContent: 'normal', top: 24, zIndex: 10, height: 180 }}>
                 <FloatButton onClick={() => setOpen(true)} icon={sign.loading ? <LoadingOutlined /> : <LoginOutlined />} />
             </FloatButton.Group>
         </Layout>

@@ -60,7 +60,8 @@ export default (cfg: iArgs) => {
                 for (const location of ls) {
 
                     await AsyncWait(250)
-                    const obj = parseLocation(location)
+                    const parsed = JSON.parse(location.value)
+                    const obj = parseLocation(parsed)
 
                     if (obj.project && obj.type && obj.name) {
 
@@ -80,7 +81,7 @@ export default (cfg: iArgs) => {
 
             }
 
-            cfg.core_collect.get('get-locations-all-last-v2', {}).then(locations).catch(console.error)
+            cfg.core_collect.get("get-enums", { type: 'location.now' }).then(locations).catch(console.error)
 
         })
 

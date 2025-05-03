@@ -299,9 +299,8 @@ export class GeometryTool {
 
                             this.layer.removeGeometry(geometry)
                             this.notif.destroy(geometry.type)
-                        }
 
-                        }>Close</Button>
+                        }}>Close</Button>
                         <Button type="primary" size="small" onClick={() => {
 
                             if (typeof name === 'string' && name.length > 0) {

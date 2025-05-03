@@ -1,4 +1,4 @@
-import { DataTypes, Model, ModelStatic } from 'sequelize'
+import { DataTypes, Model, ModelStatic, Op } from 'sequelize'
 import { Sequelize } from 'sequelize'
 import { Uid, Now } from 'utils'
 import { Host } from 'unet'
@@ -50,8 +50,8 @@ export class Enums {
 
     table_serve = () => {
 
-        this.local.on(`get-${this.name}`, async (req: any) => await this.get(req.query))
-        this.local.on(`set-${this.name}`, async (req: any) => await this.set(req.query), true, 4)
+        this.local.on(`get-${this.name}`, async ({ query, user }: any) => await this.get(query, user), true, 2)
+        this.local.on(`set-${this.name}`, async ({ query, user }: any) => await this.set(query, user), true, 4)
 
     }
 
@@ -62,9 +62,15 @@ export class Enums {
 
     /*** *** *** @___Table_Queries___ *** *** ***/
 
-    get = async (args: any) => await this.collection.findAll({ where: { ...args, deletedAt: null } })
+    get = async (args: any, { proj }: any) => await this.collection.findAll({
+        where: {
+            ...(proj === '*' ? {} : { name: { [Op.like]: `${proj}%` } }),
+            ...args,
+            deletedAt: null,
+        }
+    })
 
-    set = async ({ type, name, value }: { type: string, name: string, value: string }) => {
+    set = async ({ type, name, value }: { type: string, name: string, value: string }, { proj }: any) => {
 
         if (this.is_s(type) && this.is_s(name)) {
 

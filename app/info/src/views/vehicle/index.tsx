@@ -62,9 +62,15 @@ export default (cfg: iArgs) => {
 
                     }
 
-                    const get_initial_location = () => cfg.core_collect.get('get-locations-last', { name })
-                        .then((location) => update(location))
-                        .catch((error) => console.error(error))
+
+                    const get_initial_location = () => cfg.core_collect.get("get-enums", { type: 'location.now', name: key }).then((ls: any) => {
+
+                        if (Array.isArray(ls) && ls.length > 0) {
+                            const parsed = JSON.parse(ls[0].value)
+                            update(parsed)
+                        }
+
+                    }).catch(console.error)
 
                     get_initial_location()
                     cfg.core_collect.on(key, (location) => update(location))
