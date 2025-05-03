@@ -67,7 +67,9 @@ export class Enums {
             ...(proj === '*' ? {} : { name: { [Op.like]: `${proj}%` } }),
             ...args,
             deletedAt: null,
-        }
+        },
+        order: [['name', 'ASC']],
+        raw: true,
     })
 
     set = async ({ type, name, value }: { type: string, name: string, value: string }, { proj }: any) => {
