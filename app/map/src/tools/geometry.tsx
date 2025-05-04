@@ -52,30 +52,31 @@ const poly = {
 }
 
 const rect = {
+    "name": "Parking",
     "type": "Feature",
     "geometry": {
         "type": "Polygon",
         "coordinates": [
             [
                 [
-                    105.51824845839818,
-                    43.674347031232735
+                    105.51818305637667,
+                    43.6736111211996
                 ],
                 [
-                    105.52187398324259,
-                    43.674347031232735
+                    105.5219429843018,
+                    43.67360400154726
                 ],
                 [
-                    105.52172819387212,
-                    43.67211569944896
+                    105.52185467859579,
+                    43.672710685025436
                 ],
                 [
-                    105.51839786986484,
-                    43.67211569944896
+                    105.51827014079007,
+                    43.672717472666974
                 ],
                 [
-                    105.51824845839818,
-                    43.674347031232735
+                    105.51818305637667,
+                    43.6736111211996
                 ]
             ]
         ]
@@ -254,15 +255,25 @@ export class GeometryTool {
         this.layer.bringToBack()
 
         const _poly = maptalks.GeoJSON.toGeometry(poly)
-        _poly.updateSymbol({ 'lineColor': '#2B65EC', 'lineWidth': 2 });
+        _poly.updateSymbol({ textName: 'S10', 'lineColor': '#2B65EC', 'lineWidth': 2, 'polygonFill': '#2B65EC', 'polygonOpacity': 0.1, textHaloRadius: 1 })
+            .on('mouseenter', (e: any) => { e.target.updateSymbol({ 'lineOpacity': '0.5' }) })
+            .on('mouseout', (e: any) => { e.target.updateSymbol({ 'lineOpacity': '1' }) })
+
         this.layer.addGeometry(_poly)
 
         const _rect = maptalks.GeoJSON.toGeometry(rect)
-        _rect.updateSymbol({ 'lineColor': 'orange', 'lineWidth': 2 });
+        _rect.updateSymbol({ textName: 'PRK14', 'lineColor': 'orange', 'lineWidth': 2, 'polygonFill': '#2B65EC', 'polygonOpacity': 0.1, textHaloRadius: 1 })
+            .on('mouseenter', (e: any) => { e.target.updateSymbol({ 'lineOpacity': '0.5' }) })
+            .on('mouseout', (e: any) => { e.target.updateSymbol({ 'lineOpacity': '1' }) })
         this.layer.addGeometry(_rect)
 
         const _line = maptalks.GeoJSON.toGeometry(line)
-        _line.updateSymbol({ 'lineColor': 'red', 'lineWidth': 2 });
+        _line.updateSymbol({
+            textName: 'P10', 'lineColor': 'red', 'lineWidth': 2, 'polygonFill': '#2B65EC', 'polygonOpacity': 0.1, textHaloRadius: 0,
+            lineJoin: 'round', lineCap: 'round', 'textPlacement': 'line', textStyle: 'italic', textFill: 'grey', textSize: 10, textDy: -8,
+        })
+            .on('mouseenter', (e: any) => { e.target.updateSymbol({ 'lineOpacity': '0.5' }) })
+            .on('mouseout', (e: any) => { e.target.updateSymbol({ 'lineOpacity': '1' }) })
         this.layer.addGeometry(_line)
 
         this.tool.on('drawend', ({ geometry }: any) => {
