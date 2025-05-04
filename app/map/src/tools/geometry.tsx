@@ -173,14 +173,14 @@ export class GeometryTool {
             event.emit('tools.close', true)
             this.geometry = value
 
-            message.open({
+            /* message.open({
                 key: als,
                 duration: 0,
                 content: <Paragraph
                     style={{ padding: 0, margin: 0 }}
                     copyable={{ icon: <CloseCircleOutlined />, tooltips: ['Close', 'Closed'], onCopy: () => close() }}
                 >{value} Tool</Paragraph>
-            })
+            }) */
 
             this.layer.show()
             this.tool.setMode(value).enable()
@@ -189,7 +189,7 @@ export class GeometryTool {
         })
 
         event.on(`${als}.disable`, (n) => this.tool.disable())
-        event.on('tools.close', () => close())
+        // event.on('tools.close', () => close())
 
     }
 
@@ -197,7 +197,6 @@ export class GeometryTool {
 
         const no_type: any = maptalks
         this.tool = new no_type.DrawTool({
-
             mode: 'LineString',
             'language': 'en-US',
             'symbol': {
@@ -283,11 +282,20 @@ export class GeometryTool {
             geometry.startEdit()
 
             this.notif.success({
-                style: { zIndex: 10 },
                 key: geometry.type,
+                size: 'small',
+                style: { zIndex: 10 },
                 message: `${geometry.type}`,
                 placement: 'bottom',
                 duration: 0,
+                onClose: () => {
+
+                    console.log('CLOSED')
+                    this.layer.removeGeometry(geometry)
+                    this.notif.destroy(geometry.type)
+                    this.tool.disable()
+
+                },
                 description:
                     <Space direction="vertical" style={{ padding: 0, margin: 0, marginTop: 16, width: '100%', zIndex: 2051 }}>
                         <Select
@@ -306,12 +314,6 @@ export class GeometryTool {
                     </Space>,
                 btn:
                     <Space>
-                        <Button type="link" size="small" onClick={() => {
-
-                            this.layer.removeGeometry(geometry)
-                            this.notif.destroy(geometry.type)
-
-                        }}>Close</Button>
                         <Button type="primary" size="small" onClick={() => {
 
                             if (typeof name === 'string' && name.length > 0) {
