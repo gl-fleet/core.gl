@@ -11,6 +11,8 @@ declare global {
         isDarkMode: boolean
         event: EventEmitter
         kv: Persist,
+
+        core_rtcm?: Connection
         core_proxy: Connection
         core_data: Connection
         core_collect: Connection

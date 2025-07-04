@@ -62,7 +62,7 @@ export class Bridge {
 
             _.destination.clients = clients
 
-            API.emit(alias, true)
+            API.emit(alias, _)
 
         }, 5000)
 

@@ -7,25 +7,22 @@ import { AddMeta, Persist } from './hooks/helper'
 import Main from './main'
 import Settings from './settings'
 
-const { useEffect } = React
-
-AddMeta()
-
 const cfg: iArgs = {
+    isDarkMode: true,
     kv: new Persist(),
     event: new EventEmitter(),
     core_proxy: new Connection({ name: 'core_proxy', token: KeyValue('token') }),
     core_data: new Connection({ name: 'core_data', token: KeyValue('token') }),
     core_collect: new Connection({ name: 'core_collect', token: KeyValue('token'), timeout: 15000 }),
-    isDarkMode: true,
 }
 
-const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
+Render(({ isDarkMode }: { isDarkMode: boolean }) => {
 
-    useEffect(() => {
+    React.useMemo(() => AddMeta(), [])
 
-        let prev = cfg.kv.get('token')
-        cfg.kv.on('token', (next) => prev !== next && location.reload())
+    React.useEffect(() => {
+
+        cfg.kv.on('token', (next) => cfg.kv.get('token') !== next && location.reload())
 
         window.addEventListener("focus", () => {
 
@@ -39,8 +36,4 @@ const main = ({ isDarkMode }: { isDarkMode: boolean }) => {
 
     return <Main {...cfg} isDarkMode={isDarkMode} />
 
-}
-
-const settings = ({ isDarkMode }: { isDarkMode: boolean }) => <Settings {...cfg} isDarkMode={isDarkMode} />
-
-Render(main, settings, { maxWidth: '100%' })
+}, ({ isDarkMode }: { isDarkMode: boolean }) => <Settings {...cfg} isDarkMode={isDarkMode} />, { maxWidth: '100%' })

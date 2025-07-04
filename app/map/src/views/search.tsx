@@ -10,7 +10,7 @@ const Style = createGlobalStyle``
 
 export default (cfg: iArgs | any) => {
 
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(0)
     const [vehicles, setVehicles] = useState([])
 
     useEffect(() => {
@@ -23,7 +23,7 @@ export default (cfg: iArgs | any) => {
 
         if (e) {
 
-            setLoading(true)
+            setLoading(1)
 
             cfg.core_collect.get("get-enums", { type: 'location.now' }).then((ls: any) => {
 
@@ -62,9 +62,10 @@ export default (cfg: iArgs | any) => {
 
                 }
 
+                setLoading(0)
                 setVehicles(arr)
 
-            }).catch(console.error).finally(() => setLoading(false))
+            }).catch(() => setLoading(2))
 
         }
 
@@ -75,15 +76,16 @@ export default (cfg: iArgs | any) => {
         <Select
             style={{
                 position: 'fixed',
+                margin: 'auto',
                 top: 24,
                 left: 0,
                 right: 0,
-                margin: 'auto',
                 width: 180,
                 zIndex: 10,
             }}
             notFoundContent={null}
-            loading={loading}
+            loading={loading === 1}
+            status={loading === 2 ? 'error' : undefined}
             showSearch={true}
             placeholder="Select a vehicle"
             onDropdownVisibleChange={onDropdownChanges}

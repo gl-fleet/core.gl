@@ -8,7 +8,7 @@
     "serve": "pm2 list && MODE=production yarn run_0 && yarn run_1 && yarn run_2 && yarn run_3",
     "run_0": "sleep 1 && nx run-many -t _serve --projects=core_proxy",
     "run_1": "sleep 1 && nx run-many -t _serve --projects=core_data,core_collect",
-    "run_2": "sleep 1 && nx run-many -t _serve --projects=core_rtcm,core_fatigue",
+    "run_2": "sleep 1 && nx run-many -t _serve --projects=core_rtcm,core_third",
     "run_3": "sleep 1 && nx run-many -t _serve --projects=core_map,core_info",
     "build": "nx run-many -t build",
     "clear": "nx run-many -t clear",

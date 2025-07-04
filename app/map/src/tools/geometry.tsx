@@ -196,9 +196,10 @@ export class GeometryTool {
     setup = () => {
 
         const no_type: any = maptalks
+
         this.tool = new no_type.DrawTool({
             mode: 'LineString',
-            'language': 'en-US',
+            language: 'en-US',
             'symbol': {
                 'lineColor': '#2B65EC',
                 'lineWidth': 2,
@@ -253,19 +254,21 @@ export class GeometryTool {
         this.Maptalks.map.addLayer(this.layer)
         this.layer.bringToBack()
 
+        /** Polygon test **/
         const _poly = maptalks.GeoJSON.toGeometry(poly)
         _poly.updateSymbol({ textName: 'S10', 'lineColor': '#2B65EC', 'lineWidth': 2, 'polygonFill': '#2B65EC', 'polygonOpacity': 0.1, textHaloRadius: 1 })
             .on('mouseenter', (e: any) => { e.target.updateSymbol({ 'lineOpacity': '0.5' }) })
             .on('mouseout', (e: any) => { e.target.updateSymbol({ 'lineOpacity': '1' }) })
-
         this.layer.addGeometry(_poly)
 
+        /** Rectangle test **/
         const _rect = maptalks.GeoJSON.toGeometry(rect)
         _rect.updateSymbol({ textName: 'PRK14', 'lineColor': 'orange', 'lineWidth': 2, 'polygonFill': '#2B65EC', 'polygonOpacity': 0.1, textHaloRadius: 1 })
             .on('mouseenter', (e: any) => { e.target.updateSymbol({ 'lineOpacity': '0.5' }) })
             .on('mouseout', (e: any) => { e.target.updateSymbol({ 'lineOpacity': '1' }) })
         this.layer.addGeometry(_rect)
 
+        /** Line test **/
         const _line = maptalks.GeoJSON.toGeometry(line)
         _line.updateSymbol({
             textName: 'P10', 'lineColor': 'red', 'lineWidth': 2, 'polygonFill': '#2B65EC', 'polygonOpacity': 0.1, textHaloRadius: 0,
@@ -275,6 +278,7 @@ export class GeometryTool {
             .on('mouseout', (e: any) => { e.target.updateSymbol({ 'lineOpacity': '1' }) })
         this.layer.addGeometry(_line)
 
+        /** On draw end **/
         this.tool.on('drawend', ({ geometry }: any) => {
 
             let name = ''

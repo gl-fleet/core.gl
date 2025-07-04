@@ -37,16 +37,11 @@ const { useEffect } = React
 
 export default (cfg: iArgs) => {
 
-    const { isDarkMode, event } = cfg
-    const [messageApi, contextHolderMessage] = message.useMessage()
+    const [isMapReady, Maptalks] = mapHook({ containerId: 'render_0', isDarkMode: cfg.isDarkMode, conf: {} })
     const [notifApi, contextHolderNotification] = notification.useNotification()
-    const [isMapReady, Maptalks] = mapHook({ containerId: 'render_0', isDarkMode, conf: {} })
+    const [messageApi, contextHolderMessage] = message.useMessage()
 
-    useEffect(() => {
-
-        event.on('message', ({ type, message }) => messageApi.open({ type, content: message }))
-
-    }, [])
+    useEffect(() => { cfg.event.on('message', ({ type, message }) => messageApi.open({ type, content: message })) }, [])
 
     useEffect(() => {
 
@@ -60,59 +55,57 @@ export default (cfg: iArgs) => {
 
         }, 'Setup_Tools')
 
+        /** Waiting for the GLTF or OBJ files to finish downloading before fetching the actual location data **/
         LoadRequiredFiles(async () => {
 
             const vcs = new Vehicles(Maptalks)
+            const dms = 100
 
+            /** Rendering vehicles to evaluate performance impact **/
             setInterval(async () => {
 
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'drill', name: 'DR001', activity: 'Idle', gps: [105.49508346330428 + 0.0235, 43.67338010130343, 0] })
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'drill', name: 'DR002', activity: 'Idle', gps: [105.49508346330428 + 0.0240, 43.67338010130343, 0] })
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'drill', name: 'DR003', activity: 'Idle', gps: [105.49508346330428 + 0.0245, 43.67338010130343, 0] })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'drill', name: 'DR001', activity: 'Idle', gps: [105.49508346330428 + 0.0235, 43.67338010130343, 0] })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'drill', name: 'DR002', activity: 'Idle', gps: [105.49508346330428 + 0.0240, 43.67338010130343, 0] })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'drill', name: 'DR003', activity: 'Idle', gps: [105.49508346330428 + 0.0245, 43.67338010130343, 0] })
 
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'dozer', name: 'DZ001', activity: 'Idle', gps: [105.49508346330428 + 0.0250, 43.67338010130343, 0] })
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'dozer', name: 'DZ002', activity: 'Idle', gps: [105.49508346330428 + 0.0255, 43.67338010130343, 0] })
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'dozer', name: 'DZ003', activity: 'Idle', gps: [105.49508346330428 + 0.0260, 43.67338010130343, 0] })
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'truck', name: 'TR001', activity: 'Idle', gps: [105.49508346330428 + 0.0265, 43.67338010130343, 0] })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'dozer', name: 'DZ001', activity: 'Idle', gps: [105.49508346330428 + 0.0250, 43.67338010130343, 0] })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'dozer', name: 'DZ002', activity: 'Idle', gps: [105.49508346330428 + 0.0255, 43.67338010130343, 0] })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'dozer', name: 'DZ003', activity: 'Idle', gps: [105.49508346330428 + 0.0260, 43.67338010130343, 0] })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'truck', name: 'TR001', activity: 'Idle', gps: [105.49508346330428 + 0.0265, 43.67338010130343, 0] })
 
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'exca', name: 'EX001', activity: 'Idle', gps: [105.49508346330428 + 0.0235, 43.67338010130343 - 0.0005, 0], head: Math.PI })
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'exca', name: 'EX002', activity: 'Idle', gps: [105.49508346330428 + 0.0240, 43.67338010130343 - 0.0005, 0], head: Math.PI })
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'exca', name: 'EX003', activity: 'Idle', gps: [105.49508346330428 + 0.0245, 43.67338010130343 - 0.0005, 0], head: Math.PI })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'exca', name: 'EX001', activity: 'Idle', gps: [105.49508346330428 + 0.0235, 43.67338010130343 - 0.0005, 0], head: Math.PI })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'exca', name: 'EX002', activity: 'Idle', gps: [105.49508346330428 + 0.0240, 43.67338010130343 - 0.0005, 0], head: Math.PI })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'exca', name: 'EX003', activity: 'Idle', gps: [105.49508346330428 + 0.0245, 43.67338010130343 - 0.0005, 0], head: Math.PI })
 
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'dump', name: 'DT001', activity: 'Idle', gps: [105.49508346330428 + 0.0250, 43.67338010130343 - 0.0005, 0], head: Math.PI })
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'dump', name: 'DT002', activity: 'Idle', gps: [105.49508346330428 + 0.0255, 43.67338010130343 - 0.0005, 0], head: Math.PI })
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'dump', name: 'DT003', activity: 'Idle', gps: [105.49508346330428 + 0.0260, 43.67338010130343 - 0.0005, 0], head: Math.PI })
-                await AsyncWait(250) && vcs.live_update({ project: 'Demo', type: 'truck', name: 'TR002', activity: 'Idle', gps: [105.49508346330428 + 0.0265, 43.67338010130343 - 0.0005, 0], head: Math.PI })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'dump', name: 'DT001', activity: 'Idle', gps: [105.49508346330428 + 0.0250, 43.67338010130343 - 0.0005, 0], head: Math.PI })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'dump', name: 'DT002', activity: 'Idle', gps: [105.49508346330428 + 0.0255, 43.67338010130343 - 0.0005, 0], head: Math.PI })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'dump', name: 'DT003', activity: 'Idle', gps: [105.49508346330428 + 0.0260, 43.67338010130343 - 0.0005, 0], head: Math.PI })
+                await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'truck', name: 'TR002', activity: 'Idle', gps: [105.49508346330428 + 0.0265, 43.67338010130343 - 0.0005, 0], head: Math.PI })
 
-            }, 2500)
+            }, 1000)
 
-            const locations = async (ls: any) => {
+            /** Fetching the most recent active locations of the vehicles **/
+            cfg.core_collect.get("get-enums", { type: 'location.now' }).then(async (ls: any) => {
 
                 for (const location of ls) {
 
-                    await AsyncWait(250)
                     const parsed = JSON.parse(location.value)
                     const obj = parseLocation(parsed)
 
                     if (obj.project && obj.type && obj.name) {
 
+                        await AsyncWait(dms)
                         const key = `${obj.project}.${obj.type}.${obj.name}`
-
                         vcs.live_update(obj)
 
-                        cfg.core_collect.on(key, (loc) => {
-
-                            vcs.live_update(parseLocation(loc))
-
-                        })
+                        /** Subscribing to a vehicle via WebSocket to receive live data updates **/
+                        cfg.core_collect.on(key, (loc) => vcs.live_update(parseLocation(loc)))
 
                     }
 
                 }
 
-            }
-
-            cfg.core_collect.get("get-enums", { type: 'location.now' }).then(locations).catch(console.error)
+            }).catch(console.error)
 
         })
 
@@ -122,12 +115,12 @@ export default (cfg: iArgs) => {
 
         <Style />
 
-        {contextHolderMessage}
         {contextHolderNotification}
+        {contextHolderMessage}
 
         <Auth {...cfg} />
         <Menu {...cfg} />
-        <Fatigue {...cfg} />
+        {/* <Fatigue {...cfg} /> */}
         <Search {...cfg} Maptalks={Maptalks} />
 
         <Col id='render_0' span={24} style={{ height: '100%' }} />

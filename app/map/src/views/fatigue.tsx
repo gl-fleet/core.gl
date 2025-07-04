@@ -8,6 +8,8 @@ const { useState, useRef, useEffect } = React
 
 export default (cfg: iArgs) => {
 
+    return null
+
     const [open, setOpen] = useState(false)
     const [status, setStatus] = useState<any>('processing')
     const [list, setList] = useState([])
@@ -18,11 +20,10 @@ export default (cfg: iArgs) => {
         const token = cfg.kv.get('token') ?? ''
         const body = parseJwt(token)
 
-        if (body && body.project && ['*', 'VMP'].includes(body.project)) {
-            setShow(true)
-        }
+        if (body && body.project && ['*', 'VMP'].includes(body.project)) setShow(true)
 
         const api = new Connection({ name: 'core_fatigue', token })
+
         api.status((name) => setStatus(name))
         api.poll('select', {}, (err: any, data: any) => !err && setList(data ?? []))
 

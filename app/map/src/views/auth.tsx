@@ -76,7 +76,7 @@ export default (cfg: iArgs) => {
 
             <Descriptions layout="vertical" items={Object.keys(sign.payload).map(key => ({
                 key: key,
-                label: key,
+                label: <span style={{ textTransform: 'capitalize' }}>{key}</span>,
                 children: sign.payload[key]
             }))} />
 
