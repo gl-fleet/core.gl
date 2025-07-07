@@ -1,5 +1,5 @@
 import { Host, NetServer } from 'unet'
-import { Now, Loop, log } from 'utils'
+import { Now, Loop, log, moment } from 'utils'
 
 export class Bridge {
 
@@ -8,12 +8,13 @@ export class Bridge {
         const _: any = {
             source: {
                 port: p0,
-                lastMessage: '',
+                lastMessage: '-',
+                lastUpdate: '-',
                 clients: 0,
             },
             destination: {
                 port: p1,
-                lastEvent: '',
+                lastEvent: '-',
                 clients: [],
             }
         }
@@ -25,6 +26,8 @@ export class Bridge {
             client.on('data', (data) => {
 
                 _.source.lastMessage = `Message size ${String(data).length}`
+                _.source.lastUpdate = moment()
+
                 destination.clients.map(client => {
 
                     try { client.write(data) }
@@ -46,12 +49,21 @@ export class Bridge {
 
         /** [ Serve events ] **/
 
-        API.on(alias, () => _)
+        const normalize = (e: any) => {
+
+            try {
+
+                e.source.lastUpdate = e.source.lastUpdate.fromNow()
+
+            } catch (err) { }
+
+        }
+
+        API.on(alias, () => normalize(_))
 
         Loop(() => {
 
             _.source.clients = source.clients.length
-            // _.destination.clients = destination.clients.length
 
             const clients: any = []
             destination.clients.map(client => {
@@ -62,7 +74,7 @@ export class Bridge {
 
             _.destination.clients = clients
 
-            API.emit(alias, _)
+            API.emit(alias, normalize(_))
 
         }, 5000)
 

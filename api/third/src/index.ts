@@ -18,9 +18,9 @@ Safe(() => {
 
     API.on('devices', async (req) => {
 
-        console.log(req.headers)
-
         const key = 'devices'
+
+        const { proj, type, name, level }: any = req.user
 
         if (cache.has(key)) return cache.get(key)
 
@@ -31,21 +31,24 @@ Safe(() => {
             auth: { username: pi_token, password: '' },
         })
 
-        console.log(devices)
-
         if (typeof devices === 'object' && Array.isArray(devices)) {
 
-            cache.set(key, devices, 5)
-            return devices
+            // Example display_name: 'HLV796.VMP.MP'
+            const filtered = devices.filter(({ display_name }) => proj === '*' || proj === display_name.split('.')[1])
+
+            cache.set(key, filtered, 5)
+            return filtered
 
         } else return []
 
-    })
+    }, true, 2)
 
     API.on('device', async (req) => {
 
         const { device_id } = req.query
         let param = qs.stringify({ 'device_id': device_id })
+
+        const { proj, level }: any = req.user
 
         const { data: { device_info } } = await axios.request({
             method: 'post',
@@ -56,10 +59,11 @@ Safe(() => {
             data: param,
         })
 
+        // Hide VNC level < 4
         console.log(device_info)
 
         return device_info
 
-    })
+    }, true, 2)
 
 })
