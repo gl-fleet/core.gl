@@ -55,7 +55,9 @@ export class Bridge {
 
                 e.source.lastUpdate = e.source.lastUpdate.fromNow()
 
-            } catch (err) { }
+                return e
+
+            } catch (err) { return e }
 
         }
 
