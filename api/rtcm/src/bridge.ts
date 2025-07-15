@@ -10,6 +10,7 @@ export class Bridge {
                 port: p0,
                 lastMessage: '-',
                 lastUpdate: 0,
+                messageDelay: 0,
                 clients: 0,
             },
             destination: {
@@ -53,8 +54,7 @@ export class Bridge {
 
             try {
 
-                e.source.lastUpdate = Date.now() - e.source.lastUpdate
-
+                e.source.messageDelay = Date.now() - e.source.lastUpdate
                 return e
 
             } catch (err) { return e }
