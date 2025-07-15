@@ -9,7 +9,7 @@ export class Bridge {
             source: {
                 port: p0,
                 lastMessage: '-',
-                lastUpdate: '-',
+                lastUpdate: 0,
                 clients: 0,
             },
             destination: {
@@ -26,7 +26,7 @@ export class Bridge {
             client.on('data', (data) => {
 
                 _.source.lastMessage = `Message size ${String(data).length}`
-                _.source.lastUpdate = moment()
+                _.source.lastUpdate = Date.now()
 
                 destination.clients.map(client => {
 
@@ -53,7 +53,7 @@ export class Bridge {
 
             try {
 
-                e.source.lastUpdate = e.source.lastUpdate.fromNow()
+                e.source.lastUpdate = Date.now() - e.source.lastUpdate
 
                 return e
 
