@@ -87,17 +87,17 @@ export default (cfg: iArgs | any) => {
             loading={loading === 1}
             status={loading === 2 ? 'error' : undefined}
             showSearch={true}
-            placeholder="Select a vehicle"
+            placeholder={loading === 2 ? "Connection error" : "Select a vehicle"}
             onDropdownVisibleChange={onDropdownChanges}
+            options={vehicles}
             filterOption={(input: any, option: any) => (option?.value ?? '').toLowerCase().includes(input.toLowerCase())}
             onSelect={(n, { data }) => {
 
                 const { east: x, north: y } = data
                 const { lat, lng } = UTM.convertUtmToLatLng(x, y, "48", "T")
-                cfg.Maptalks.animateTo([lng, lat], 2)
+                cfg.Maptalks.animateTo([lng, lat], 0)
 
             }}
-            options={vehicles}
         />
     </>
 

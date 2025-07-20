@@ -15,11 +15,7 @@ export class Locations {
         limit: 100,
     }
 
-    constructor({ local, core_data, sequelize }: {
-        local: Host,
-        core_data: Connection,
-        sequelize: Sequelize,
-    }) {
+    constructor({ local, core_data, sequelize }: { local: Host, core_data: Connection, sequelize: Sequelize }, run_background: boolean) {
 
         this.local = local
         this.core_data = core_data
@@ -28,7 +24,8 @@ export class Locations {
         this.table_build()
         this.table_serve()
         this.table_event()
-        this.scheduler()
+
+        run_background && this.scheduler()
 
     }
 
@@ -53,33 +50,12 @@ export class Locations {
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             deletedAt: { type: DataTypes.STRING, defaultValue: null },
 
-            // }, { indexes: [{ unique: true, fields: ['proj', 'type', 'name', 'updatedAt'] }] })
         }, {
             indexes: [
-                {
-                    unique: false,
-                    name: `${this.name}_proj_index`,
-                    using: 'BTREE',
-                    fields: ['proj'],
-                },
-                {
-                    unique: false,
-                    name: `${this.name}_type_index`,
-                    using: 'BTREE',
-                    fields: ['type'],
-                },
-                {
-                    unique: false,
-                    name: `${this.name}_name_index`,
-                    using: 'BTREE',
-                    fields: ['name'],
-                },
-                {
-                    unique: false,
-                    name: `${this.name}_updatedat_index`,
-                    using: 'BTREE',
-                    fields: ['updatedAt'],
-                },
+                { unique: false, name: `${this.name}_proj_index`, using: 'BTREE', fields: ['proj'] },
+                { unique: false, name: `${this.name}_type_index`, using: 'BTREE', fields: ['type'] },
+                { unique: false, name: `${this.name}_name_index`, using: 'BTREE', fields: ['name'] },
+                { unique: false, name: `${this.name}_updatedat_index`, using: 'BTREE', fields: ['updatedAt'] },
             ]
         })
 

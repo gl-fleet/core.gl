@@ -1,10 +1,10 @@
 import { Host, Connection } from 'unet'
-import { Sequelize, DataTypes, Model, ModelStatic } from 'sequelize'
+import { Sequelize, DataTypes, Model, ModelStatic, QueryTypes } from 'sequelize'
 import { AsyncWait, Jfy, Now, Uid, Safe, Loop, dateFormat, moment, log } from 'utils'
 
-export class Coverages {
+export class Activities {
 
-    public name = 'coverages'
+    public name = 'activities'
     public local: Host
     public core_data: Connection
     public sequelize: Sequelize
@@ -12,8 +12,7 @@ export class Coverages {
 
     _ = {
         days: 7,
-        size: 4,
-        limit: 100,
+        duration: 5, /** Another 5 minutes will be added when there are no data **/
     }
 
     constructor({ local, core_data, sequelize }: { local: Host, core_data: Connection, sequelize: Sequelize }, run_background: boolean) {
@@ -38,9 +37,14 @@ export class Coverages {
 
             proj: { type: DataTypes.STRING, defaultValue: '' },
             type: { type: DataTypes.STRING, defaultValue: '' },
-            est: { type: DataTypes.INTEGER, defaultValue: 0 },
-            nrt: { type: DataTypes.INTEGER, defaultValue: 0 },
-            data: { type: DataTypes.STRING, defaultValue: '' },
+            name: { type: DataTypes.STRING, defaultValue: '' },
+
+            activity: { type: DataTypes.STRING, defaultValue: '' },
+            start: { type: DataTypes.STRING, defaultValue: '' },
+            end: { type: DataTypes.STRING, defaultValue: '' },
+            distance: { type: DataTypes.INTEGER, defaultValue: 0 },
+            duration: { type: DataTypes.INTEGER, defaultValue: 0 },
+            note: { type: DataTypes.STRING, defaultValue: '' },
 
             createdAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
@@ -50,10 +54,18 @@ export class Coverages {
             indexes: [
                 { unique: false, name: `${this.name}_proj_index`, using: 'BTREE', fields: ['proj'] },
                 { unique: false, name: `${this.name}_type_index`, using: 'BTREE', fields: ['type'] },
-                { unique: false, name: `${this.name}_est_index`, using: 'BTREE', fields: ['est'] },
-                { unique: false, name: `${this.name}_nrt_index`, using: 'BTREE', fields: ['nrt'] },
+                { unique: false, name: `${this.name}_name_index`, using: 'BTREE', fields: ['name'] },
+                { unique: false, name: `${this.name}_activity_index`, using: 'BTREE', fields: ['activity'] },
+                { unique: false, name: `${this.name}_updatedat_index`, using: 'BTREE', fields: ['updatedAt'], },
             ]
         })
+
+    }
+
+    table_serve = () => {
+
+        this.local.on(`get-${this.name}`, async (req: any) => await this.get(req.query))
+        this.local.on(`set-${this.name}`, async (req: any) => await this.set(req.query), true, 4)
 
     }
 
@@ -62,13 +74,6 @@ export class Coverages {
         this.collection.afterCreate(() => this.local.emit(this.name, 'create'))
         this.collection.afterUpdate(() => this.local.emit(this.name, 'update'))
         this.collection.afterUpsert(() => this.local.emit(this.name, 'upsert'))
-
-    }
-
-    table_serve = () => {
-
-        this.local.on(`get-${this.name}`, async (req: any) => await this.get(req.query))
-        this.local.on(`set-${this.name}`, async (req: any) => await this.set(req.query), true, 4)
 
     }
 
@@ -107,15 +112,24 @@ export class Coverages {
     executer = async () => {
 
         /** ** Data pulling **  **/
-        const start = Date.now()
         const alias = `[${this.name}.executer]`
         const enums = this.sequelize.models['enums']
+        const locations = this.sequelize.models['locations']
 
         const { value = ',' }: any = (await enums.findOne({ where: { type: 'collect', name: this.name, deletedAt: null }, raw: true }) ?? {})
         const sp = value.split(',')
 
-        const updatedAt = sp[1] ?? moment().add(-(this._.days), 'days').format(dateFormat)
-        const rows: any = await this.core_data.get('get-events-status', { id: sp[0], updatedAt, limit: this._.limit })
+        const time = sp[1] || moment().add(-(this._.days), 'days').format(dateFormat)
+        // const timeEnd = sp[1] || moment().add(-(this._.days), 'days').add(this._.duration, 'minutes').format(dateFormat)
+
+        const rows: any = await this.sequelize.query(`
+            SELECT *
+            FROM public.locations
+            WHERE "updatedAt" > '${time}' AND "updatedAt" <= '${moment(time).add(this._.duration, 'minutes').format(dateFormat)}'
+            ORDER BY "updatedAt" ASC
+        `, { type: QueryTypes.SELECT })
+
+        // data: '105.1891,43.586636|rtk,32|rtk,32|0.8,0.8|error,,...,1.1,0.96,throttled=0x0|success,stopped [↗↗],0|undefined,-,-',
 
         /** ** Data aggregating **  **/
         const obj: any = {}
@@ -124,24 +138,7 @@ export class Coverages {
 
             try {
 
-                const parsed: any = Jfy(x.data)
-                const { data, data_gps1, data_gps, data_gsm } = parsed
-                const [proj, type] = data
-                const { gps, utm } = data_gps
-                const [est, nrt] = utm
-
-                if (true /** Exca Truck [ Drill Dozer Grader Vehicle ] ... **/) {
-
-                    /** Indexing ['proj', 'type', 'est', 'nrt'] **/
-                    const es = Math.round(est / this._.size)
-                    const nr = Math.round(nrt / this._.size)
-                    const index = `${proj}_${type}_${es}_${nr}`
-
-                    /** Satellites | Network | Precision | Speed | Elevation **/
-                    const inject = `${gps[0]},${gps[1]}|${data_gps1[2]}|${data_gsm?.quality ?? ''}|${data_gps1[3]}|${data_gps1[5]}|${utm[2]}`
-                    obj[index] = { proj, type, est: es, nrt: nr, data: inject }
-
-                }
+                // console.log(rows)
 
             } catch (err: any) { log.warn(`${alias} In the Loop / ${err.message}`) }
 
@@ -150,13 +147,16 @@ export class Coverages {
         /** ** Data saving **  **/
         if (rows.length > 0) {
 
-            const keys = Object.keys(obj)
-            for (const x of keys) await this.collection.upsert({ ...obj[x], updatedAt: Now() })
+            console.log(` ${rows[0].updatedAt} -> ${rows[rows.length - 1].updatedAt}  [${rows.length} / ${this._.duration}]`)
+
+            // const keys = Object.keys(obj)
+            // for (const x of keys) await this.collection.upsert({ ...obj[x], updatedAt: Now() })
 
             const item = rows[rows.length - 1]
             await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: Now() })
+            this._.duration = 5
 
-        }
+        } else this._.duration += 5
 
     }
 
@@ -166,9 +166,7 @@ export class Coverages {
         let free = true
         let fail = 0
 
-        this.core_data.on('collect', ({ table }) => table === 'events' && this.todos.push(true))
-
-        Loop(() => ((Date.now() - this.last) >= (10 * 1000)) && Safe(() => {
+        Loop(() => ((Date.now() - this.last) >= (5 * 1000)) && Safe(() => {
 
             this.todos.push(true)
             this.last = Date.now()
@@ -177,6 +175,7 @@ export class Coverages {
 
         Loop(() => free && Safe(async () => {
 
+            let tStart = Date.now()
             free = false
 
             try {
@@ -184,6 +183,9 @@ export class Coverages {
                 if (this.todos.length > 0) {
 
                     await this.executer()
+
+                    log.success(`${alias} Todos:${this.todos.length} Fails:${fail} Duration:${Date.now() - tStart}ms Query/Range:${this._.duration} minutes`)
+
                     this.todos = []
                     fail = 0
 
@@ -194,8 +196,6 @@ export class Coverages {
                 log.error(`${alias} In the Loop / ${err.message}`) && ++fail
 
             } finally {
-
-                log.info(`${alias} Todos:${this.todos.length} Fails:${fail}`)
 
                 if (fail >= 25) {
 
