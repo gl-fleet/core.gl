@@ -160,7 +160,7 @@ export class Coverages {
             await this.collection.bulkCreate(points)
 
             const item = rows[rows.length - 1]
-            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: Now() })
+            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: item.updatedAt })
 
         }
 

@@ -158,7 +158,7 @@ export class Locations {
 
             try {
 
-                const { type: _type, src, dst, createdAt, updatedAt } = x
+                const { createdAt, updatedAt } = x
                 const parsed: any = Jfy(x.data)
                 const { value, data, data_gps = {}, data_gps1, data_gps2, data_gsm, data_rtcm, data_activity, inj_clients } = parsed
                 const { gps = [], utm } = data_gps
@@ -200,7 +200,7 @@ export class Locations {
             for (const x in last_position) {
 
                 this.local.emit(x, last_position[x])
-                await enums.upsert({ type: 'location.now', name: x, value: JSON.stringify(last_position[x]), updatedAt: Now() })
+                await enums.upsert({ type: 'location.now', name: x, value: JSON.stringify(last_position[x]), updatedAt: last_position[x].updatedAt })
 
             }
 
@@ -208,7 +208,7 @@ export class Locations {
             await this.collection.bulkCreate(points)
 
             const item = rows[rows.length - 1]
-            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: Now() })
+            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: item.updatedAt })
 
         }
 

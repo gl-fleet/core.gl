@@ -207,13 +207,14 @@ export class Activities {
         /** ** Data saving **  **/
         if (rows.length > 0) {
 
-            console.log(` ${rows[0].updatedAt} -> ${rows[rows.length - 1].updatedAt}  [${rows.length} / ${this._.duration}]`)
+            // console.log(` ${rows[0].updatedAt} -> ${rows[rows.length - 1].updatedAt}  [${rows.length} / ${this._.duration}]`)
 
             // const keys = Object.keys(obj)
             // for (const x of keys) await this.collection.upsert({ ...obj[x], updatedAt: Now() })
 
             const item = rows[rows.length - 1]
-            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: Now() })
+            log.warn(`[ ${item.updatedAt} && ${Now()} ]`)
+            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: item.updatedAt })
             this._.duration = 5
 
         } else this._.duration += 5
