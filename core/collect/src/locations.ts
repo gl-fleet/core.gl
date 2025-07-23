@@ -157,8 +157,8 @@ export class Locations {
 
                 const { createdAt, updatedAt } = x
                 const parsed: any = Jfy(x.data)
-                const { value, data, data_gps, data_gps1, data_gps2, data_gsm, data_rtcm, data_activity, inj_clients } = parsed
-                const { gps, utm } = data_gps
+                const { value, data, data_gps = {}, data_gps1, data_gps2, data_gsm, data_rtcm, data_activity, inj_clients } = parsed
+                const { gps = [], utm } = data_gps
                 const [proj, type, name] = data
                 const [east, north, elevation] = utm
 
@@ -201,7 +201,8 @@ export class Locations {
 
             }
 
-            for (const x of points) await this.collection.upsert({ ...x })
+            // for (const x of points) await this.collection.upsert({ ...x })
+            await this.collection.bulkCreate(points)
 
             const item = rows[rows.length - 1]
             await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: Now() })
@@ -227,6 +228,7 @@ export class Locations {
 
         Loop(() => free && Safe(async () => {
 
+            let tStart = Date.now()
             free = false
 
             try {
@@ -234,6 +236,9 @@ export class Locations {
                 if (this.todos.length > 0) {
 
                     await this.executer()
+
+                    log.info(`${alias} Todos:${this.todos.length} Fails:${fail} Duration:${Date.now() - tStart}ms`)
+
                     this.todos = []
                     fail = 0
 
@@ -244,8 +249,6 @@ export class Locations {
                 log.error(`${alias} In the Loop / ${err.message}`) && ++fail
 
             } finally {
-
-                log.info(`${alias} Todos:${this.todos.length} Fails:${fail}`)
 
                 if (fail >= 25) {
 

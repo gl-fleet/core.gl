@@ -125,9 +125,9 @@ export class Coverages {
             try {
 
                 const parsed: any = Jfy(x.data)
-                const { data, data_gps1, data_gps, data_gsm } = parsed
+                const { data, data_gps1, data_gps = {}, data_gsm } = parsed
                 const [proj, type] = data
-                const { gps, utm } = data_gps
+                const { gps = [], utm } = data_gps
                 const [est, nrt] = utm
 
                 if (true /** Exca Truck [ Drill Dozer Grader Vehicle ] ... **/) {
@@ -151,7 +151,10 @@ export class Coverages {
         if (rows.length > 0) {
 
             const keys = Object.keys(obj)
-            for (const x of keys) await this.collection.upsert({ ...obj[x], updatedAt: Now() })
+            const points = []
+
+            for (const x of keys) points.push({ ...obj[x], updatedAt: Now() })
+            await this.collection.bulkCreate(points)
 
             const item = rows[rows.length - 1]
             await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: Now() })
@@ -177,6 +180,7 @@ export class Coverages {
 
         Loop(() => free && Safe(async () => {
 
+            let tStart = Date.now()
             free = false
 
             try {
@@ -184,6 +188,9 @@ export class Coverages {
                 if (this.todos.length > 0) {
 
                     await this.executer()
+
+                    log.info(`${alias} Todos:${this.todos.length} Fails:${fail} Duration:${Date.now() - tStart}ms`)
+
                     this.todos = []
                     fail = 0
 
@@ -194,8 +201,6 @@ export class Coverages {
                 log.error(`${alias} In the Loop / ${err.message}`) && ++fail
 
             } finally {
-
-                log.info(`${alias} Todos:${this.todos.length} Fails:${fail}`)
 
                 if (fail >= 25) {
 

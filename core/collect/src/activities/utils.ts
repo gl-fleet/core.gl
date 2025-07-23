@@ -1,4 +1,12 @@
-import * as turf from '@turf/turf';
+import * as turf from '@turf/turf'
+
+const clear_noise = () => {
+
+    // Duration between updatedAt < clear the noise >
+    // Bounce between east / north speed ... 
+    // Speed and Heading sudden changes
+
+}
 
 type TelemetryPoint = {
     timestamp: number; // Unix timestamp in seconds
@@ -15,7 +23,7 @@ type ActivitySegment = {
     endTime: number;
     durationSec: number;
     distanceMeters: number;
-};
+}
 
 function calculateDistance(p1: TelemetryPoint, p2: TelemetryPoint): number {
     const from = turf.point([p1.east, p1.north]);

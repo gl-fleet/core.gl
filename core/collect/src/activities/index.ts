@@ -2,6 +2,57 @@ import { Host, Connection } from 'unet'
 import { Sequelize, DataTypes, Model, ModelStatic, QueryTypes } from 'sequelize'
 import { AsyncWait, Jfy, Now, Uid, Safe, Loop, dateFormat, moment, log } from 'utils'
 
+const calculateDistance = (e1: number, n1: number, e2: number, n2: number) => {
+    return Math.sqrt((e2 - e1) ** 2 + (n2 - n1) ** 2)
+}
+
+const calculateBearing = (e1: number, n1: number, e2: number, n2: number) => {
+    const angle = Math.atan2(e2 - e1, n2 - n1) * (180 / Math.PI)
+    return (angle + 360) % 360
+}
+
+const headingDifference = (h1: number, h2: number) => {
+    let diff = Math.abs(h1 - h2) % 360
+    return diff > 180 ? 360 - diff : diff
+}
+
+const getActivity = (prev: any, current: any, next: any) => {
+
+    const dist = calculateDistance(prev.east, prev.north, current.east, current.north)
+    const bearing = calculateBearing(prev.east, prev.north, current.east, current.north)
+    const speed = dist / ((current.time - prev.time) || 1); // m/s
+    const angleDiff = headingDifference(prev.heading, current.heading)
+    const movementAngleDiff = headingDifference(current.heading, bearing)
+
+    if (speed < 0.1) {
+        return 'Idling'
+    }
+
+    if (speed < 0.5 && angleDiff > 20) {
+        return 'Cornering (slow)'
+    }
+
+    if (movementAngleDiff > 135) {
+        if (angleDiff > 20) return 'Reversing Turn'
+        return 'Backing'
+    }
+
+    if (angleDiff > 25) {
+        return 'Cornering'
+    }
+
+    if (speed >= 2) {
+        return 'Hauling'
+    }
+
+    if (speed < 0.5) {
+        return 'Parking'
+    }
+
+    return 'Moving'
+
+}
+
 export class Activities {
 
     public name = 'activities'
@@ -114,13 +165,10 @@ export class Activities {
         /** ** Data pulling **  **/
         const alias = `[${this.name}.executer]`
         const enums = this.sequelize.models['enums']
-        const locations = this.sequelize.models['locations']
 
         const { value = ',' }: any = (await enums.findOne({ where: { type: 'collect', name: this.name, deletedAt: null }, raw: true }) ?? {})
         const sp = value.split(',')
-
         const time = sp[1] || moment().add(-(this._.days), 'days').format(dateFormat)
-        // const timeEnd = sp[1] || moment().add(-(this._.days), 'days').add(this._.duration, 'minutes').format(dateFormat)
 
         const rows: any = await this.sequelize.query(`
             SELECT *
@@ -130,6 +178,15 @@ export class Activities {
         `, { type: QueryTypes.SELECT })
 
         // data: '105.1891,43.586636|rtk,32|rtk,32|0.8,0.8|error,,...,1.1,0.96,throttled=0x0|success,stopped [↗↗],0|undefined,-,-',
+
+        // Your raw data (example)
+        const samples = [
+            { east: 100, north: 100, heading: 90, time: 0 },
+            { east: 102, north: 100, heading: 95, time: 2.5 },
+            { east: 104, north: 100, heading: 100, time: 5 },
+            { east: 103, north: 100, heading: 275, time: 7.5 },
+            { east: 102, north: 100, heading: 270, time: 10 },
+        ]
 
         /** ** Data aggregating **  **/
         const obj: any = {}

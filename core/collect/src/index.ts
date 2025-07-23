@@ -31,7 +31,7 @@ Safe(async () => {
 
     const locations = new Locations(cf, mode !== 'development')
     const coverages = new Coverages(cf, mode !== 'development')
-    const activities = new Activities(cf, true)
+    const activities = new Activities(cf, mode === 'development')
 
     /* Following tables are generated from events and chunks */
 
