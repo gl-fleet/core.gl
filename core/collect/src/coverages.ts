@@ -122,6 +122,9 @@ export class Coverages {
 
         for (const x of rows) {
 
+            const { type: t, src, dst } = x
+            const key = `${t}.${src}.${dst}`
+
             try {
 
                 const parsed: any = Jfy(x.data)
@@ -143,7 +146,7 @@ export class Coverages {
 
                 }
 
-            } catch (err: any) { log.warn(`${alias} In the Loop / ${err.message}`) }
+            } catch (err: any) { log.warn(`${alias} ${key} In the Loop / ${err.message}`) }
 
         }
 

@@ -153,9 +153,12 @@ export class Locations {
 
         for (const x of rows) {
 
+            const { type: t, src, dst } = x
+            const key = `${t}.${src}.${dst}`
+
             try {
 
-                const { createdAt, updatedAt } = x
+                const { type: _type, src, dst, createdAt, updatedAt } = x
                 const parsed: any = Jfy(x.data)
                 const { value, data, data_gps = {}, data_gps1, data_gps2, data_gsm, data_rtcm, data_activity, inj_clients } = parsed
                 const { gps = [], utm } = data_gps
@@ -187,7 +190,7 @@ export class Locations {
 
                 }
 
-            } catch (err: any) { log.warn(`${alias} In the Loop / ${err.message}`) }
+            } catch (err: any) { log.warn(`${alias} ${key} In the Loop / ${err.message}`) }
 
         }
 

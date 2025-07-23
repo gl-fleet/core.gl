@@ -193,11 +193,14 @@ export class Activities {
 
         for (const x of rows) {
 
+            const { type: t, src, dst } = x
+            const key = `${t}.${src}.${dst}`
+
             try {
 
                 // console.log(rows)
 
-            } catch (err: any) { log.warn(`${alias} In the Loop / ${err.message}`) }
+            } catch (err: any) { log.warn(`${alias} ${key} In the Loop / ${err.message}`) }
 
         }
 
