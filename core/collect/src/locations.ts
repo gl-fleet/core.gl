@@ -151,7 +151,9 @@ export class Locations {
         const points: any = []
         const last_position: any = {}
 
-        console.log(`${value} ${rows.length} | ${rows[0].updatedAt} ${rows[rows.length - 1].updatedAt}`)
+        if (rows.length > 0) {
+            console.log(`${value} ${rows.length} | ${rows[0].updatedAt} ${rows[rows.length - 1].updatedAt}`)
+        }
 
         for (const x of rows) {
 
