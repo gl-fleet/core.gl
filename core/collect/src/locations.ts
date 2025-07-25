@@ -213,7 +213,8 @@ export class Locations {
             await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: Now() })
 
             for (const x of rows) console.log(`Select -> ${x.src} ${x.updatedAt}`)
-            for (const x of points) console.log(`Upsert -> ${x.name} ${x.updatedAt} [Flag ${item.updatedAt}]`)
+            for (const x of points) console.log(`Upsert -> ${x.name} ${x.updatedAt}`)
+            console.log(`Flag -> ${item.updatedAt} \n`)
 
         }
 
