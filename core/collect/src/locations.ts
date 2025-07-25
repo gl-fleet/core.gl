@@ -151,7 +151,7 @@ export class Locations {
         const points: any = []
         const last_position: any = {}
 
-        if (rows.length > 0)  console.log(`${value} ${rows.length} | ${rows[0].updatedAt} ${rows[rows.length - 1].updatedAt}`)
+        // if (rows.length > 0)  console.log(`${value} ${rows.length} | ${rows[0].updatedAt} ${rows[rows.length - 1].updatedAt}`)
 
         for (const x of rows) {
 
@@ -208,6 +208,9 @@ export class Locations {
 
             // for (const x of points) await this.collection.upsert({ ...x })
             await this.collection.bulkCreate(points)
+
+            for (const x of rows) console.log(`Select -> ${x.src} ${x.updatedAt}`)
+            for (const x of points) console.log(`Upsert -> ${x.name} ${x.updatedAt}`)
 
             const item = rows[rows.length - 1]
             await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: Now() })
