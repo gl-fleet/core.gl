@@ -144,6 +144,8 @@ export class Locations {
         const { value = ',' }: any = (await enums.findOne({ where: { type: 'collect', name: this.name, deletedAt: null }, raw: true }) ?? {})
         const sp = value.split(',')
 
+        console.log(sp)
+
         const time = sp[1] || moment().add(-(this._.days), 'days').format(dateFormat)
         const rows: any = await this.core_data.get('get-events-status', { id: sp[0], createdAt: time, limit: this._.limit })
 
