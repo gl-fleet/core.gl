@@ -145,13 +145,11 @@ export class Locations {
         const sp = value.split(',')
 
         const time = sp[1] || moment().add(-(this._.days), 'days').format(dateFormat)
-        const rows: any = await this.core_data.get('get-events-status', { id: sp[0], updatedAt: time, limit: this._.limit })
+        const rows: any = await this.core_data.get('get-events-status', { id: sp[0], createdAt: time, limit: this._.limit })
 
         /** ** Data aggregating **  **/
         const points: any = []
         const last_position: any = {}
-
-        // if (rows.length > 0)  console.log(`${value} ${rows.length} | ${rows[0].updatedAt} ${rows[rows.length - 1].updatedAt}`)
 
         for (const x of rows) {
 
@@ -210,7 +208,7 @@ export class Locations {
             await this.collection.bulkCreate(points)
 
             const item = rows[rows.length - 1]
-            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: Now() })
+            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.createdAt}`, updatedAt: Now() })
 
             for (const x of rows) console.log(`Select -> ${x.src} ${x.updatedAt}`)
             for (const x of points) console.log(`Upsert -> ${x.name} ${x.updatedAt}`)

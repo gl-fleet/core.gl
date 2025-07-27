@@ -76,17 +76,17 @@ export class Event {
 
     /*** *** *** @___Table_Queries___ *** *** ***/
 
-    getStatus = async ({ id = '', updatedAt = '', limit = 10 }) => {
+    getStatus = async ({ id = '', createdAt = '', limit = 10 }) => {
 
         /** Need lot more work on this **/
         const items = await this.collection.findAll({
             where: {
                 // type: 'status', /** Need to add this filter to collect custom data */
                 // dst: 'master',
-                updatedAt: { [Op.gte]: updatedAt }, /** Just for using index **/
+                createdAt: { [Op.gte]: createdAt }, /** Just for using index **/
                 [Op.or]: [
-                    { updatedAt: { [Op.gt]: updatedAt } },
-                    { id: { [Op.gt]: id }, updatedAt: { [Op.eq]: updatedAt } }
+                    { createdAt: { [Op.gt]: createdAt } },
+                    { id: { [Op.gt]: id }, createdAt: { [Op.eq]: createdAt } }
                 ],
                 deletedAt: null,
             },

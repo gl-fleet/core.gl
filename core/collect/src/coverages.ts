@@ -114,8 +114,8 @@ export class Coverages {
         const { value = ',' }: any = (await enums.findOne({ where: { type: 'collect', name: this.name, deletedAt: null }, raw: true }) ?? {})
         const sp = value.split(',')
 
-        const updatedAt = sp[1] || moment().add(-(this._.days), 'days').format(dateFormat)
-        const rows: any = await this.core_data.get('get-events-status', { id: sp[0], updatedAt, limit: this._.limit })
+        const createdAt = sp[1] || moment().add(-(this._.days), 'days').format(dateFormat)
+        const rows: any = await this.core_data.get('get-events-status', { id: sp[0], createdAt, limit: this._.limit })
 
         /** ** Data aggregating **  **/
         const obj: any = {}
@@ -160,7 +160,7 @@ export class Coverages {
             await this.collection.bulkCreate(points)
 
             const item = rows[rows.length - 1]
-            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: Now() })
+            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.createdAt}`, updatedAt: Now() })
 
         }
 
