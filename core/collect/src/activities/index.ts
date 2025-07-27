@@ -63,7 +63,8 @@ export class Activities {
 
     _ = {
         days: 7,
-        duration: 5, /** Another 5 minutes will be added when there are no data **/
+        duration: 10, /** Another @{extending} minutes will be added when there are no data **/
+        extending: 10,
     }
 
     constructor({ local, core_data, sequelize }: { local: Host, core_data: Connection, sequelize: Sequelize }, run_background: boolean) {
@@ -100,7 +101,6 @@ export class Activities {
             createdAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             deletedAt: { type: DataTypes.STRING, defaultValue: null },
-            // count: { type: DataTypes.INTEGER, autoIncrement: true },
 
         }, {
             indexes: [
@@ -161,7 +161,7 @@ export class Activities {
     last = 0
     todos: any[] = []
 
-    executer = async () => {
+    executer_0 = async () => {
 
         /** ** Data pulling **  **/
         const alias = `[${this.name}.executer]`
@@ -178,31 +178,25 @@ export class Activities {
             ORDER BY "updatedAt" ASC
         `, { type: QueryTypes.SELECT })
 
-        // data: '105.1891,43.586636|rtk,32|rtk,32|0.8,0.8|error,,...,1.1,0.96,throttled=0x0|success,stopped [↗↗],0|undefined,-,-',
-
-        // Your raw data (example)
-        const samples = [
-            { east: 100, north: 100, heading: 90, time: 0 },
-            { east: 102, north: 100, heading: 95, time: 2.5 },
-            { east: 104, north: 100, heading: 100, time: 5 },
-            { east: 103, north: 100, heading: 275, time: 7.5 },
-            { east: 102, north: 100, heading: 270, time: 10 },
-        ]
-
         /** ** Data aggregating **  **/
         const obj: any = {}
 
         for (const x of rows) {
 
-            const { type: t, src, dst } = x
-            const key = `${t}.${src}.${dst}`
+            const { proj, type, name } = x
+            const key = `${proj}.${type}.${name}`
 
             try {
 
-                // console.log(rows)
+                if (!obj.hasOwnProperty(key)) obj[key] = []
+                obj[key].push(x)
 
             } catch (err: any) { log.warn(`${alias} ${key} In the Loop / ${err.message}`) }
 
+        }
+
+        for (const n in obj) {
+            console.log(`${n} -> ${obj[n][0].updatedAt} [${obj[n].length}]`)
         }
 
         /** ** Data saving **  **/
@@ -216,9 +210,34 @@ export class Activities {
             const item = rows[rows.length - 1]
             log.warn(`[ ${item.updatedAt} && ${Now()} ]`)
             await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: item.updatedAt })
-            this._.duration = 5
+            this._.duration = this._.extending
 
-        } else this._.duration += 5
+        } else this._.duration += this._.extending
+
+    }
+
+
+    executer = async () => {
+
+        /** ** Data pulling **  **/
+        const alias = `[${this.name}.executer]`
+
+        const locations: any = await this.sequelize.query(`
+            SELECT * 
+            FROM public.enums
+            WHERE type = 'location.now'
+            ORDER BY name DESC
+        `, { type: QueryTypes.SELECT })
+
+        const activities: any = await this.sequelize.query(`
+            SELECT * 
+            FROM public.enums
+            WHERE type = 'activity.now'
+            ORDER BY name DESC
+        `, { type: QueryTypes.SELECT })
+
+        console.log(locations)
+        console.log(activities)
 
     }
 

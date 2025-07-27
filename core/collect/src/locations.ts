@@ -179,7 +179,7 @@ export class Locations {
                         `${data_gps1[1]},${data_gps1[2]}`,
                         `${data_gps2[1]},${data_gps2[2]}`,
                         `${data_gps.prec2d},${data_gps.prec3d}`,
-                        `${data_gsm?.state ?? ''},${data_gsm?.quality ?? ''},${data_gsm?.operator ?? ''},${value.rx},${value.tx},${value.pw}`,
+                        `${data_gsm?.state ?? ''},${data_gsm?.quality ?? ''},${data_gsm?.operator ?? ''},${value.rx},${value.tx},${value.pw}`, /** this comes undefined **/
                         `${data_rtcm?.state ?? ''},${data_activity?.state ?? ''},${inj_clients.length ?? 0}`,
                         current_work(),
                     ].join('|')
