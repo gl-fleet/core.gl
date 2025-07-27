@@ -12,7 +12,7 @@ export class Locations {
 
     _ = {
         days: 7,
-        limit: 100,
+        limit: 1000,
     }
 
     constructor({ local, core_data, sequelize }: { local: Host, core_data: Connection, sequelize: Sequelize }, run_background: boolean) {
@@ -144,8 +144,6 @@ export class Locations {
         const { value = ',' }: any = (await enums.findOne({ where: { type: 'collect', name: this.name, deletedAt: null }, raw: true }) ?? {})
         const sp = value.split(',')
 
-        console.log(sp)
-
         const time = sp[1] || moment().add(-(this._.days), 'days').format(dateFormat)
         const rows: any = await this.core_data.get('get-events-status', { id: sp[0], createdAt: time, limit: this._.limit })
 
@@ -206,15 +204,10 @@ export class Locations {
 
             }
 
-            // for (const x of points) await this.collection.upsert({ ...x })
             await this.collection.bulkCreate(points)
 
             const item = rows[rows.length - 1]
             await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.createdAt}`, updatedAt: Now() })
-
-            for (const x of rows) console.log(`Select -> ${x.src} ${x.updatedAt}`)
-            for (const x of points) console.log(`Upsert -> ${x.name} ${x.updatedAt}`)
-            console.log(`Flag -> ${item.updatedAt} \n`)
 
         }
 
