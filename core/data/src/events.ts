@@ -90,7 +90,7 @@ export class Event {
                 ],
                 deletedAt: null,
             },
-            order: [['updatedAt', 'ASC'], ['id', 'ASC']],
+            order: [['createdAt', 'ASC'], ['id', 'ASC']],
             limit: limit,
             raw: true,
         })
