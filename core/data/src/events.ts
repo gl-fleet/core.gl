@@ -40,30 +40,11 @@ export class Event {
 
         }, {
             indexes: [
-                {
-                    unique: false,
-                    name: 'Type_index',
-                    using: 'BTREE',
-                    fields: ['type'],
-                },
-                {
-                    unique: false,
-                    name: 'Source_index',
-                    using: 'BTREE',
-                    fields: ['src'],
-                },
-                {
-                    unique: false,
-                    name: 'Destination_index',
-                    using: 'BTREE',
-                    fields: ['dst'],
-                },
-                {
-                    unique: false,
-                    name: 'UpdatedAt_index',
-                    using: 'BTREE',
-                    fields: ['updatedAt'],
-                },
+                { unique: false, name: 'Type_index', using: 'BTREE', fields: ['type'] },
+                { unique: false, name: 'Source_index', using: 'BTREE', fields: ['src'] },
+                { unique: false, name: 'Destination_index', using: 'BTREE', fields: ['dst'] },
+                { unique: false, name: 'CreatedAt_index', using: 'BTREE', fields: ['createdAt'] },
+                { unique: false, name: 'UpdatedAt_index', using: 'BTREE', fields: ['updatedAt'] },
             ]
         })
 

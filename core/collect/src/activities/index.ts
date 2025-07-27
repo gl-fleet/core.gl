@@ -100,6 +100,7 @@ export class Activities {
             createdAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             deletedAt: { type: DataTypes.STRING, defaultValue: null },
+            // count: { type: DataTypes.INTEGER, autoIncrement: true },
 
         }, {
             indexes: [
