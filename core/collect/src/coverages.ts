@@ -13,7 +13,7 @@ export class Coverages {
     _ = {
         days: 7,
         size: 4,
-        limit: 1000,
+        limit: 100,
     }
 
     constructor({ local, core_data, sequelize }: { local: Host, core_data: Connection, sequelize: Sequelize }, run_background: boolean) {

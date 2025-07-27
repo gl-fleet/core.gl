@@ -12,7 +12,7 @@ export class Locations {
 
     _ = {
         days: 7,
-        limit: 1000,
+        limit: 100,
     }
 
     constructor({ local, core_data, sequelize }: { local: Host, core_data: Connection, sequelize: Sequelize }, run_background: boolean) {
