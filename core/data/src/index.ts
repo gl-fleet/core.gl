@@ -16,10 +16,7 @@ const cf: any = {
         host: mode === 'development' ? '139.59.115.158' : 'localhost',
         pool: { max: 16, min: 4, acquire: 30000, idle: 15000 },
         logging: false,
-        /* logging: (sql, timing: any) => {
-            console.log('***')
-            console.log(sql)
-        }, */
+        /* logging: (sql, timing: any) => { console.log(sql) }, */
     }),
 }
 
@@ -29,8 +26,6 @@ Safe(async () => {
 
     new Event(cf)
     new Chunk(cf)
-
-    // order: [[cf.sequelize.literal(`"events"."updatedAt", "events"."id" DESC`)]]
 
     const replica = new rMaster({
         api: cf.local,

@@ -63,8 +63,7 @@ export class Activities {
 
     _ = {
         days: 7,
-        duration: 10, /** Another @{extending} minutes will be added when there are no data **/
-        extending: 10,
+        limit: 100,
     }
 
     constructor({ local, core_data, sequelize }: { local: Host, core_data: Connection, sequelize: Sequelize }, run_background: boolean) {
@@ -161,7 +160,7 @@ export class Activities {
     last = 0
     todos: any[] = []
 
-    executer_0 = async () => {
+    executer = async () => {
 
         /** ** Data pulling **  **/
         const alias = `[${this.name}.executer]`
@@ -169,75 +168,58 @@ export class Activities {
 
         const { value = ',' }: any = (await enums.findOne({ where: { type: 'collect', name: this.name, deletedAt: null }, raw: true }) ?? {})
         const sp = value.split(',')
-        const time = sp[1] || moment().add(-(this._.days), 'days').format(dateFormat)
 
-        const rows: any = await this.sequelize.query(`
-            SELECT *
-            FROM public.locations
-            WHERE "updatedAt" > '${time}' AND "updatedAt" <= '${moment(time).add(this._.duration, 'minutes').format(dateFormat)}'
-            ORDER BY "updatedAt" ASC
-        `, { type: QueryTypes.SELECT })
+        const createdAt = sp[1] || moment().add(-(this._.days), 'days').format(dateFormat)
+        const rows: any = await this.core_data.get('get-events-status', { id: sp[0], createdAt, limit: this._.limit })
+
+        log.success(``)
+        log.success(`Pulled ${rows.length} / ${rows[0].createdAt}`)
+        log.success(`Pulled ${rows.length} / ${rows[rows.length - 1].createdAt}`)
 
         /** ** Data aggregating **  **/
         const obj: any = {}
 
         for (const x of rows) {
 
-            const { proj, type, name } = x
-            const key = `${proj}.${type}.${name}`
+            const { type: t, src, dst } = x
+            const key = `${t}.${src}.${dst}`
 
             try {
 
-                if (!obj.hasOwnProperty(key)) obj[key] = []
-                obj[key].push(x)
+                const { createdAt, updatedAt } = x
+                const parsed: any = Jfy(x.data)
+                const { data, data_gps1, data_gps2, data_gps = {}, data_gsm } = parsed
+                const [proj, type, name] = data
+                const { utm = [-1, -1, -1], head = -1 } = data_gps
+                const [est, nrt, el] = utm
+                const id = `${proj}.${type}.${name}`
+
+                if (!obj.hasOwnProperty(id)) obj[id] = []
+
+                obj[id].push(`${est},${nrt},${el},${head},${data_gps1[5] ?? -1},${updatedAt}`)
 
             } catch (err: any) { log.warn(`${alias} ${key} In the Loop / ${err.message}`) }
 
         }
 
-        for (const n in obj) {
-            console.log(`${n} -> ${obj[n][0].updatedAt} [${obj[n].length}]`)
-        }
+        console.log(obj)
+
+        console.log(Object.keys(obj))
+
+        const pres: any = await enums.findAll({ where: { type: 'activity.buffer', name: Object.keys(obj), deletedAt: null }, raw: true })
+        const prea: any = await enums.findAll({ where: { type: 'activity.now', name: Object.keys(obj), deletedAt: null }, raw: true })
+
+        /** Do the calculation with result of activity buffer after adding the last chanks, then cut and save **/
+
+        console.log(pres)
 
         /** ** Data saving **  **/
         if (rows.length > 0) {
 
-            // console.log(` ${rows[0].updatedAt} -> ${rows[rows.length - 1].updatedAt}  [${rows.length} / ${this._.duration}]`)
-
-            // const keys = Object.keys(obj)
-            // for (const x of keys) await this.collection.upsert({ ...obj[x], updatedAt: Now() })
-
             const item = rows[rows.length - 1]
-            log.warn(`[ ${item.updatedAt} && ${Now()} ]`)
-            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.updatedAt}`, updatedAt: item.updatedAt })
-            this._.duration = this._.extending
+            // await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.createdAt}`, updatedAt: Now() })
 
-        } else this._.duration += this._.extending
-
-    }
-
-
-    executer = async () => {
-
-        /** ** Data pulling **  **/
-        const alias = `[${this.name}.executer]`
-
-        const locations: any = await this.sequelize.query(`
-            SELECT * 
-            FROM public.enums
-            WHERE type = 'location.now'
-            ORDER BY name DESC
-        `, { type: QueryTypes.SELECT })
-
-        const activities: any = await this.sequelize.query(`
-            SELECT * 
-            FROM public.enums
-            WHERE type = 'activity.now'
-            ORDER BY name DESC
-        `, { type: QueryTypes.SELECT })
-
-        console.log(locations)
-        console.log(activities)
+        }
 
     }
 
@@ -247,7 +229,9 @@ export class Activities {
         let free = true
         let fail = 0
 
-        Loop(() => ((Date.now() - this.last) >= (5 * 1000)) && Safe(() => {
+        this.core_data.on('collect', ({ table }) => table === 'events' && this.todos.push(true))
+
+        Loop(() => ((Date.now() - this.last) >= (10 * 1000)) && Safe(() => {
 
             this.todos.push(true)
             this.last = Date.now()
@@ -265,7 +249,7 @@ export class Activities {
 
                     await this.executer()
 
-                    log.success(`${alias} Todos:${this.todos.length} Fails:${fail} Duration:${Date.now() - tStart}ms Query/Range:${this._.duration} minutes`)
+                    log.info(`${alias} Todos:${this.todos.length} Fails:${fail} Duration:${Date.now() - tStart}ms`)
 
                     this.todos = []
                     fail = 0
