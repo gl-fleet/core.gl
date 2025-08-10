@@ -2,55 +2,95 @@ import { Host, Connection } from 'unet'
 import { Sequelize, DataTypes, Model, ModelStatic, QueryTypes } from 'sequelize'
 import { AsyncWait, Jfy, Now, Uid, Safe, Loop, dateFormat, moment, log } from 'utils'
 
-const calculateDistance = (e1: number, n1: number, e2: number, n2: number) => {
-    return Math.sqrt((e2 - e1) ** 2 + (n2 - n1) ** 2)
+type VehiclePoint = {
+    east: number
+    north: number
+    elevation: number
+    heading: number
+    speed: number
+    updated: Date
 }
 
-const calculateBearing = (e1: number, n1: number, e2: number, n2: number) => {
-    const angle = Math.atan2(e2 - e1, n2 - n1) * (180 / Math.PI)
-    return (angle + 360) % 360
+type VehicleActivity = {
+    startTime: string
+    endTime: string
+    avgSpeed: string
+    headingChange: string
+    elevationChange: string
+    distance: string
+    activity: string
+    work: string
 }
 
-const headingDifference = (h1: number, h2: number) => {
-    let diff = Math.abs(h1 - h2) % 360
-    return diff > 180 ? 360 - diff : diff
-}
+const analyzeVehicleActivity = (dataArray: string[], offlineThresholdSeconds: number = 30): VehicleActivity => {
 
-const getActivity = (prev: any, current: any, next: any) => {
+    if (dataArray.length !== 4) throw new Error("Exactly 4 elements are required for accurate activity analysis.")
 
-    const dist = calculateDistance(prev.east, prev.north, current.east, current.north)
-    const bearing = calculateBearing(prev.east, prev.north, current.east, current.north)
-    const speed = dist / ((current.time - prev.time) || 1); // m/s
-    const angleDiff = headingDifference(prev.heading, current.heading)
-    const movementAngleDiff = headingDifference(current.heading, bearing)
+    let current_work = '-|-|-'
 
-    if (speed < 0.1) {
-        return 'Idling'
+    const parsed: VehiclePoint[] = dataArray.map(entry => {
+
+        const [east, north, elevation, heading, speed, updated, work = '-|-|-'] = entry.split(',')
+
+        if (work !== '-|-|-') current_work = work
+
+        return {
+            east: parseFloat(east),
+            north: parseFloat(north),
+            elevation: parseFloat(elevation),
+            heading: parseFloat(heading),
+            speed: parseFloat(speed),
+            updated: new Date(updated),
+            work,
+        }
+
+    })
+
+    const avgSpeed = parsed.reduce((sum, p) => sum + p.speed, 0) / 4
+    const headingChange = Math.abs(parsed[3].heading - parsed[0].heading)
+    const elevationChange = parsed[3].elevation - parsed[0].elevation
+
+    const dx = parsed[3].east - parsed[0].east
+    const dy = parsed[3].north - parsed[0].north
+    const distance = Math.sqrt(dx * dx + dy * dy)
+
+    const movementAngle = Math.atan2(dy, dx)
+    const headingDiff = Math.abs(movementAngle - parsed[0].heading)
+
+    const timeGapSeconds = (parsed[3].updated.getTime() - parsed[0].updated.getTime()) / 1000
+
+    let activity = 'Idling'
+
+    if (timeGapSeconds > offlineThresholdSeconds) {
+
+        activity = 'Offline'
+
+    } else if (avgSpeed > 0.1 && distance > 1) {
+
+        activity = 'Moving'
+
+        // const wasIdle = parsed[0].speed <= 0.01 && parsed[1].speed <= 0.01
+        /// const isNowMoving = parsed[2].speed > 0.1 && parsed[3].speed > 0.1
+
+        // if (wasIdle && isNowMoving) activity = 'Started Moving'
+        // else if (parsed[0].speed > 0.1 && parsed[3].speed <= 0.01) activity = 'Stopping'
+        // if (headingDiff > Math.PI / 2) activity = 'Backing'
+        // if (headingChange >= Math.PI / 8) activity = 'Turning'
+        // if (elevationChange > 0.5) activity = 'Ascending'
+        // else if (elevationChange < -0.5) activity = 'Descending'
+
     }
 
-    if (speed < 0.5 && angleDiff > 20) {
-        return 'Cornering (slow)'
+    return {
+        startTime: parsed[0].updated.toISOString(),
+        endTime: parsed[3].updated.toISOString(),
+        avgSpeed: avgSpeed.toFixed(3),
+        headingChange: headingChange.toFixed(3),
+        elevationChange: elevationChange.toFixed(2),
+        distance: distance.toFixed(2),
+        activity,
+        work: current_work,
     }
-
-    if (movementAngleDiff > 135) {
-        if (angleDiff > 20) return 'Reversing Turn'
-        return 'Backing'
-    }
-
-    if (angleDiff > 25) {
-        return 'Cornering'
-    }
-
-    if (speed >= 2) {
-        return 'Hauling'
-    }
-
-    if (speed < 0.5) {
-        return 'Parking'
-    }
-
-    return 'Moving'
-
 }
 
 export class Activities {
@@ -63,7 +103,7 @@ export class Activities {
 
     _ = {
         days: 7,
-        limit: 100,
+        limit: 1000,
     }
 
     constructor({ local, core_data, sequelize }: { local: Host, core_data: Connection, sequelize: Sequelize }, run_background: boolean) {
@@ -91,11 +131,14 @@ export class Activities {
             name: { type: DataTypes.STRING, defaultValue: '' },
 
             activity: { type: DataTypes.STRING, defaultValue: '' },
+            note: { type: DataTypes.STRING, defaultValue: '' },
+
             start: { type: DataTypes.STRING, defaultValue: '' },
             end: { type: DataTypes.STRING, defaultValue: '' },
+
+            averages: { type: DataTypes.STRING, defaultValue: '' },
             distance: { type: DataTypes.INTEGER, defaultValue: 0 },
             duration: { type: DataTypes.INTEGER, defaultValue: 0 },
-            note: { type: DataTypes.STRING, defaultValue: '' },
 
             createdAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
@@ -110,6 +153,26 @@ export class Activities {
                 { unique: false, name: `${this.name}_updatedat_index`, using: 'BTREE', fields: ['updatedAt'], },
             ]
         })
+
+
+        /* const ok = {
+
+            proj: proj,
+            type: type,
+            name: name,
+
+            activity: activity,
+            note: `${work},${avgSpeed},${headingChange},${elevationChange}`,]
+
+            start: start.format(dateFormat),
+            end: end.format(dateFormat),
+
+            averages: '',
+            distance: Number(distance),
+            duration: seconds,
+
+
+        } */
 
     }
 
@@ -166,8 +229,8 @@ export class Activities {
         const alias = `[${this.name}.executer]`
         const enums = this.sequelize.models['enums']
 
-        const { value = ',' }: any = (await enums.findOne({ where: { type: 'collect', name: this.name, deletedAt: null }, raw: true }) ?? {})
-        const sp = value.split(',')
+        const { value: val = ',' }: any = (await enums.findOne({ where: { type: 'collect', name: this.name, deletedAt: null }, raw: true }) ?? {})
+        const sp = val.split(',')
 
         const createdAt = sp[1] || moment().add(-(this._.days), 'days').format(dateFormat)
         const rows: any = await this.core_data.get('get-events-status', { id: sp[0], createdAt, limit: this._.limit })
@@ -188,36 +251,159 @@ export class Activities {
 
                 const { createdAt, updatedAt } = x
                 const parsed: any = Jfy(x.data)
-                const { data, data_gps1, data_gps2, data_gps = {}, data_gsm } = parsed
+                const { data = {}, value = {}, data_gps1 = [], data_gps2 = [], data_gps = {}, data_gsm } = parsed
                 const [proj, type, name] = data
                 const { utm = [-1, -1, -1], head = -1 } = data_gps
                 const [est, nrt, el] = utm
                 const id = `${proj}.${type}.${name}`
 
+                const current_work = () => {
+
+                    const d = '|'
+                    let s = `${value.screen ?? '-'}${d}${'-'}${d}${'-'}`
+                    if (value && value.dig_plan) s = `${value.screen}${d}${value.dig_plan?.dir ?? ''}${d}${value.dig_plan?.dis ?? ''}`
+                    if (value && value.shot_plan) s = `${value.screen}${d}${value.shot_plan?.dir ?? ''}${d}${value.shot_plan?.d2 ?? ''}`
+                    return s.replaceAll(',', ' ')
+
+                }
+
                 if (!obj.hasOwnProperty(id)) obj[id] = []
 
-                obj[id].push(`${est},${nrt},${el},${head},${data_gps1[5] ?? -1},${updatedAt}`)
+                obj[id].push(`${est},${nrt},${el},${head},${data_gps1[5] ?? -1},${updatedAt},${current_work()}`)
 
-            } catch (err: any) { log.warn(`${alias} ${key} In the Loop / ${err.message}`) }
+            } catch (err: any) {
+                log.warn(`${alias} ${key} In the Loop / ${err.message}`)
+            }
 
         }
 
-        console.log(obj)
+        const buffer: any = await enums.findAll({ where: { type: 'activity.buffer', name: Object.keys(obj), deletedAt: null }, raw: true })
 
-        console.log(Object.keys(obj))
+        /** Merge the Events.data.array <-> Enums.buffer.string **/
 
-        const pres: any = await enums.findAll({ where: { type: 'activity.buffer', name: Object.keys(obj), deletedAt: null }, raw: true })
-        const prea: any = await enums.findAll({ where: { type: 'activity.now', name: Object.keys(obj), deletedAt: null }, raw: true })
+        const merged: any = {}
 
-        /** Do the calculation with result of activity buffer after adding the last chanks, then cut and save **/
+        for (const x of buffer) {
 
-        console.log(pres)
+            const { name, value } = x
+            merged[name] = JSON.parse(value)
+
+        }
+
+        for (const x in obj) {
+
+            if (merged.hasOwnProperty(x)) merged[x].samples = [...merged[x].samples, ...obj[x]]
+            else merged[x] = { prev: [], samples: obj[x] }
+
+        }
+
+        /** Cut_and_Calculate -> Save_Calculated -> Save_Uncalculated */
+
+        const calc_len = 4
+
+        for (const x in merged) {
+
+            try {
+
+                const { samples: ls, prev = [] }: any = merged[x]
+                const prev_count = prev.length
+
+                if (Array.isArray(ls) && ls.length >= calc_len) {
+
+                    let l = 0
+
+                    for (let i = 0; i < ls.length; i += 3) {
+
+                        let spl = []
+
+                        for (let j = 0; j < calc_len; j++) ls[i + j] && spl.push(ls[i + j])
+
+                        if (spl.length === calc_len) {
+
+                            const current = analyzeVehicleActivity(spl)
+                            l = i + calc_len - 2
+
+                            if (prev.length > 0) {
+
+                                const last = prev[prev.length - 1]
+
+                                if (last.activity !== current.activity) {
+
+                                    prev.push(current)
+
+                                } else {
+
+                                    prev[prev.length - 1] = {
+                                        ...last,
+                                        endTime: current.endTime,
+                                        distance: Number(last.distance ?? 0) + Number(current.distance ?? 0),
+                                    }
+
+                                }
+
+                            } else prev.push(current)
+
+                        }
+
+                    }
+
+                    const _samples = ls.slice(l)
+                    const _prev = prev.length > calc_len ? prev.slice(calc_len - prev.length) : prev
+
+                    console.log(`~~~> ${x} --- prev_count ${prev_count} and now_count ${prev.length}`)
+
+                    const activities = []
+                    const start_point = prev_count > 0 ? prev_count - 1 : 0
+
+                    for (let i = start_point; i < prev.length - 1; i++) {
+
+                        const [proj, type, name] = x.split('.')
+                        const { activity, startTime, endTime, distance } = prev[i]
+                        const { avgSpeed, headingChange, elevationChange, work } = prev[i]
+
+                        const start = moment(startTime)
+                        const end = moment(endTime)
+
+                        const duration = moment.duration(end.diff(start))
+                        const seconds = duration.asSeconds()
+
+                        activities.push({
+
+                            proj: proj,
+                            type: type,
+                            name: name,
+
+                            activity: activity,
+                            note: work,
+
+                            start: start.format(dateFormat),
+                            end: end.format(dateFormat),
+
+                            averages: '',
+                            distance: Number(distance),
+                            duration: seconds,
+
+                        })
+
+                    }
+
+                    await enums.upsert({ type: 'activity.buffer', name: x, value: JSON.stringify({ prev: _prev, samples: _samples }), updatedAt: Now() })
+                    await enums.upsert({ type: 'activity.now', name: x, value: JSON.stringify(_prev[_prev.length - 1]), updatedAt: Now() })
+                    await this.collection.bulkCreate(activities)
+
+                }
+
+            } catch (err: any) {
+                log.warn(`${alias} In the Merged.Loop / ${err.message}`)
+            }
+
+        }
 
         /** ** Data saving **  **/
         if (rows.length > 0) {
 
             const item = rows[rows.length - 1]
-            // await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.createdAt}`, updatedAt: Now() })
+            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.createdAt} `, updatedAt: Now() })
 
         }
 
@@ -249,7 +435,7 @@ export class Activities {
 
                     await this.executer()
 
-                    log.info(`${alias} Todos:${this.todos.length} Fails:${fail} Duration:${Date.now() - tStart}ms`)
+                    log.info(`${alias} Todos:${this.todos.length} Fails:${fail} Duration:${Date.now() - tStart} ms`)
 
                     this.todos = []
                     fail = 0
@@ -258,7 +444,7 @@ export class Activities {
 
             } catch (err: any) {
 
-                log.error(`${alias} In the Loop / ${err.message}`) && ++fail
+                log.error(`${alias} In the Loop / ${err.message} `) && ++fail
 
             } finally {
 

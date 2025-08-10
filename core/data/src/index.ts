@@ -39,6 +39,21 @@ Safe(async () => {
 
     }
 
+    const table_size = `
+        SELECT 
+            table_schema || '.' || table_name AS table_name,
+            pg_size_pretty(pg_total_relation_size(table_schema || '.' || table_name)) AS total_size,
+            pg_size_pretty(pg_relation_size(table_schema || '.' || table_name)) AS table_size,
+            pg_size_pretty(pg_total_relation_size(table_schema || '.' || table_name) - pg_relation_size(table_schema || '.' || table_name)) AS index_size
+        FROM 
+            information_schema.tables
+        WHERE 
+            table_schema NOT IN ('pg_catalog', 'information_schema')
+            AND table_type = 'BASE TABLE'
+        ORDER BY 
+            pg_total_relation_size(table_schema || '.' || table_name) DESC;
+    `
+
     await cf.sequelize.sync({ force: false, alter: true })
 
 })

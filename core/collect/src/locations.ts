@@ -169,7 +169,7 @@ export class Locations {
                     /** Need more coding here [...] **/
                     if (value && value.dig_plan) return `${value.screen},${value.dig_plan?.dir ?? ''},${value.dig_plan?.dis ?? ''}`
                     if (value && value.shot_plan) return `${value.screen},${value.shot_plan?.dir ?? ''},${value.shot_plan?.d2 ?? ''}`
-                    return `${value.screen},${'-'},${'-'}`
+                    return `${value.screen ?? '-'},${'-'},${'-'}`
                 }
 
                 if (true /** Exca Truck [ Drill Dozer Grader Vehicle ] ... **/) {
