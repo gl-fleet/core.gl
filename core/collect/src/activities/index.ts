@@ -13,12 +13,15 @@ type VehiclePoint = {
 
 type VehicleActivity = {
     startTime: string
+    startData: string
     endTime: string
+    endData: string
     avgSpeed: string
     headingChange: string
     elevationChange: string
     distance: string
     activity: string
+    predicted: string
     work: string
 }
 
@@ -60,6 +63,7 @@ const analyzeVehicleActivity = (dataArray: string[], offlineThresholdSeconds: nu
     const timeGapSeconds = (parsed[3].updated.getTime() - parsed[0].updated.getTime()) / 1000
 
     let activity = 'Idling'
+    let predicted = ''
 
     if (timeGapSeconds > offlineThresholdSeconds) {
 
@@ -69,27 +73,30 @@ const analyzeVehicleActivity = (dataArray: string[], offlineThresholdSeconds: nu
 
         activity = 'Moving'
 
-        // const wasIdle = parsed[0].speed <= 0.01 && parsed[1].speed <= 0.01
-        /// const isNowMoving = parsed[2].speed > 0.1 && parsed[3].speed > 0.1
+        const wasIdle = parsed[0].speed <= 0.01 && parsed[1].speed <= 0.01
+        const isNowMoving = parsed[2].speed > 0.1 && parsed[3].speed > 0.1
 
-        // if (wasIdle && isNowMoving) activity = 'Started Moving'
-        // else if (parsed[0].speed > 0.1 && parsed[3].speed <= 0.01) activity = 'Stopping'
-        // if (headingDiff > Math.PI / 2) activity = 'Backing'
-        // if (headingChange >= Math.PI / 8) activity = 'Turning'
-        // if (elevationChange > 0.5) activity = 'Ascending'
-        // else if (elevationChange < -0.5) activity = 'Descending'
+        if (wasIdle && isNowMoving) predicted = 'Started Moving'
+        else if (parsed[0].speed > 0.1 && parsed[3].speed <= 0.01) predicted = 'Stopping'
+        if (headingDiff > Math.PI / 2) predicted = 'Backing'
+        if (headingChange >= Math.PI / 8) predicted = 'Turning'
+        if (elevationChange > 0.5) predicted = 'Ascending'
+        else if (elevationChange < -0.5) predicted = 'Descending'
 
     }
 
     return {
         startTime: parsed[0].updated.toISOString(),
+        startData: parsed[0].east + ',' + parsed[0].north + ',' + parsed[0].elevation + ',' + parsed[0].heading + ',' + parsed[0].speed,
         endTime: parsed[3].updated.toISOString(),
+        endData: parsed[3].east + ',' + parsed[3].north + ',' + parsed[3].elevation + ',' + parsed[3].heading + ',' + parsed[3].speed,
+        activity,
+        predicted,
+        work: current_work,
         avgSpeed: avgSpeed.toFixed(3),
         headingChange: headingChange.toFixed(3),
         elevationChange: elevationChange.toFixed(2),
         distance: distance.toFixed(2),
-        activity,
-        work: current_work,
     }
 }
 
@@ -131,12 +138,14 @@ export class Activities {
             name: { type: DataTypes.STRING, defaultValue: '' },
 
             activity: { type: DataTypes.STRING, defaultValue: '' },
+            predicted: { type: DataTypes.STRING, defaultValue: '' },
             note: { type: DataTypes.STRING, defaultValue: '' },
 
+            startedAt: { type: DataTypes.STRING, defaultValue: '' },
             start: { type: DataTypes.STRING, defaultValue: '' },
+            endedAt: { type: DataTypes.STRING, defaultValue: '' },
             end: { type: DataTypes.STRING, defaultValue: '' },
 
-            averages: { type: DataTypes.STRING, defaultValue: '' },
             distance: { type: DataTypes.INTEGER, defaultValue: 0 },
             duration: { type: DataTypes.INTEGER, defaultValue: 0 },
 
@@ -150,29 +159,10 @@ export class Activities {
                 { unique: false, name: `${this.name}_type_index`, using: 'BTREE', fields: ['type'] },
                 { unique: false, name: `${this.name}_name_index`, using: 'BTREE', fields: ['name'] },
                 { unique: false, name: `${this.name}_activity_index`, using: 'BTREE', fields: ['activity'] },
+                { unique: false, name: `${this.name}_startedat_index`, using: 'BTREE', fields: ['startedAt'], },
                 { unique: false, name: `${this.name}_updatedat_index`, using: 'BTREE', fields: ['updatedAt'], },
             ]
         })
-
-
-        /* const ok = {
-
-            proj: proj,
-            type: type,
-            name: name,
-
-            activity: activity,
-            note: `${work},${avgSpeed},${headingChange},${elevationChange}`,]
-
-            start: start.format(dateFormat),
-            end: end.format(dateFormat),
-
-            averages: '',
-            distance: Number(distance),
-            duration: seconds,
-
-
-        } */
 
     }
 
@@ -333,9 +323,12 @@ export class Activities {
 
                                 } else {
 
+
                                     prev[prev.length - 1] = {
                                         ...last,
                                         endTime: current.endTime,
+                                        endData: current.endData,
+                                        predicted: last.predicted ? (current.predicted ? (last.predicted.indexOf(current.predicted) === -1 ? `${last.predicted},${current.predicted}` : last.predicted) : last.predicted) : current.predicted,
                                         distance: Number(last.distance ?? 0) + Number(current.distance ?? 0),
                                     }
 
@@ -358,8 +351,8 @@ export class Activities {
                     for (let i = start_point; i < prev.length - 1; i++) {
 
                         const [proj, type, name] = x.split('.')
-                        const { activity, startTime, endTime, distance } = prev[i]
-                        const { avgSpeed, headingChange, elevationChange, work } = prev[i]
+                        const { activity, startTime, startData, endTime, endData, distance } = prev[i]
+                        const { avgSpeed, headingChange, elevationChange, predicted, work } = prev[i]
 
                         const start = moment(startTime)
                         const end = moment(endTime)
@@ -374,12 +367,14 @@ export class Activities {
                             name: name,
 
                             activity: activity,
+                            predicted: predicted,
                             note: work,
 
-                            start: start.format(dateFormat),
-                            end: end.format(dateFormat),
+                            startedAt: start.format(dateFormat),
+                            start: startData,
+                            endedAt: end.format(dateFormat),
+                            end: endData,
 
-                            averages: '',
                             distance: Number(distance),
                             duration: seconds,
 
