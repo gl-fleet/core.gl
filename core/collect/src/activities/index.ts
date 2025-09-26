@@ -1,104 +1,7 @@
 import { Host, Connection } from 'unet'
 import { Sequelize, DataTypes, Model, ModelStatic, QueryTypes } from 'sequelize'
 import { AsyncWait, Jfy, Now, Uid, Safe, Loop, dateFormat, moment, log } from 'utils'
-
-type VehiclePoint = {
-    east: number
-    north: number
-    elevation: number
-    heading: number
-    speed: number
-    updated: Date
-}
-
-type VehicleActivity = {
-    startTime: string
-    startData: string
-    endTime: string
-    endData: string
-    avgSpeed: string
-    headingChange: string
-    elevationChange: string
-    distance: string
-    activity: string
-    predicted: string
-    work: string
-}
-
-const analyzeVehicleActivity = (dataArray: string[], offlineThresholdSeconds: number = 30): VehicleActivity => {
-
-    if (dataArray.length !== 4) throw new Error("Exactly 4 elements are required for accurate activity analysis.")
-
-    let current_work = '-|-|-'
-
-    const parsed: VehiclePoint[] = dataArray.map(entry => {
-
-        const [east, north, elevation, heading, speed, updated, work = '-|-|-'] = entry.split(',')
-
-        if (work !== '-|-|-') current_work = work
-
-        return {
-            east: parseFloat(east),
-            north: parseFloat(north),
-            elevation: parseFloat(elevation),
-            heading: parseFloat(heading),
-            speed: parseFloat(speed),
-            updated: new Date(updated),
-            work,
-        }
-
-    })
-
-    const avgSpeed = parsed.reduce((sum, p) => sum + p.speed, 0) / 4
-    const headingChange = Math.abs(parsed[3].heading - parsed[0].heading)
-    const elevationChange = parsed[3].elevation - parsed[0].elevation
-
-    const dx = parsed[3].east - parsed[0].east
-    const dy = parsed[3].north - parsed[0].north
-    const distance = Math.sqrt(dx * dx + dy * dy)
-
-    const movementAngle = Math.atan2(dy, dx)
-    const headingDiff = Math.abs(movementAngle - parsed[0].heading)
-
-    const timeGapSeconds = (parsed[3].updated.getTime() - parsed[0].updated.getTime()) / 1000
-
-    let activity = 'Idling'
-    let predicted = ''
-
-    if (timeGapSeconds > offlineThresholdSeconds) {
-
-        activity = 'Offline'
-
-    } else if (avgSpeed > 0.1 && distance > 1) {
-
-        activity = 'Moving'
-
-        const wasIdle = parsed[0].speed <= 0.01 && parsed[1].speed <= 0.01
-        const isNowMoving = parsed[2].speed > 0.1 && parsed[3].speed > 0.1
-
-        if (wasIdle && isNowMoving) predicted = 'Started Moving'
-        else if (parsed[0].speed > 0.1 && parsed[3].speed <= 0.01) predicted = 'Stopping'
-        if (headingDiff > Math.PI / 2) predicted = 'Backing'
-        if (headingChange >= Math.PI / 8) predicted = 'Turning'
-        if (elevationChange > 0.5) predicted = 'Ascending'
-        else if (elevationChange < -0.5) predicted = 'Descending'
-
-    }
-
-    return {
-        startTime: parsed[0].updated.toISOString(),
-        startData: parsed[0].east + ',' + parsed[0].north + ',' + parsed[0].elevation + ',' + parsed[0].heading + ',' + parsed[0].speed,
-        endTime: parsed[3].updated.toISOString(),
-        endData: parsed[3].east + ',' + parsed[3].north + ',' + parsed[3].elevation + ',' + parsed[3].heading + ',' + parsed[3].speed,
-        activity,
-        predicted,
-        work: current_work,
-        avgSpeed: avgSpeed.toFixed(3),
-        headingChange: headingChange.toFixed(3),
-        elevationChange: elevationChange.toFixed(2),
-        distance: distance.toFixed(2),
-    }
-}
+import { calculate_activities } from './utils'
 
 export class Activities {
 
@@ -108,10 +11,12 @@ export class Activities {
     public sequelize: Sequelize
     public collection: ModelStatic<Model<any, any>> & any
 
-    _ = {
-        days: 7,
-        limit: 1000,
-    }
+    _ = { days: 7, limit: 100 }
+    buffer = { max_samples: 720 /** Around 30 minutes **/, max_activities: 5 }
+    todos: any[] = []
+    last = 0
+    svg: any[] = []
+    once = true
 
     constructor({ local, core_data, sequelize }: { local: Host, core_data: Connection, sequelize: Sequelize }, run_background: boolean) {
 
@@ -138,12 +43,12 @@ export class Activities {
             name: { type: DataTypes.STRING, defaultValue: '' },
 
             activity: { type: DataTypes.STRING, defaultValue: '' },
-            predicted: { type: DataTypes.STRING, defaultValue: '' },
+            details: { type: DataTypes.TEXT, defaultValue: '' },
             note: { type: DataTypes.STRING, defaultValue: '' },
 
             startedAt: { type: DataTypes.STRING, defaultValue: '' },
-            start: { type: DataTypes.STRING, defaultValue: '' },
             endedAt: { type: DataTypes.STRING, defaultValue: '' },
+            start: { type: DataTypes.STRING, defaultValue: '' },
             end: { type: DataTypes.STRING, defaultValue: '' },
 
             distance: { type: DataTypes.INTEGER, defaultValue: 0 },
@@ -161,6 +66,7 @@ export class Activities {
                 { unique: false, name: `${this.name}_activity_index`, using: 'BTREE', fields: ['activity'] },
                 { unique: false, name: `${this.name}_startedat_index`, using: 'BTREE', fields: ['startedAt'], },
                 { unique: false, name: `${this.name}_updatedat_index`, using: 'BTREE', fields: ['updatedAt'], },
+                { unique: true, name: `${this.name}_name_startedat_index`, using: 'BTREE', fields: ['name', 'startedAt'] },
             ]
         })
 
@@ -170,6 +76,11 @@ export class Activities {
 
         this.local.on(`get-${this.name}`, async (req: any) => await this.get(req.query))
         this.local.on(`set-${this.name}`, async (req: any) => await this.set(req.query), true, 4)
+        this.local.on(`get-svg`, async (req: any) => {
+            let put = ``
+            this.svg.map((s, i) => { put += s })
+            return put
+        })
 
     }
 
@@ -210,24 +121,18 @@ export class Activities {
 
     /*** *** *** @___Table_Jobs___ *** *** ***/
 
-    last = 0
-    todos: any[] = []
+    event_poller = async () => {
 
-    executer = async () => {
-
-        /** ** Data pulling **  **/
-        const alias = `[${this.name}.executer]`
+        const alias = `[${this.name}.event_poller]`
         const enums = this.sequelize.models['enums']
-
         const { value: val = ',' }: any = (await enums.findOne({ where: { type: 'collect', name: this.name, deletedAt: null }, raw: true }) ?? {})
         const sp = val.split(',')
 
         const createdAt = sp[1] || moment().add(-(this._.days), 'days').format(dateFormat)
         const rows: any = await this.core_data.get('get-events-status', { id: sp[0], createdAt, limit: this._.limit })
 
-        log.success(``)
-        log.success(`Pulled ${rows.length} / ${rows[0].createdAt}`)
-        log.success(`Pulled ${rows.length} / ${rows[rows.length - 1].createdAt}`)
+        log.success(`${alias} Pulled ${rows.length} / ${rows[0].createdAt}`)
+        log.success(`${alias} Pulled ${rows.length} / ${rows[rows.length - 1].createdAt}`)
 
         /** ** Data aggregating **  **/
         const obj: any = {}
@@ -261,146 +166,137 @@ export class Activities {
 
                 obj[id].push(`${est},${nrt},${el},${head},${data_gps1[5] ?? -1},${updatedAt},${current_work()}`)
 
-            } catch (err: any) {
-                log.warn(`${alias} ${key} In the Loop / ${err.message}`)
-            }
+            } catch (err: any) { log.warn(`${alias} ${key} In the Loop / ${err.message}`) }
 
         }
 
-        const buffer: any = await enums.findAll({ where: { type: 'activity.buffer', name: Object.keys(obj), deletedAt: null }, raw: true })
+        return [rows, obj]
 
-        /** Merge the Events.data.array <-> Enums.buffer.string **/
+    }
+
+    buffer_poller = async (obj: any) => {
+
+        const alias = `[${this.name}.buffer_poller]`
+
+        try {
+
+            const enums = this.sequelize.models['enums']
+            return await enums.findAll({ where: { type: 'activity.buffer', name: Object.keys(obj), deletedAt: null }, raw: true })
+
+        } catch (err: any) { log.warn(`${alias} In the Loop / ${err.message}`) }
+
+    }
+
+    aggregator = (events: any, buffer: any) => {
 
         const merged: any = {}
 
         for (const x of buffer) {
 
             const { name, value } = x
-            merged[name] = JSON.parse(value)
+            const { buff_acts, buff_samps } = JSON.parse(value)
+
+            for (let i = 0; i < buff_acts.length; i++) buff_acts[i] = { ...buff_acts[i], source: 'buffer' }
+            for (let i = 0; i < buff_samps.length; i++) if (buff_samps[i].indexOf(',buffer') === -1) buff_samps[i] = buff_samps[i] + ',buffer'
+
+            merged[name] = { buff_acts, buff_samps }
 
         }
 
-        for (const x in obj) {
+        for (const x in events) {
 
-            if (merged.hasOwnProperty(x)) merged[x].samples = [...merged[x].samples, ...obj[x]]
-            else merged[x] = { prev: [], samples: obj[x] }
+            if (merged.hasOwnProperty(x)) merged[x].buff_samps = [...merged[x].buff_samps, ...events[x],]
+            else merged[x] = { buff_acts: [], buff_samps: events[x] }
 
         }
 
-        /** Cut_and_Calculate -> Save_Calculated -> Save_Uncalculated */
+        return merged
 
-        const calc_len = 4
+    }
 
-        for (const x in merged) {
+    calculator = async (merged: any) => {
+
+        // -- DELETE FROM public.enums WHERE type = 'activity.buffer' or type = 'activity.now' or name = 'activities'
+        // -- DELETE FROM public.activities
+
+        const alias = `[${this.name}.calculator]`
+        let debug = `HLV796`
+
+        for (const key in merged) {
 
             try {
 
-                const { samples: ls, prev = [] }: any = merged[x]
-                const prev_count = prev.length
+                const { buff_acts = [], buff_samps = [] }: any = merged[key]
 
-                if (Array.isArray(ls) && ls.length >= calc_len) {
+                console.log('')
 
-                    let l = 0
+                log.success(`${alias} Processing ${key} with ${buff_acts.length} activities and ${buff_samps.length} samples`)
 
-                    for (let i = 0; i < ls.length; i += 3) {
+                const [activities, sliced_acts, sliced_samps, [svg, box]]: any = calculate_activities(key, buff_acts, buff_samps, debug)
 
-                        let spl = []
+                box > 1 && this.svg.push(svg) && this.svg.length > 5 && this.svg.shift()
 
-                        for (let j = 0; j < calc_len; j++) ls[i + j] && spl.push(ls[i + j])
+                log.success(`${alias} Sliced ${key} with ${sliced_acts.length} activities and ${sliced_samps.length} samples`)
 
-                        if (spl.length === calc_len) {
+                await this.upsert_buffer(key, sliced_acts, sliced_samps)
+                await this.upsert_activity(activities, 'merge')
 
-                            const current = analyzeVehicleActivity(spl)
-                            l = i + calc_len - 2
-
-                            if (prev.length > 0) {
-
-                                const last = prev[prev.length - 1]
-
-                                if (last.activity !== current.activity) {
-
-                                    prev.push(current)
-
-                                } else {
-
-
-                                    prev[prev.length - 1] = {
-                                        ...last,
-                                        endTime: current.endTime,
-                                        endData: current.endData,
-                                        predicted: last.predicted ? (current.predicted ? (last.predicted.indexOf(current.predicted) === -1 ? `${last.predicted},${current.predicted}` : last.predicted) : last.predicted) : current.predicted,
-                                        distance: Number(last.distance ?? 0) + Number(current.distance ?? 0),
-                                    }
-
-                                }
-
-                            } else prev.push(current)
-
-                        }
-
-                    }
-
-                    const _samples = ls.slice(l)
-                    const _prev = prev.length > calc_len ? prev.slice(calc_len - prev.length) : prev
-
-                    console.log(`~~~> ${x} --- prev_count ${prev_count} and now_count ${prev.length}`)
-
-                    const activities = []
-                    const start_point = prev_count > 0 ? prev_count - 1 : 0
-
-                    for (let i = start_point; i < prev.length - 1; i++) {
-
-                        const [proj, type, name] = x.split('.')
-                        const { activity, startTime, startData, endTime, endData, distance } = prev[i]
-                        const { avgSpeed, headingChange, elevationChange, predicted, work } = prev[i]
-
-                        const start = moment(startTime)
-                        const end = moment(endTime)
-
-                        const duration = moment.duration(end.diff(start))
-                        const seconds = duration.asSeconds()
-
-                        activities.push({
-
-                            proj: proj,
-                            type: type,
-                            name: name,
-
-                            activity: activity,
-                            predicted: predicted,
-                            note: work,
-
-                            startedAt: start.format(dateFormat),
-                            start: startData,
-                            endedAt: end.format(dateFormat),
-                            end: endData,
-
-                            distance: Number(distance),
-                            duration: seconds,
-
-                        })
-
-                    }
-
-                    await enums.upsert({ type: 'activity.buffer', name: x, value: JSON.stringify({ prev: _prev, samples: _samples }), updatedAt: Now() })
-                    await enums.upsert({ type: 'activity.now', name: x, value: JSON.stringify(_prev[_prev.length - 1]), updatedAt: Now() })
-                    await this.collection.bulkCreate(activities)
-
-                }
-
-            } catch (err: any) {
-                log.warn(`${alias} In the Merged.Loop / ${err.message}`)
-            }
+            } catch (err: any) { log.warn(`${alias} In the Merged.Loop / ${err.message}`) }
 
         }
 
-        /** ** Data saving **  **/
+    }
+
+    upsert_buffer = async (key: string, sliced_acts: any, sliced_samps: any) => {
+
+        const enums = this.sequelize.models['enums']
+
+        if (sliced_samps.length > this.buffer.max_samples) sliced_samps = sliced_samps.slice(this.buffer.max_samples - sliced_samps.length)
+        if (sliced_acts.length > this.buffer.max_activities) sliced_acts = sliced_acts.slice(this.buffer.max_activities - sliced_acts.length)
+
+        await enums.upsert({ type: 'activity.buffer', name: key, value: JSON.stringify({ buff_acts: sliced_acts, buff_samps: sliced_samps }), updatedAt: Now() })
+        await enums.upsert({ type: 'activity.now', name: key, value: JSON.stringify(sliced_acts[sliced_acts.length - 1]), updatedAt: Now() })
+
+    }
+
+    upsert_activity = async (activities: any, action = 'add') => {
+
+        if (Array.isArray(activities) == false || activities.length === 0) return
+
+        for (const x of activities)
+            await this.collection.upsert(x, { updateOnDuplicate: ['name', 'startedAt'] })
+        // await this.collection.bulkCreate(activities, { updateOnDuplicate: ['name', 'startedAt'] })
+
+    }
+
+    update_checkpoint = async (rows: any) => {
+
         if (rows.length > 0) {
 
+            const enums = this.sequelize.models['enums']
             const item = rows[rows.length - 1]
             await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.createdAt} `, updatedAt: Now() })
 
         }
+
+    }
+
+    executer = async () => {
+
+        /** Get the latest events by checkpoint **/
+        const [rows, events] = await this.event_poller()
+
+        /** Get the buffer from enums **/
+        const buffer: any = await this.buffer_poller(events)
+
+        /** Merge the Events.data.array <-> Enums.buffer.string **/
+        const merged = this.aggregator(events, buffer)
+
+        /** Cut_and_Calculate -> Save_Calculated -> Save_Uncalculated */
+        await this.calculator(merged)
+
+        /** ** Data saving **  **/
+        await this.update_checkpoint(rows)
 
     }
 
@@ -427,6 +323,9 @@ export class Activities {
             try {
 
                 if (this.todos.length > 0) {
+
+                    /* if (this.once) this.once = false
+                    else return null */
 
                     await this.executer()
 
