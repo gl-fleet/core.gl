@@ -13,6 +13,8 @@
     "_stop": "pm2 stop ecosystem.config.js",
     "_delete": "pm2 delete ecosystem.config.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "ntrip-client": "^1.1.1"
+  },
   "devDependencies": {}
 }

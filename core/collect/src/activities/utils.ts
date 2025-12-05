@@ -55,7 +55,7 @@ const angleToCompass8Short = (angleDeg: number): 'N' | 'NE' | 'E' | 'SE' | 'S' |
 }
 
 
-const unicodeArrows: Record<Compass8OrUndef, string> = {
+const unicodeArrows: any = {
     N: '↑',
     NE: '↗',
     E: '→',

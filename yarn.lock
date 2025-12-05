@@ -5175,6 +5175,18 @@ nssocket@0.6.0:
     eventemitter2 "~0.4.14"
     lazy "~1.0.11"
 
+ntrip-client@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/ntrip-client/-/ntrip-client-1.1.1.tgz#2126c6f493d74f25c6d9d55be93b19e2e272113f"
+  integrity sha512-wKxE/29FHdhtTtB8YRQRsXQ7HO/D4G89Ifl6psXVhuo44sLKnxFLrvSW3Fcm/Q13baDPkFwpfzRi7MoTjKUaAQ==
+  dependencies:
+    ntrip-decoder "^1.0.1"
+
+ntrip-decoder@^1.0.1:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/ntrip-decoder/-/ntrip-decoder-1.0.2.tgz#03ad12ff1eb04e002cf7df3f57ef3e2232e6079c"
+  integrity sha512-K9pL7BuKwYGCRQRwESBTNpKGpVeJMexdBnlAMa3OeEVn+ErQMlPv91+eh72CTzewv0dBdKWAnVPaq+Hp6a57wg==
+
 nx@^20.8.0:
   version "20.8.1"
   resolved "https://registry.yarnpkg.com/nx/-/nx-20.8.1.tgz#f63136b3f7c5a33a3ed1d6145e8507d9bcc77bc0"
