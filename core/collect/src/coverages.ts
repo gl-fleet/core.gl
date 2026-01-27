@@ -130,6 +130,19 @@ export class Coverages {
                 const parsed: any = Jfy(x.data)
                 const { data, data_gps1, data_gps = {}, data_gsm } = parsed
                 const [proj, type] = data
+
+                if (data_gps.hasOwnProperty('T') && typeof data_gps.T === 'string') {
+
+                    const { T, R, G, A } = data_gps
+
+                    data_gps.gps = G
+                    data_gps.utm = A
+                    data_gps.head = R
+                    data_gps.prec2d = '0'
+                    data_gps.prec3d = '0'
+
+                }
+
                 const { gps = [], utm } = data_gps
                 const [est, nrt] = utm
 

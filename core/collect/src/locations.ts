@@ -160,9 +160,24 @@ export class Locations {
 
                 const { createdAt, updatedAt } = x
                 const parsed: any = Jfy(x.data)
+
                 const { value, data, data_gps = {}, data_gps1, data_gps2, data_gsm, data_rtcm, data_activity, inj_clients } = parsed
-                const { gps = [], utm } = data_gps
+
                 const [proj, type, name] = data
+
+                if (data_gps.hasOwnProperty('T') && typeof data_gps.T === 'string') {
+
+                    const { T, R, G, A } = data_gps
+
+                    data_gps.gps = G
+                    data_gps.utm = A
+                    data_gps.head = R
+                    data_gps.prec2d = '0'
+                    data_gps.prec3d = '0'
+
+                }
+
+                const { gps = [], utm } = data_gps
                 const [east, north, elevation] = utm
 
                 const current_work = () => {
