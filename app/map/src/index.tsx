@@ -7,13 +7,15 @@ import { AddMeta, Persist } from './hooks/helper'
 import Main from './main'
 import Settings from './settings'
 
+const proxy = undefined // `https://gearlink.cc`
+
 const cfg: iArgs = {
     isDarkMode: true,
     kv: new Persist(),
     event: new EventEmitter(),
-    core_proxy: new Connection({ name: 'core_proxy', token: KeyValue('token') }),
-    core_data: new Connection({ name: 'core_data', token: KeyValue('token') }),
-    core_collect: new Connection({ name: 'core_collect', token: KeyValue('token'), timeout: 15000 }),
+    core_proxy: new Connection({ proxy, name: 'core_proxy', token: KeyValue('token') }),
+    core_data: new Connection({ proxy, name: 'core_data', token: KeyValue('token') }),
+    core_collect: new Connection({ proxy, name: 'core_collect', token: KeyValue('token'), timeout: 15000 }),
 }
 
 Render(({ isDarkMode }: { isDarkMode: boolean }) => {

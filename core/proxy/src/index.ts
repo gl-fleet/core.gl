@@ -20,7 +20,6 @@ Run({
             auth: (req: any, res: any, next: any) => {
                 try {
 
-                    console.log(req.headers)
                     req.headers.verified = 'no'
                     const verify: any = jwt.verify(req.headers.authorization.split(' ')[1], secret)
                     if (typeof verify === 'object') req.headers = { ...req.headers, ...verify, verified: 'yes' }

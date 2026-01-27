@@ -91,11 +91,15 @@ export default (cfg: iArgs | any) => {
             onDropdownVisibleChange={onDropdownChanges}
             options={vehicles}
             filterOption={(input: any, option: any) => (option?.value ?? '').toLowerCase().includes(input.toLowerCase())}
-            onSelect={(n, { data }) => {
+            onSelect={(n, { data }: any) => {
 
-                const { east: x, north: y } = data
-                const { lat, lng } = UTM.convertUtmToLatLng(x, y, "48", "T")
-                cfg.Maptalks.animateTo([lng, lat], 0)
+                console.log(data)
+                const [_g, _g1, _g2, _gps, _gsm, _rtcm, _val] = data.data.split('|')
+                const g = _g.split(',')
+                const gps = [Number(g[0]), Number(g[1]), 0]
+                // const { east: x, north: y } = data
+                // const { lat, lng } = UTM.convertUtmToLatLng(x, y, "48", "T")
+                cfg.Maptalks.animateTo([gps[0], gps[1]], 0)
 
             }}
         />

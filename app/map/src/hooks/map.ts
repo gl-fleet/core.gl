@@ -46,21 +46,21 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
         const lowReso = document.documentElement.clientWidth < 1024
 
         const types = {
-            'free': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-            'topo': 'https://api.maptiler.com/maps/topo-v2/{z}/{x}/{y}.png?key=fM6kwMjQVVdkhE21oKJh',
-            'satellite': 'https://api.maptiler.com/maps/satellite/256/{z}/{x}/{y}.jpg?key=l4hWJmvvmISSL7tpiPUZ',
-            'openstreet': 'https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=l4hWJmvvmISSL7tpiPUZ',
+            'light': 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+            'dark': 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            'voyager': 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
         }
 
         ref.current = new MapView({
-            zoom: 18, lat: 43.67338010130343, lon: 105.52008346330428,
-            minZoom: 14,
+            lat: 43.67338010130343, lon: 105.52008346330428,
+            zoom: 18,
+            minZoom: 8,
             devicePixelRatio: 1,
             containerId,
             isDarkMode,
             simulate: false,
             doubleClickZoom: lowReso,
-            urlTemplate: types.free,
+            urlTemplate: types.light,
             fps: 60,
             ...conf,
         })
