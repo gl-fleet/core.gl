@@ -1,5 +1,5 @@
 import { React, Row, Col, notification, message } from 'uweb'
-import { createGlobalStyle } from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
 import { AsyncWait, Safe } from 'utils/web'
 import { LoadRequiredFiles } from 'uweb/utils'
 
@@ -13,8 +13,9 @@ import { GeometryTool } from './tools/geometry'
 
 import Menu from './views/menu'
 import Auth from './views/auth'
-import Fatigue from './views/fatigue'
 import Search from './views/search'
+
+import { LocationsLayer } from './layers/locations'
 
 const Style = createGlobalStyle`
 
@@ -33,7 +34,9 @@ const Style = createGlobalStyle`
 
 `
 
-const { useEffect } = React
+const Layers = styled.div``
+
+const { useEffect, useState } = React
 
 export default (cfg: iArgs) => {
 
@@ -41,11 +44,67 @@ export default (cfg: iArgs) => {
     const [notifApi, contextHolderNotification] = notification.useNotification()
     const [messageApi, contextHolderMessage] = message.useMessage()
 
-    useEffect(() => { cfg.event.on('message', ({ type, message }) => messageApi.open({ type, content: message })) }, [])
+    const [paneLoaded, setPaneLoaded] = useState(false)
+
+    useEffect(() => {
+
+        cfg.event.on('message', ({ type, message }) => messageApi.open({ type, content: message }))
+
+        Safe(async () => {
+
+            const { Pane } = await import('tweakpane')
+            cfg.Pane = new Pane({ title: 'Settings' })
+            cfg.Pane.addBinding(
+                { Vehicle: 'All' }, 'Vehicle',
+                { options: { All: 'All', Other: 'Other' } }
+            )
+            setPaneLoaded(true)
+
+        })
+
+    }, [])
 
     useEffect(() => {
 
         if (!isMapReady) { return }
+
+        // cfg.core_collect.pull('get-locations-by-date', { name: 'SV102', start: '2026-01-20 10:00', end: '2026-01-20 11:00' }, (err: any, res: any) => {
+        cfg.core_collect.pull('get-locations-by-date', { name: 'SV102', start: '2026-01-25 00:00', end: '2026-01-26 00:00' }, (err: any, res: any) => {
+
+            console.log(res)
+            const points: any = []
+            let minElev = 99999, maxElev = -99999, top = 0
+            let i = 0
+
+            for (const x of res) {
+                const { east, north, elevation, data, updatedAt } = x
+                if (elevation < minElev) minElev = elevation
+                if (elevation > maxElev) maxElev = elevation
+            }
+
+            top = maxElev - minElev
+
+            for (const x of res) {
+
+                const { east, north, elevation, data, updatedAt } = x
+                // 105.501397,43.669155|rtk,32|rtk,32|1.1,1.3|success,28.250000000000004,Point-to-Point Protocol,undefined,undefined,undefined|success,moving [←←],1|2,CUT ↓,0.56
+                const _ = data.split('|')
+                const [xlng, ylat] = _[0].split(',')
+                const coordinate: any = [Number(xlng), Number(ylat)]
+                const [scr, dir, dis] = _[6].split(',')
+                const h = elevation - minElev
+
+                // if (dis !== '-') console.log(`${scr} ${dir} ${dis}`)
+
+                points.push({ coordinate, height: h, value: ++i, color: dis !== '-' ? 'white' : 'green', size: 2 })
+
+            }
+
+            // const point: any = Maptalks.threeLayer.toPoints(points, {}, coloredMaterial())
+            // Maptalks.threeLayer.addMesh(point)
+            // const point = threeLayer.toPoint(lnglat, { height: 100 * Math.random() }, material);
+
+        })
 
         Safe(() => {
 
@@ -63,6 +122,8 @@ export default (cfg: iArgs) => {
 
             /** Rendering vehicles to evaluate performance impact **/
             setInterval(async () => {
+
+                return null
 
                 await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'drill', name: 'DR001', activity: 'Idle', gps: [105.49508346330428 + 0.0235, 43.67338010130343, 0] })
                 await AsyncWait(dms) && vcs.live_update({ project: 'Demo', type: 'drill', name: 'DR002', activity: 'Idle', gps: [105.49508346330428 + 0.0240, 43.67338010130343, 0] })
@@ -111,6 +172,8 @@ export default (cfg: iArgs) => {
 
     }, [isMapReady])
 
+    console.log(paneLoaded)
+
     return <Row id="main" style={{ /* filter: 'sepia(1)', */ height: '100%' }}>
 
         <Style />
@@ -124,6 +187,10 @@ export default (cfg: iArgs) => {
         <Search {...cfg} Maptalks={Maptalks} />
 
         <Col id='render_0' span={24} style={{ height: '100%' }} />
+
+        <Layers>
+            {paneLoaded && <LocationsLayer {...cfg} />}
+        </Layers>
 
     </Row>
 

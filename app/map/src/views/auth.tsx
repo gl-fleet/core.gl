@@ -1,6 +1,7 @@
 import { React, Layout, Modal, Input, FloatButton, Descriptions } from 'uweb'
 import { SafetyCertificateOutlined, LoginOutlined, LoadingOutlined, SafetyOutlined } from '@ant-design/icons'
 import { createGlobalStyle } from 'styled-components'
+import { Delay } from 'utils/web'
 import { handler } from '../hooks/utils'
 
 const { useRef, useEffect, useState } = React
@@ -31,9 +32,15 @@ export default (cfg: iArgs) => {
 
         handler(null, setSign)
         core_proxy.get('verify', { token: String(token.current) }).then(e => {
+
+            console.log(e)
             setReloading(idx === 0)
             handler(e, setSign)
-        }).catch(e => { handler(e, setSign) })
+
+        }).catch(e => {
+            console.log(e)
+            handler(e, setSign)
+        })
 
     }
 
@@ -59,13 +66,19 @@ export default (cfg: iArgs) => {
 
     }, [sign.loading])
 
+    useEffect(() => {
+
+        isReloading && Delay(() => window.location.reload(), 500)
+
+    }, [isReloading])
+
     if (!did) { return null }
 
     /* Sign(d)-In */
     if (!isReloading && sign.loading === false && sign.payload !== null) return <div>
 
         <Layout style={{ background: 'transparent', position: 'absolute', left: 16, top: 16, padding: 0, zIndex: 100 }}>
-            <FloatButton.Group shape="circle" style={{ top: 24, zIndex: 10, height: 'fit-content' }}>
+            <FloatButton.Group shape="circle" style={{ display: 'table', left: 8, top: 8, zIndex: 10, height: 'fit-content' }}>
                 <FloatButton type="primary" onClick={() => setOpen(true)} icon={<SafetyOutlined />} />
             </FloatButton.Group>
         </Layout>
@@ -88,7 +101,7 @@ export default (cfg: iArgs) => {
     else return <div>
 
         <Layout style={{ background: 'transparent', position: 'absolute', left: 16, top: 16, padding: 0, zIndex: 100 }}>
-            <FloatButton.Group shape="circle" style={{ justifyContent: 'normal', top: 24, zIndex: 10, height: 180 }}>
+            <FloatButton.Group shape="circle" style={{ display: 'table', left: 8, top: 8, zIndex: 10, height: 'fit-content' }}>
                 <FloatButton onClick={() => setOpen(true)} icon={sign.loading ? <LoadingOutlined /> : <LoginOutlined />} />
             </FloatButton.Group>
         </Layout>

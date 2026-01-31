@@ -45,6 +45,7 @@ export class Event {
                 { unique: false, name: 'Destination_index', using: 'BTREE', fields: ['dst'] },
                 { unique: false, name: 'CreatedAt_index', using: 'BTREE', fields: ['createdAt'] },
                 { unique: false, name: 'UpdatedAt_index', using: 'BTREE', fields: ['updatedAt'] },
+                // Not tested but it needs { unique: false, name: 'idx_events_src_updatedat_id', using: 'BTREE', fields: ['src', 'updatedAt', 'id'] },
             ]
         })
 

@@ -15,13 +15,28 @@ log.success(`"${env.npm_package_name}" <${version}> module is running on "${proc
 console.log(`[${db_name} ${db_user} ${db_pass}]`)
 
 const cf = {
-    local: new Host({ name, port: 8050, timeout: 10000 }),
-    core_data: new Connection({ name: 'core_data', proxy: 'http://127.0.0.1:8040', timeout: 15000 }),
+    local: new Host({ name, port: 8050, timeout: 15000 * 4 }),
+    core_data: new Connection({ name: 'core_data', proxy: 'http://127.0.0.1:8040', timeout: 15000 * 4 }),
     sequelize: new Sequelize(db_name, db_user, db_pass, {
         dialect: 'postgres',
         host: mode === 'development' ? '139.59.115.158' : 'localhost',
         pool: { max: 64, min: 16, acquire: 30000, idle: 15000 },
         logging: (sql, timing: any) => { },
+        retry: {
+            match: [
+                /SequelizeConnectionError/,
+                /SequelizeConnectionRefusedError/,
+                /SequelizeHostNotFoundError/,
+                /SequelizeHostNotReachableError/,
+                /SequelizeInvalidConnectionError/,
+                /SequelizeConnectionTimedOutError/
+            ],
+            name: 'query',
+            backoffBase: 100,
+            backoffExponent: 1.1,
+            timeout: 30000,
+            max: Infinity
+        }
     }),
 }
 
@@ -33,7 +48,7 @@ Safe(async () => {
 
     const locations = new Locations(cf, mode !== 'development')
     const coverages = new Coverages(cf, mode !== 'development')
-    const activities = new Activities(cf, mode === 'development')
+    const activities = new Activities(cf, mode !== 'development')
 
     /* Following tables are generated from events and chunks */
 

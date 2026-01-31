@@ -7,11 +7,6 @@ export const handler = (e: any, state: any = undefined) => {
         message: string | null,
     } = { loading: true, payload: null, message: null }
 
-    if (e === null && typeof state !== 'undefined') {
-        state(result)
-        return result
-    }
-
     const res = () => {
         result.payload = e ?? null
     }
@@ -30,6 +25,11 @@ export const handler = (e: any, state: any = undefined) => {
 
     }
 
+    if (e === null && typeof state !== 'undefined') {
+        state(result)
+        return result
+    }
+
     if (typeof e !== 'undefined') {
 
         if (typeof e === 'object' && e.hasOwnProperty('code')) rej()
@@ -38,7 +38,6 @@ export const handler = (e: any, state: any = undefined) => {
     }
 
     result.loading = false
-
 
     if (typeof state !== 'undefined') {
         state(result)

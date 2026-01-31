@@ -2,8 +2,6 @@ import { React, Layout, Menu, Modal } from 'uweb'
 import { EnvironmentOutlined, ProfileOutlined, RadarChartOutlined, GatewayOutlined, HighlightOutlined } from '@ant-design/icons'
 import { createGlobalStyle } from 'styled-components'
 
-import Status from './status'
-
 const Style = createGlobalStyle`
 
     .maptalks-attribution {
@@ -29,25 +27,13 @@ export default (cfg: iArgs) => {
 
     const { event } = cfg
 
-    const [showStatus, setShowStatus] = React.useState(false)
-
-    const open = (url: string) => {
-
-        const width = screen.width
-        const height = screen.height
-        const popw = 720
-        const poph = 640
-        window.open(`/${url}`, url, `top=${(height / 2) - (poph / 2) - 24},left=${window.screenX + (width / 2) - (popw / 2)},width=${popw},height=${poph}`)
-
-    }
-
     const items: any = [
         {
-            key: 'equipments',
-            label: 'Equipments',
+            key: 'locations',
+            label: 'Locations',
             disabled: false,
             icon: <EnvironmentOutlined />,
-            onClick: () => setShowStatus(true)
+            onClick: () => event.emit('layer.locations'),
         },
         {
             key: 'coverage',
@@ -101,16 +87,6 @@ export default (cfg: iArgs) => {
             inlineCollapsed={true}
             items={items}
         />
-
-        <Modal
-            title="Basic Modal"
-            open={showStatus}
-            destroyOnClose={true}
-            onCancel={() => setShowStatus(false)}
-            width={{ xs: '90%', sm: '80%', md: '70%', lg: '60%', xl: '50%', xxl: '40%' }}
-        >
-            <Status {...cfg} />
-        </Modal>
 
     </Layout>
 

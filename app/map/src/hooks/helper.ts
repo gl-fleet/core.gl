@@ -2,11 +2,40 @@ import { moment } from 'utils/web'
 
 export const AddMeta = () => {
 
-    const low = document.documentElement.clientWidth < 1024 ? '0.75' : '1'
-    const meta = document.createElement('meta')
+    const local = window.location.hostname === 'localhost'
+    const doc: any = document ?? {}
+    const low = doc.documentElement.clientWidth < 1024 ? '0.75' : '1'
+    const meta = doc.createElement('meta')
+
     meta.name = "viewport"
     meta.content = `width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=${low}, minimum-scale=${low}`
-    document.getElementsByTagName('head')[0].appendChild(meta)
+    doc.getElementsByTagName('head')[0].appendChild(meta)
+
+    // if (local) doc.getElementsByTagName("body")[0].style = `filter: sepia(1)`
+
+    const scripts = [
+        `<script type="x-shader/x-vertex" id="vertexshader">
+            attribute float size;
+            varying vec3 vColor;
+            void main() {
+                vColor = color;
+                vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                gl_PointSize = size * ( 1.0 );
+                // gl_PointSize = size * (30.0 / -mvPosition.z);  // tweak 300.0
+                gl_Position = projectionMatrix * mvPosition;
+            }
+        </script>`,
+        `<script type="x-shader/x-fragment" id="fragmentshader">
+            uniform sampler2D pointTexture;
+            varying vec3 vColor;
+            void main() {
+                gl_FragColor = vec4( vColor, 1.0 );
+                gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
+            }
+        </script>`
+    ]
+
+    scripts.map((s) => doc.getElementsByTagName('head')[0].insertAdjacentHTML('beforeend', s))
 
 }
 

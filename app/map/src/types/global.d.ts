@@ -3,6 +3,7 @@ import { Connection } from 'unet/web'
 import { Persist } from '../hooks/helper'
 
 import { MapView } from 'uweb/maptalks'
+import type { Pane } from 'tweakpane'
 
 declare global {
 
@@ -18,6 +19,7 @@ declare global {
         core_collect: Connection
 
         MapView?: MapView
+        Pane?: Pane
 
     }
 

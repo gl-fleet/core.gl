@@ -74,13 +74,15 @@ export default (cfg: iArgs | any) => {
     return <>
         <Style />
         <Select
+            size='small'
             style={{
                 position: 'fixed',
                 margin: 'auto',
-                top: 24,
+                fontSize: 10,
+                top: 8,
                 left: 0,
                 right: 0,
-                width: 180,
+                width: 240,
                 zIndex: 10,
             }}
             notFoundContent={null}

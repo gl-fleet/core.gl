@@ -56,6 +56,7 @@ export class Locations {
                 { unique: false, name: `${this.name}_type_index`, using: 'BTREE', fields: ['type'] },
                 { unique: false, name: `${this.name}_name_index`, using: 'BTREE', fields: ['name'] },
                 { unique: false, name: `${this.name}_updatedat_index`, using: 'BTREE', fields: ['updatedAt'] },
+                // { unique: false, name: `${this.name}_by_range_index`, using: 'BTREE', fields: ['name', { name: 'updatedAt', order: 'DESC' }] },
             ]
         })
 
@@ -77,6 +78,9 @@ export class Locations {
         this.local.on(`get-${this.name}-last`, async (req: any) => await this.get_last(req.query))
         this.local.on(`get-${this.name}-all-last`, async ({ query, user }: any) => await this.get_all_last(query, user), true, 2)
         this.local.on(`get-${this.name}-all-last-v2`, async ({ query, user }: any) => await this.get_all_last_v2(query, user), true, 2)
+
+        this.local.on(`get-${this.name}-by-date`, async ({ path, query, user }: any) => await this.get_by_range(path, query, user), true, 2)
+        // this.local.on(`get-${this.name}-by-boundry`, async ({ query, user }: any) => await this.get_by_range(query, user), true, 2)
 
     }
 
@@ -127,6 +131,37 @@ export class Locations {
             )`, { type: QueryTypes.SELECT })
 
         return proj === '*' ? result : result.filter((e: any) => e.proj === proj)
+
+    }
+
+    get_by_range = async (path: string, query: any, user: any, time = Date.now()) => {
+
+        let { name, start, end, count = -1 } = query
+
+        try {
+
+            const rows = await this.sequelize.query(`
+
+                SELECT east, north, elevation, speed, heading, "updatedAt", data
+                FROM public.locations
+                WHERE name = '${name}' AND "updatedAt" >= '${start}' AND "updatedAt" < '${end}'
+                ORDER BY "updatedAt" ASC 
+
+            `, { type: QueryTypes.SELECT })
+
+            count = rows.length
+
+            return rows
+
+        } catch (err: any) {
+
+            return []
+
+        } finally {
+
+            log.success(`[${path}] ${user.proj}/${user.name}: ${name}-${start}-${end} [ ${count}rows / ${Date.now() - time}ms ]`)
+
+        }
 
     }
 

@@ -12,12 +12,27 @@ log.success(`"${env.npm_package_name}" <${version}> module is running on "${proc
 console.log(`[${db_name} ${db_user} ${db_pass}]`)
 
 const cf: any = {
-    local: new Host({ name, port: 8040, timeout: 10000 }),
+    local: new Host({ name, port: 8040, timeout: 15000 * 4 }),
     sequelize: new Sequelize(db_name, db_user, db_pass, {
         dialect: 'postgres',
         host: mode === 'development' ? '139.59.115.158' : 'localhost',
         pool: { max: 16, min: 4, acquire: 30000, idle: 15000 },
-        logging: (sql, timing: any) => { }
+        logging: (sql, timing: any) => { },
+        retry: {
+            match: [
+                /SequelizeConnectionError/,
+                /SequelizeConnectionRefusedError/,
+                /SequelizeHostNotFoundError/,
+                /SequelizeHostNotReachableError/,
+                /SequelizeInvalidConnectionError/,
+                /SequelizeConnectionTimedOutError/
+            ],
+            name: 'query',
+            backoffBase: 100,
+            backoffExponent: 1.1,
+            timeout: 30000,
+            max: Infinity
+        }
     }),
 }
 
@@ -53,6 +68,10 @@ Safe(async () => {
             AND table_type = 'BASE TABLE'
         ORDER BY 
             pg_total_relation_size(table_schema || '.' || table_name) DESC;
+    `
+
+    const clear_the_history = `
+        DELETE FROM public.events WHERE "updatedAt" <= '2025-10-01 00:00:00.000' 
     `
 
     await cf.sequelize.sync({ force: false, alter: true })
