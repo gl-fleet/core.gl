@@ -20,16 +20,20 @@ export const LocationsLayer = (cfg: iArgs) => {
             else {
 
                 const PARAMS = {
-                    background: { r: 255, g: 0, b: 55 },
-                    tint: { r: 0, g: 255, b: 214, a: 0.5 },
+                    background: { key: 'bg', r: 255, g: 0, b: 55 },
+                    tint: { key: 'tnt', r: 0, g: 255, b: 214, a: 0.5 },
                 }
 
                 folder.current = cfg.Pane.addFolder({
-                    title: 'Basic'
+                    title: 'Locations'
                 })
 
                 folder.current.addBinding(PARAMS, 'background')
                 folder.current.addBinding(PARAMS, 'tint')
+
+                folder.current.on('change', (ev: any) => {
+                    console.log(ev)
+                })
 
             }
 
