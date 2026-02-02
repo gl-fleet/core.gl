@@ -34,15 +34,15 @@ const Header = styled.div`
 
 export default (cfg: iArgs) => {
 
-    return <Header style={{ background: cfg.isDarkMode ? '#37383d' : '#e5e5e5', textAlign: 'center' }}>
+    return <Header style={{ background: cfg.isDarkMode ? '#37383d' : '#e5e5e5', textAlign: 'center', overflowX: 'auto' }}>
 
         <Space align='center'>
 
             <Avatar src="favicon.ico" size={'small'} shape='square' />
 
-            <Tooltip title="Vehicles">
+            {/*<Tooltip title="Vehicles">
                 <Button disabled type='text' icon={<CarOutlined />} />
-            </Tooltip>
+            </Tooltip> */}
 
             <Tooltip title="Locations">
                 <Button type='text' icon={<EnvironmentOutlined />} onClick={() => cfg.event.emit('layer.locations')} />
@@ -68,10 +68,6 @@ export default (cfg: iArgs) => {
 
             <Tooltip title="Theme">
                 <Button type='text' icon={cfg.isDarkMode ? <BulbOutlined /> : <BulbFilled />} onClick={() => cfg.setIsDarMode((v: any) => !v)} />
-            </Tooltip>
-
-            <Tooltip title="Setting">
-                <Button disabled type='text' icon={<SettingOutlined />} />
             </Tooltip>
 
             <Auth {...cfg} />
