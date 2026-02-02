@@ -4,12 +4,13 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "pm2 list && MODE=development yarn run_0 && yarn run_1 && yarn run_2 && yarn run_3",
-    "serve": "pm2 list && MODE=production yarn run_0 && yarn run_1 && yarn run_2 && yarn run_3",
+    "start": "pm2 list && MODE=development yarn run_0 && yarn run_1 && yarn run_2 && yarn run_3 && yarn run_4",
+    "serve": "pm2 list && MODE=production yarn run_0 && yarn run_1 && yarn run_2 && yarn run_3 && yarn run_4",
     "run_0": "sleep 1 && nx run-many -t _serve --projects=core_proxy",
-    "run_1": "sleep 1 && nx run-many -t _serve --projects=core_data,core_collect",
-    "run_2": "sleep 1 && nx run-many -t _serve --projects=core_rtcm,core_third",
-    "run_3": "sleep 1 && nx run-many -t _serve --projects=core_map,core_fms,core_info",
+    "run_1": "sleep 1 && nx run-many -t _serve --projects=core_data",
+    "run_2": "sleep 1 && nx run-many -t _serve --projects=core_collect",
+    "run_3": "sleep 1 && nx run-many -t _serve --projects=core_rtcm,core_third",
+    "run_4": "sleep 1 && nx run-many -t _serve --projects=core_map,core_fms,core_info",
     "build": "nx run-many -t build",
     "clear": "nx run-many -t clear",
     "stop": "nx run-many -t _stop",
@@ -23,8 +24,8 @@
     "app/*"
   ],
   "dependencies": {
-    "ubin": "upacks/ubin#1.2.1",
-    "uweb": "upacks/uweb#1.3.1",
+    "ubin": "upacks/ubin#1.2.3",
+    "uweb": "upacks/uweb#1.3.2",
     "ucan": "upacks/ucan#1.0.4",
     "unet": "upacks/unet#1.5.5",
     "utils": "upacks/utils#1.2.2"

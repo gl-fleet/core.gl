@@ -10,8 +10,11 @@ declare global {
     interface iArgs {
 
         isDarkMode: boolean
+        setIsDarMode: any
         event: EventEmitter
         kv: Persist,
+        notifApi: NotificationInstance
+        messageApi: MessageInstance
 
         core_rtcm?: Connection
         core_proxy: Connection

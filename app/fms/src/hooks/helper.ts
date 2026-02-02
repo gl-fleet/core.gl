@@ -10,7 +10,6 @@ export const AddMeta = () => {
     meta.name = "viewport"
     meta.content = `width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=${low}, minimum-scale=${low}`
     doc.getElementsByTagName('head')[0].appendChild(meta)
-
     // if (local) doc.getElementsByTagName("body")[0].style = `filter: sepia(1)`
 
     const scripts = [
@@ -21,7 +20,6 @@ export const AddMeta = () => {
                 vColor = color;
                 vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
                 gl_PointSize = size * ( 1.0 );
-                // gl_PointSize = size * (30.0 / -mvPosition.z);  // tweak 300.0
                 gl_Position = projectionMatrix * mvPosition;
             }
         </script>`,
@@ -29,8 +27,10 @@ export const AddMeta = () => {
             uniform sampler2D pointTexture;
             varying vec3 vColor;
             void main() {
+
                 gl_FragColor = vec4( vColor, 1.0 );
                 gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
+
             }
         </script>`
     ]

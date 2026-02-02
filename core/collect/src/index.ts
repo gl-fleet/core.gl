@@ -12,7 +12,7 @@ const { name, version, mode, db_name, db_user, db_pass } = decodeENV()
 
 log.success(`"${env.npm_package_name}" <${version}> module is running on "${process.pid}" / [${mode}] 🚀🚀🚀\n`)
 
-console.log(`[${db_name} ${db_user} ${db_pass}]`)
+log.info(`[${db_name} ${db_user} ${db_pass}]`)
 
 const cf = {
     local: new Host({ name, port: 8050, timeout: 15000 * 4 }),
@@ -20,7 +20,7 @@ const cf = {
     sequelize: new Sequelize(db_name, db_user, db_pass, {
         dialect: 'postgres',
         host: mode === 'development' ? '139.59.115.158' : 'localhost',
-        pool: { max: 64, min: 16, acquire: 30000, idle: 15000 },
+        pool: { max: 64, min: 16, acquire: 15000, idle: 15000 },
         logging: (sql, timing: any) => { },
         retry: {
             match: [
@@ -34,7 +34,7 @@ const cf = {
             name: 'query',
             backoffBase: 100,
             backoffExponent: 1.1,
-            timeout: 30000,
+            timeout: 15000 * 4 - 2500,
             max: Infinity
         }
     }),

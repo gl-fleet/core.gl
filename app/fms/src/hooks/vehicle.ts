@@ -47,10 +47,10 @@ export class Vehicles {
     }
     public state: any = {}
 
-    constructor(Maptalks: MapView) {
+    constructor(Maptalks: MapView | undefined) {
 
         this.maptalks = Maptalks
-        this.layer = new maptalks.VectorLayer('vector', { enableAltitude: true }).addTo(this.maptalks.map)
+        this.layer = new maptalks.VectorLayer('vector', { enableAltitude: true }).addTo(this.maptalks?.map)
 
         setInterval(() => {
 
@@ -146,7 +146,7 @@ export class Vehicles {
 
         }
 
-        getVehicle(this.maptalks, type).then(proc).catch(e => { }).finally(() => {
+        this.maptalks && getVehicle(this.maptalks, type).then(proc).catch(e => { }).finally(() => {
             this.cfg.is_loading = false
         })
 

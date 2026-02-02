@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "ubin watch_app --npm",
+    "start": "ubin watch_app",
     "build": "ubin build_app --bundle --minify --sourcemap --port 3020",
     "serve": "node ./dist/run.js",
     "clear": "rm -rf ./dist ./node_modules",

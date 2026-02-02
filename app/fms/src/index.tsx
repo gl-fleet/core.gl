@@ -6,23 +6,33 @@ import { EventEmitter } from "events"
 import { AddMeta, Persist } from './hooks/helper'
 import Main from './main'
 
+const { useRef, useEffect, useState } = React
+
 const proxy = undefined
 const timeout = 15000 * 4
 
 const cfg: iArgs = {
+
     isDarkMode: true,
+    setIsDarMode: null,
     kv: new Persist(),
     event: new EventEmitter(),
+    messageApi: null,
+    notifApi: null,
+
     core_proxy: new Connection({ proxy, name: 'core_proxy', token: KeyValue('token'), timeout }),
     core_data: new Connection({ proxy, name: 'core_data', token: KeyValue('token'), timeout }),
     core_collect: new Connection({ proxy, name: 'core_collect', token: KeyValue('token'), timeout }),
+
 }
 
-Render(({ isDarkMode, setIsDarkMode }: any) => {
+Render((args: any) => {
 
-    React.useMemo(() => AddMeta(), [])
+    React.useMemo(() => {
 
-    React.useEffect(() => {
+        AddMeta()
+
+        cfg.setIsDarMode = args.setIsDarkMode
 
         cfg.kv.on('token', (next) => cfg.kv.get('token') !== next && location.reload())
 
@@ -36,6 +46,6 @@ Render(({ isDarkMode, setIsDarkMode }: any) => {
 
     }, [])
 
-    return <Main {...cfg} isDarkMode={isDarkMode} />
+    return <Main {...cfg} isDarkMode={args.isDarkMode} />
 
 }, null, { maxWidth: '100%' })

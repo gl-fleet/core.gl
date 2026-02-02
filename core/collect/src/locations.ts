@@ -140,22 +140,29 @@ export class Locations {
 
         try {
 
-            const rows = await this.sequelize.query(`
+            const start_m = moment(start)
+            const end_m = moment(end)
 
-                SELECT east, north, elevation, speed, heading, "updatedAt", data
-                FROM public.locations
-                WHERE name = '${name}' AND "updatedAt" >= '${start}' AND "updatedAt" < '${end}'
-                ORDER BY "updatedAt" ASC 
+            if (start_m.isValid() && end_m.isValid() && moment.duration(end_m.diff(start_m)).asHours() <= 48) {
 
-            `, { type: QueryTypes.SELECT })
+                const rows = await this.sequelize.query(`
 
-            count = rows.length
+                    SELECT east, north, elevation, speed, heading, "updatedAt", data
+                    FROM public.locations
+                    WHERE name = '${name}' AND "updatedAt" >= '${start}' AND "updatedAt" < '${end}'
+                    ORDER BY "updatedAt" ASC 
 
-            return rows
+                `, { type: QueryTypes.SELECT })
+
+                count = rows.length
+
+                return rows
+
+            } else throw new Error('Invalid date range, maximum is 48 hours')
 
         } catch (err: any) {
 
-            return []
+            throw new Error(err.message)
 
         } finally {
 

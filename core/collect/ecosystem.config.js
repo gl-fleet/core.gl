@@ -21,8 +21,9 @@ module.exports = {
         env.u_mode === 'development' ? {
 
             name: env.u_name,
-            script: "npm",
+            script: "yarn",
             args: "start",
+            interpreter: '/bin/bash',
             log_date_format: "YYYY-MM-DD HH:mm:ss.SSS",
             env: env
 

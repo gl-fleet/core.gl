@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "ubin watch_api --npm",
+    "start": "ubin watch_api",
     "build": "ubin build_api",
     "serve": "node ./dist/run.js",
     "clear": "rm -rf ./dist ./node_modules",
