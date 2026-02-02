@@ -7,15 +7,12 @@ import { handler } from '../hooks/utils'
 const { useRef, useEffect, useState } = React
 
 const Style = createGlobalStyle`
-
     html, body {
         width: 100% !important;
     }
-
     #auth-pop {
         border-radius: 8px;
     }
-
 `
 
 export default (cfg: iArgs) => {
@@ -31,11 +28,13 @@ export default (cfg: iArgs) => {
     const signIn = (idx: number = 0) => {
 
         handler(null, setSign)
+
         core_proxy.get('verify', { token: String(token.current) }).then(e => {
 
             console.log(e)
-            setReloading(idx === 0)
             handler(e, setSign)
+
+            setReloading(idx === 0)
 
         }).catch(e => {
             console.log(e)
@@ -68,7 +67,7 @@ export default (cfg: iArgs) => {
 
     useEffect(() => {
 
-        isReloading && Delay(() => window.location.reload(), 500)
+        isReloading && Delay(() => window.location.reload(), 1000)
 
     }, [isReloading])
 

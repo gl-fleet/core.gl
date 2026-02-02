@@ -1,4 +1,5 @@
 import { React, Select, Typography, Button, message } from 'uweb'
+import { Delay } from 'utils/web'
 import { createGlobalStyle } from 'styled-components'
 const { useEffect, useState, useRef } = React
 
@@ -14,10 +15,16 @@ export default (cfg: iArgs) => {
     useEffect(() => {
 
         const doc: any = document
+
         const elem = doc.getElementById('render_0')
         const input: any = doc.querySelector('#header input')
 
-        if (elem && input) elem.onclick = (e: any) => { input.blur() }
+        if (elem && input) {
+
+            elem.addEventListener('touchstart', () => input.blur())
+            elem.addEventListener('mousedown', () => input.blur()) // fallback for desktop
+
+        }
 
     }, [])
 
