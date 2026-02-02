@@ -50,61 +50,11 @@ export default (cfg: iArgs) => {
 
         cfg.event.on('message', ({ type, message }) => messageApi.open({ type, content: message }))
 
-        Safe(async () => {
-
-            const { Pane } = await import('tweakpane')
-            cfg.Pane = new Pane({ title: 'Settings' })
-            cfg.Pane.addBinding(
-                { Vehicle: 'All' }, 'Vehicle',
-                { options: { All: 'All', Other: 'Other' } }
-            )
-            setPaneLoaded(true)
-
-        })
-
     }, [])
 
     useEffect(() => {
 
         if (!isMapReady) { return }
-
-        // cfg.core_collect.pull('get-locations-by-date', { name: 'SV102', start: '2026-01-20 10:00', end: '2026-01-20 11:00' }, (err: any, res: any) => {
-        cfg.core_collect.pull('get-locations-by-date', { name: 'SV102', start: '2026-01-25 00:00', end: '2026-01-26 00:00' }, (err: any, res: any) => {
-
-            console.log(res)
-            const points: any = []
-            let minElev = 99999, maxElev = -99999, top = 0
-            let i = 0
-
-            for (const x of res) {
-                const { east, north, elevation, data, updatedAt } = x
-                if (elevation < minElev) minElev = elevation
-                if (elevation > maxElev) maxElev = elevation
-            }
-
-            top = maxElev - minElev
-
-            for (const x of res) {
-
-                const { east, north, elevation, data, updatedAt } = x
-                // 105.501397,43.669155|rtk,32|rtk,32|1.1,1.3|success,28.250000000000004,Point-to-Point Protocol,undefined,undefined,undefined|success,moving [←←],1|2,CUT ↓,0.56
-                const _ = data.split('|')
-                const [xlng, ylat] = _[0].split(',')
-                const coordinate: any = [Number(xlng), Number(ylat)]
-                const [scr, dir, dis] = _[6].split(',')
-                const h = elevation - minElev
-
-                // if (dis !== '-') console.log(`${scr} ${dir} ${dis}`)
-
-                points.push({ coordinate, height: h, value: ++i, color: dis !== '-' ? 'white' : 'green', size: 2 })
-
-            }
-
-            // const point: any = Maptalks.threeLayer.toPoints(points, {}, coloredMaterial())
-            // Maptalks.threeLayer.addMesh(point)
-            // const point = threeLayer.toPoint(lnglat, { height: 100 * Math.random() }, material);
-
-        })
 
         Safe(() => {
 
