@@ -6,9 +6,14 @@ import { Safe } from 'utils/web'
 import { mapHook } from './hooks/map'
 
 import LayoutHeader from './layouts/header'
+import LayoutFooter from './layouts/footer'
 import LayoutMenu from './layouts/menu'
 
-import LayerVehicle from './layers/vehicles'
+import { DistanceTool } from './tools/distance'
+import { AreaTool } from './tools/area'
+
+import LayerControllers from './layers/controllers'
+import LayerVehicles from './layers/vehicles'
 import LayerLocations from './layers/locations'
 import LayerGeofences from './layers/geofences'
 
@@ -29,6 +34,15 @@ const GlobalStyle = createGlobalStyle`
 
     .maptalks-attribution {
         display: none;
+    }
+
+    .ant-message {
+        top: auto !important;
+        bottom: 36px;
+    }
+
+    .ant-message-notice-content {
+        padding: 4px 12px !important;
     }
 
 `
@@ -69,8 +83,17 @@ export default (cfg: iArgs) => {
         props.current.messageApi = messageApi
 
         if (isMapReady) {
+
             props.current.MapView = Maptalks
             LoadRequiredFiles(() => setLoaded((v) => v - 1))
+
+            Safe(() => {
+
+                new DistanceTool(Maptalks, cfg, messageApi)
+                new AreaTool(Maptalks, cfg, messageApi)
+
+            }, 'Setup_Tools')
+
         }
 
     }, [isMapReady])
@@ -82,13 +105,16 @@ export default (cfg: iArgs) => {
         <GlobalStyle />
 
         {loaded === 0 && <LayoutHeader {...cfg} />}
+
         <LayoutMenu {...cfg} />
         <Pane id="pane" />
-
         <Col id='render_0' span={24} style={{ height: '100%' }} />
 
+        {loaded === 0 && <LayoutFooter {...cfg} />}
+
         <Layers>
-            {loaded === 0 && <LayerVehicle {...cfg} />}
+            {loaded === 0 && <LayerControllers {...cfg} />}
+            {loaded === 0 && <LayerVehicles {...cfg} />}
             {loaded === 0 && <LayerLocations {...cfg} />}
             {loaded === 0 && <LayerGeofences {...cfg} />}
         </Layers>

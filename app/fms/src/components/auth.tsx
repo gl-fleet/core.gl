@@ -31,13 +31,11 @@ export default (cfg: iArgs) => {
 
         core_proxy.get('verify', { token: String(token.current) }).then(e => {
 
-            console.log(e)
             handler(e, setSign)
 
             setReloading(idx === 0)
 
         }).catch(e => {
-            console.log(e)
             handler(e, setSign)
         })
 
