@@ -89,3 +89,16 @@ export const exportCSVFile = (headers: any, items: any, fileTitle: string) => {
         }
     }
 }
+
+export const getUTMZone = (lat: number, lon: number) => {
+
+    // Calculate UTM Zone Number
+    const zoneNumber = Math.floor((lon + 180) / 6) + 1
+    // Calculate UTM Zone Letter
+    const letters = "CDEFGHJKLMNPQRSTUVWX" // UTM zone letters (I and O are skipped)
+    let zoneLetter = ''
+    if (lat >= -80 && lat <= 84) zoneLetter = letters[Math.floor((lat + 80) / 8)]
+    else zoneLetter = 'Z' // Outside UTM limits
+    return { zoneNumber, zoneLetter }
+
+}

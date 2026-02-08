@@ -42,7 +42,28 @@ const GlobalStyle = createGlobalStyle`
     }
 
     .ant-message-notice-content {
+        background: ${({ dark = true }) => dark ? '#37383d' : '#e5e5e5'} !important;
+        box-shadow: none !important;
+    }
+
+    .ant-message-notice-content {
         padding: 4px 12px !important;
+    }
+
+    .tp-fldv_t {
+        padding-left: 7px !important;
+        font-weight: 800;
+    }
+    .tp-rotv {
+        box-shadow: none !important;
+    }
+
+    :root {
+        --tp-base-background-color: ${({ dark = true }) => dark ? 'rgb(55, 56, 61)' : '#e5e5e5'};
+        --tp-base-border-radius: 0px;
+        --tp-input-background-color: ${({ dark = true }) => dark ? 'hsla(0, 0%, 0%, 0.3)' : 'hsla(0, 0%, 0%, 0.5)'};
+        --tp-label-foreground-color: ${({ dark = true }) => dark ? 'hsla(0, 0%, 100%, 0.5)' : '#000'};
+        --tp-container-foreground-color: ${({ dark = true }) => dark ? '#fff' : '#000'};
     }
 
 `
@@ -102,7 +123,7 @@ export default (cfg: iArgs) => {
 
     return <Row id="main" style={{ height: '100%' }}>
 
-        <GlobalStyle />
+        <GlobalStyle dark={cfg.isDarkMode} />
 
         {loaded === 0 && <LayoutHeader {...cfg} />}
 

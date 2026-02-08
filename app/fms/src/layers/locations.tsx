@@ -96,7 +96,7 @@ export default (cfg: iArgs) => {
                 const df = `YYYY-MM-DD HH:mm`
                 const arg = {
                     Vehicles: '',
-                    Start: moment().add(-(24 * 2), 'hours').format(df),
+                    Start: moment().add(-(24 * 1), 'hours').format(df),
                     End: moment().format(df),
                     '3D': false,
                     Point: { r: 255, g: 55, b: 55 },

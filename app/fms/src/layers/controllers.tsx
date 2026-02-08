@@ -12,9 +12,6 @@ export default (cfg: iArgs) => {
             position: 'bottom-right',
         })
 
-        console.log(bottomRightCompass)
-        console.log(cfg.MapView?.map)
-
         cfg.MapView?.map.addControl(bottomRightCompass)
 
     }, [])

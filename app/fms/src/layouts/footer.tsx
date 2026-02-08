@@ -1,25 +1,12 @@
-import { React, Row, Col } from 'uweb'
+import { React, Row, Col, Typography } from 'uweb'
+import { UTM } from 'uweb/utils'
 import { AsyncWait, Safe } from 'utils/web'
 import styled from 'styled-components'
+import { getUTMZone } from '../hooks/utils'
 
 import { Avatar, Button, Dropdown, Space, Tooltip, Input } from 'uweb'
-
-import {
-    CarOutlined,
-    EnvironmentOutlined,
-    GatewayOutlined,
-    AlertOutlined,
-    ToolOutlined,
-    BarChartOutlined,
-    SettingOutlined,
-    UserOutlined,
-    ExpandOutlined,
-
-    ColumnWidthOutlined,
-    RadiusSettingOutlined,
-} from '@ant-design/icons'
-
-import { BulbOutlined, BulbFilled } from '@ant-design/icons'
+import { ColumnWidthOutlined, RadiusSettingOutlined } from '@ant-design/icons'
+const { Paragraph, Text } = Typography
 
 const { useState, useEffect } = React
 
@@ -46,7 +33,12 @@ export default (cfg: iArgs) => {
         const getStatus = () => {
 
             var center = map.getCenter()
-            const stat = `${map.getProjection().code} ${center.x.toFixed(5)} ${center.y.toFixed(5)} ${map.getZoom().toFixed(1)}`
+            const lon = center.x
+            const lat = center.y
+
+            const { Easting, Northing, ZoneLetter, ZoneNumber } = UTM.convertLatLngToUtm(lat, lon, 2)
+
+            const stat = `${Easting} ${Northing} ${ZoneNumber}${ZoneLetter}`
             setStatus(stat)
 
         }
@@ -68,7 +60,7 @@ export default (cfg: iArgs) => {
                 <Button type='text' icon={<ColumnWidthOutlined />} onClick={() => cfg.event.emit('tool.distance.enable')} />
             </Tooltip>
 
-            <Button disabled type='text'>{status}</Button>
+            <Paragraph code copyable style={{ margin: 0, paddingTop: 2 }}>{status}</Paragraph>
 
         </Space>
 
