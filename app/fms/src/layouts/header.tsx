@@ -34,23 +34,42 @@ const Header = styled.div`
 
 export default (cfg: iArgs) => {
 
-    return <Header style={{ background: cfg.isDarkMode ? '#37383d' : '#e5e5e5', textAlign: 'center', overflowX: 'auto' }}>
+    const items: any = [
+        {
+            key: 'LineString',
+            label: 'LineString',
+            onClick: () => cfg.event.emit('layer.geofences', { title: 'Create LineString', value: 'LineString' })
+        },
+        {
+            key: 'Polygon',
+            label: 'Polygon',
+            onClick: () => cfg.event.emit('layer.geofences', { title: 'Create Polygon', value: 'Polygon' })
+        },
+        {
+            key: 'Circle',
+            label: 'Circle',
+            onClick: () => cfg.event.emit('layer.geofences', { title: 'Create Circle', value: 'Circle' })
+        },
+        {
+            key: 'Rectangle',
+            label: 'Rectangle',
+            onClick: () => cfg.event.emit('layer.geofences', { title: 'Create Rectangle', value: 'Rectangle' })
+        },
+    ]
+
+    return <Header style={{ background: cfg.isDarkMode ? '#282828' : '#e5e5e5', textAlign: 'center', overflowX: 'auto' }}>
 
         <Space align='center'>
 
             <Avatar src="favicon.ico" size={'small'} shape='square' />
 
-            {/*<Tooltip title="Vehicles">
-                <Button disabled type='text' icon={<CarOutlined />} />
-            </Tooltip> */}
-
             <Tooltip title="Locations">
-                <Button type='text' icon={<EnvironmentOutlined />} onClick={() => cfg.event.emit('layer.locations')} />
+                <Button type='text' icon={<EnvironmentOutlined />} onClick={() => cfg.event.emit('layer.locations', 'Location history')} />
             </Tooltip>
 
-            <Tooltip title="Geofences">
-                <Button type='text' icon={<GatewayOutlined />} onClick={() => cfg.event.emit('layer.geofences')} />
-            </Tooltip>
+            <Dropdown menu={{ items }} placement="bottom">
+                <Button type='text' icon={<GatewayOutlined />} />
+            </Dropdown>
 
             <Tooltip title="Alerts">
                 <Button disabled type='text' icon={<AlertOutlined />} />

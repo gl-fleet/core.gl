@@ -1,11 +1,10 @@
-import { React, Row, Col, Typography } from 'uweb'
+import { React, Row, Col, Typography, Popover, InputNumber } from 'uweb'
 import { UTM } from 'uweb/utils'
-import { AsyncWait, Safe } from 'utils/web'
 import styled from 'styled-components'
-import { getUTMZone } from '../hooks/utils'
+import { KeyValue } from 'utils/web'
 
 import { Avatar, Button, Dropdown, Space, Tooltip, Input } from 'uweb'
-import { ColumnWidthOutlined, RadiusSettingOutlined } from '@ant-design/icons'
+import { CodepenOutlined, ColumnWidthOutlined, RadiusSettingOutlined } from '@ant-design/icons'
 const { Paragraph, Text } = Typography
 
 const { useState, useEffect } = React
@@ -25,6 +24,8 @@ const Header = styled.div`
 export default (cfg: iArgs) => {
 
     const [status, setStatus]: any = useState('-')
+    const [_3D, set_3D]: any = useState(KeyValue('3D') === 'yes')
+    const [_el, setEl]: any = useState(Number(KeyValue('Elevation') ?? 1500))
 
     useEffect(() => {
 
@@ -48,9 +49,21 @@ export default (cfg: iArgs) => {
 
     }, [])
 
-    return <Header style={{ background: cfg.isDarkMode ? '#37383d' : '#e5e5e5', textAlign: 'center', overflowX: 'auto' }}>
+    useEffect(() => { KeyValue('3D', _3D === true ? 'yes' : 'no') }, [_3D])
+    useEffect(() => { KeyValue('Elevation', `${_el}`) }, [_el])
+
+    return <Header style={{ background: cfg.isDarkMode ? '#282828' : '#e5e5e5', textAlign: 'center', overflowX: 'auto' }}>
 
         <Space align='center'>
+
+            <Popover content={<InputNumber disabled={!_3D} prefix={'Elevation:'} defaultValue={_el} style={{ minWidth: 140 }} size='small' onChange={(e) => { setEl(e) }} />}>
+                <Button type='text' icon={<CodepenOutlined style={{ color: _3D ? '#1677ff' : 'inherit' }} />} onClick={() => {
+
+                    cfg.event.emit('tool.3D.enable', !_3D)
+                    set_3D(!_3D)
+
+                }} />
+            </Popover>
 
             <Tooltip title="Area">
                 <Button type='text' icon={<RadiusSettingOutlined />} onClick={() => cfg.event.emit('tool.area.enable')} />

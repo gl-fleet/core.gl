@@ -1,10 +1,10 @@
 import { Vehicle, Toyota, Drill, Dozer, Exca, Dump, Truck } from 'uweb/utils'
 import { MapView, maptalks } from 'uweb/maptalks'
-import { log } from 'utils/web'
+import { KeyValue, log } from 'utils/web'
 
 export const getVehicle = (Maptalks: MapView, type: string): Promise<Vehicle> => new Promise((resolve, reject) => {
 
-    log.info(`[Vehicles] -> Get Vehicle / ${type} [LOAD]`)
+    // log.info(`[Vehicles] -> Get Vehicle / ${type} [LOAD]`)
 
     const fps = 60
     const buffer = true
@@ -44,6 +44,7 @@ export class Vehicles {
     public cfg = {
         last_update: 0,
         is_loading: false,
+        is_3D: 0,
     }
     public state: any = {}
 
@@ -52,7 +53,17 @@ export class Vehicles {
         this.maptalks = Maptalks
         this.layer = new maptalks.VectorLayer('vector', { enableAltitude: true }).addTo(this.maptalks?.map)
 
+        if (KeyValue('3D') === 'yes') this.cfg.is_3D = Number(KeyValue('Elevation'))
+        else this.cfg.is_3D = 0
+
+        let i = 0
+
         setInterval(() => {
+
+            if (++i % 5 === 0) {
+                if (KeyValue('3D') === 'yes') this.cfg.is_3D = Number(KeyValue('Elevation'))
+                else this.cfg.is_3D = 0
+            }
 
             for (const x in this.state) {
 
@@ -62,8 +73,8 @@ export class Vehicles {
 
                 if (updated_at <= 1) {
 
-                    _vehicle.setColor('#000')
-                    _marker.updateSymbol({ textFill: '#fff', textHaloFill: '#000' })
+                    _vehicle.setColor('#333')
+                    _marker.updateSymbol({ textFill: '#fff', textHaloFill: '#333' })
 
                 } else if ((Date.now() - updated_at) > 15000) {
 
@@ -90,14 +101,24 @@ export class Vehicles {
 
     }
 
+    altitude = (el: number) => {
+
+        if (el === 0) return 0
+        const vector3 = this.maptalks?.threeLayer.distanceToVector3(el, el)
+        const zPos = vector3.x
+        return zPos
+
+    }
+
     update_vehicle = (key: string, loc: any) => {
 
         const t = this.obj[key]?.vehicle
+        if (this.cfg.is_3D !== 0) loc.gps[2] = this.altitude(loc.utm[2] - this.cfg.is_3D)
         if (typeof t !== 'undefined') t.update(loc)
 
     }
 
-    update_marker = (key: string, { name, gps, activity }: any) => {
+    update_marker = (key: string, { name, gps, utm, activity }: any) => {
 
         const t = this.obj[key]?.marker
 
@@ -109,8 +130,9 @@ export class Vehicles {
             color = activity.indexOf('stopped') !== -1 ? 'orange' : color */
 
             t.setCoordinates(gps)
-            t.setProperties({ name: name, altitude: 12 })
-            // t.updateSymbol({ textFill: '#fff', textHaloFill: color })
+
+            if (this.cfg.is_3D !== 0) t.setProperties({ name: name, altitude: utm[2] - this.cfg.is_3D + 12 })
+            else t.setProperties({ name: name, altitude: 12 })
 
         }
 
@@ -159,10 +181,10 @@ export class Vehicles {
             'symbol': <any>{
                 'textFaceName': 'sans-serif',
                 'textName': '{name}',
-                'textWeight': 'bold', //'bold', 'bolder'
+                'textWeight': 'bolder', //'bold', 'bolder'
                 'textStyle': 'normal', //'italic', 'oblique'
                 'cursor': 'pointer',
-                'textSize': 12,
+                'textSize': 10,
                 'textFont': null,     //same as CanvasRenderingContext2D.font, override textName, textWeight and textStyle
                 'textFill': '#fff',
                 'textOpacity': 1,

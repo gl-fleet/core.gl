@@ -1,7 +1,11 @@
 import { Host, Connection } from 'unet'
 import { Sequelize, DataTypes, Model, ModelStatic, QueryTypes } from 'sequelize'
 import { AsyncWait, Jfy, Now, Uid, Safe, Loop, dateFormat, moment, log } from 'utils'
-import { calculate_activities } from './utils'
+import * as turf from '@turf/turf'
+
+import { process_activities } from './process'
+
+let debug: any = null
 
 export class Activities {
 
@@ -13,10 +17,11 @@ export class Activities {
 
     _ = { days: 7, limit: 100 }
     buffer = { max_samples: 720 /** Around 30 minutes **/, max_activities: 5 }
+    shapes: any = {}
     todos: any[] = []
-    last = 0
     svg: any[] = []
     once = true
+    last = 0
 
     constructor({ local, core_data, sequelize }: { local: Host, core_data: Connection, sequelize: Sequelize }, run_background: boolean) {
 
@@ -42,17 +47,16 @@ export class Activities {
             type: { type: DataTypes.STRING, defaultValue: '' },
             name: { type: DataTypes.STRING, defaultValue: '' },
 
-            activity: { type: DataTypes.STRING, defaultValue: '' },
-            details: { type: DataTypes.TEXT, defaultValue: '' },
-            note: { type: DataTypes.STRING, defaultValue: '' },
+            state: { type: DataTypes.STRING, defaultValue: '', comment: 'GPS activity' },
+            trigger: { type: DataTypes.STRING, defaultValue: '', comment: 'Geofence activity' },
+            visit: { type: DataTypes.STRING, defaultValue: '', comment: 'Name of Geofence' },
+            distance: { type: DataTypes.FLOAT, defaultValue: 0.0, comment: 'meters' },
+            duration: { type: DataTypes.INTEGER, defaultValue: 0, comment: 'seconds' },
 
             startedAt: { type: DataTypes.STRING, defaultValue: '' },
             endedAt: { type: DataTypes.STRING, defaultValue: '' },
             start: { type: DataTypes.STRING, defaultValue: '' },
             end: { type: DataTypes.STRING, defaultValue: '' },
-
-            distance: { type: DataTypes.INTEGER, defaultValue: 0 },
-            duration: { type: DataTypes.INTEGER, defaultValue: 0 },
 
             createdAt: { type: DataTypes.STRING, defaultValue: () => Now() },
             updatedAt: { type: DataTypes.STRING, defaultValue: () => Now() },
@@ -63,7 +67,8 @@ export class Activities {
                 { unique: false, name: `${this.name}_proj_index`, using: 'BTREE', fields: ['proj'] },
                 { unique: false, name: `${this.name}_type_index`, using: 'BTREE', fields: ['type'] },
                 { unique: false, name: `${this.name}_name_index`, using: 'BTREE', fields: ['name'] },
-                { unique: false, name: `${this.name}_activity_index`, using: 'BTREE', fields: ['activity'] },
+                { unique: false, name: `${this.name}_state_index`, using: 'BTREE', fields: ['state'] },
+                { unique: false, name: `${this.name}_trigger_index`, using: 'BTREE', fields: ['trigger'] },
                 { unique: false, name: `${this.name}_startedat_index`, using: 'BTREE', fields: ['startedAt'], },
                 { unique: false, name: `${this.name}_updatedat_index`, using: 'BTREE', fields: ['updatedAt'], },
                 { unique: true, name: `${this.name}_name_startedat_index`, using: 'BTREE', fields: ['name', 'startedAt'] },
@@ -77,9 +82,12 @@ export class Activities {
         this.local.on(`get-${this.name}`, async (req: any) => await this.get(req.query))
         this.local.on(`set-${this.name}`, async (req: any) => await this.set(req.query), true, 4)
         this.local.on(`get-svg`, async (req: any) => {
+
             let put = ``
             this.svg.map((s, i) => { put += s })
+            console.log(this.svg.length)
             return put
+
         })
 
     }
@@ -119,11 +127,48 @@ export class Activities {
 
     }
 
+    upsert_buffer = async (key: string, sliced_acts: any, sliced_samps: any) => {
+
+        try {
+
+            const enums = this.sequelize.models['enums']
+
+            if (sliced_samps.length > this.buffer.max_samples) sliced_samps = sliced_samps.slice(this.buffer.max_samples - sliced_samps.length)
+            if (sliced_acts.length > this.buffer.max_activities) sliced_acts = sliced_acts.slice(this.buffer.max_activities - sliced_acts.length)
+
+            await enums.upsert({ type: 'activity.buffer', name: key, value: JSON.stringify({ buff_acts: sliced_acts, buff_samps: sliced_samps }), updatedAt: Now() })
+            await enums.upsert({ type: 'activity.now', name: key, value: JSON.stringify(sliced_acts[sliced_acts.length - 1]), updatedAt: Now() })
+
+        } catch (err: any) { log.warn(`[upsert_buffer] ${err.message}`) }
+
+    }
+
+    upsert_activity = async (activities: any, action = 'add') => {
+
+        try {
+
+            if (Array.isArray(activities) == false || activities.length === 0) return
+
+            if (true) { /** If true, will execute the query one by one **/
+
+                for (const x of activities) await this.collection.upsert(x, { updateOnDuplicate: ['name', 'startedAt'] })
+
+            } else { /** If false, will execute the query in bulk **/
+
+                await this.collection.bulkCreate(activities, { updateOnDuplicate: ['name', 'startedAt'] })
+
+            }
+
+        } catch (err: any) { log.warn(`[upsert_activity] ${err.message}`) }
+
+    }
+
     /*** *** *** @___Table_Jobs___ *** *** ***/
 
-    event_poller = async () => {
+    /** [01] **/ event_poller = async () => {
 
         const alias = `[${this.name}.event_poller]`
+        debug && console.log(alias)
         const enums = this.sequelize.models['enums']
         const { value: val = ',' }: any = (await enums.findOne({ where: { type: 'collect', name: this.name, deletedAt: null }, raw: true }) ?? {})
         const sp = val.split(',')
@@ -131,8 +176,16 @@ export class Activities {
         const createdAt = sp[1] || moment().add(-(this._.days), 'days').format(dateFormat)
         const rows: any = await this.core_data.get('get-events-status', { id: sp[0], createdAt, limit: this._.limit })
 
-        log.success(`${alias} Pulled ${rows.length} / ${rows[0].createdAt}`)
-        log.success(`${alias} Pulled ${rows.length} / ${rows[rows.length - 1].createdAt}`)
+        debug && console.log('')
+        debug && log.success(`Start checkpoint: ${val}`)
+
+        if (rows.length === 0) {
+            log.warn(`${alias} No new events found since ${createdAt}`)
+            return [[], {}]
+        }
+
+        log.success(`${alias} Pulled ${rows.length} /  ${rows[0].createdAt} - ${rows[rows.length - 1].createdAt}`)
+        debug && console.log('')
 
         /** ** Data aggregating **  **/
         const obj: any = {}
@@ -144,12 +197,13 @@ export class Activities {
 
             try {
 
-                const { createdAt, updatedAt } = x
+                const { src, createdAt, updatedAt } = x
                 const parsed: any = Jfy(x.data)
                 const { data = {}, value = {}, data_gps1 = [], data_gps2 = [], data_gps = {}, data_gsm } = parsed
                 const [proj, type, name] = data
-                const { utm = [-1, -1, -1], head = -1 } = data_gps
+                const { utm = [-1, -1, -1], head = -1, gps = [-1, -1, -1] } = data_gps
                 const [est, nrt, el] = utm
+                const [lon, lat] = gps
                 const id = `${proj}.${type}.${name}`
 
                 const current_work = () => {
@@ -164,7 +218,9 @@ export class Activities {
 
                 if (!obj.hasOwnProperty(id)) obj[id] = []
 
-                obj[id].push(`${est},${nrt},${el},${head},${data_gps1[5] ?? -1},${updatedAt},${current_work()}`)
+                obj[id].push(`${est},${nrt},${lat},${lon},${el},${head},${data_gps1[5] ?? -1},${createdAt},${current_work()}`)
+
+                debug === src && log.success(`${debug} ${createdAt} / ${updatedAt}`)
 
             } catch (err: any) { log.warn(`${alias} ${key} In the Loop / ${err.message}`) }
 
@@ -174,9 +230,10 @@ export class Activities {
 
     }
 
-    buffer_poller = async (obj: any) => {
+    /** [02] **/ buffer_poller = async (obj: any) => {
 
         const alias = `[${this.name}.buffer_poller]`
+        debug && console.log(alias)
 
         try {
 
@@ -187,7 +244,7 @@ export class Activities {
 
     }
 
-    aggregator = (events: any, buffer: any) => {
+    /** [03] **/ aggregator = (events: any, buffer: any) => {
 
         const merged: any = {}
 
@@ -214,13 +271,57 @@ export class Activities {
 
     }
 
-    calculator = async (merged: any) => {
+    /** [04] **/ pull_shapes = async () => {
 
-        // -- DELETE FROM public.enums WHERE type = 'activity.buffer' or type = 'activity.now' or name = 'activities'
-        // -- DELETE FROM public.activities
+        const alias = `[${this.name}.pull_shapes]`
+        debug && console.log(alias)
+        let tmp = ``, errs = 0
+
+        try {
+
+            const shapes: any = await this.core_data.get('_get-shapes', {})
+
+            log.success(`${alias} Pulled ${shapes.length} shapes from the core_data`)
+
+            if (shapes && shapes.length > 0) {
+
+                for (const x of shapes) {
+
+                    try {
+
+                        const points = JSON.parse(x.geojson)
+
+                        if (x.type === "LineString") {
+
+                            const obj = turf.lineString(points)
+                            if (obj && obj.geometry) this.shapes[x.id] = { ...x, obj }
+
+                        } else {
+
+                            const obj = turf.polygon(x.type === 'Rectangle' ? [points] : points)
+                            if (obj && obj.geometry) this.shapes[x.id] = { ...x, obj }
+
+                        }
+
+                    } catch (err: any) {
+
+                        tmp = `${err.message} '${x.type}' '${x.name}' (${++errs} similar errors so far)`
+
+                    }
+
+                }
+
+                tmp && log.warn(`${alias} ${tmp}`)
+
+            }
+
+        } catch (err: any) { log.warn(`${alias} In the Loop / ${err.message} / ${tmp}`) }
+    }
+
+    /** [05] **/ calculator = async (merged: any) => {
 
         const alias = `[${this.name}.calculator]`
-        let debug = `HLV796`
+        debug && console.log(alias)
 
         for (const key in merged) {
 
@@ -228,15 +329,13 @@ export class Activities {
 
                 const { buff_acts = [], buff_samps = [] }: any = merged[key]
 
-                console.log('')
+                let dbg = debug && key.indexOf(debug) !== -1
+                dbg && log.success(`${alias} Processing ${key} with ${buff_acts.length} activities and ${buff_samps.length} samples`)
 
-                log.success(`${alias} Processing ${key} with ${buff_acts.length} activities and ${buff_samps.length} samples`)
+                const [activities = [], sliced_acts = [], sliced_samps = [], /* [svg, box] = [] */]: any = process_activities(key, buff_acts, buff_samps, this.shapes, debug)
 
-                const [activities, sliced_acts, sliced_samps, [svg, box]]: any = calculate_activities(key, buff_acts, buff_samps, debug)
-
-                box > 1 && this.svg.push(svg) && this.svg.length > 5 && this.svg.shift()
-
-                log.success(`${alias} Sliced ${key} with ${sliced_acts.length} activities and ${sliced_samps.length} samples`)
+                // box > 1 && this.svg.push(svg) && this.svg.length > 5 && this.svg.shift()
+                dbg && log.success(`${alias} ${activities.length} activities & ${sliced_acts.length} sliced_act & ${sliced_samps.length} sliced_samps`)
 
                 await this.upsert_buffer(key, sliced_acts, sliced_samps)
                 await this.upsert_activity(activities, 'merge')
@@ -247,35 +346,15 @@ export class Activities {
 
     }
 
-    upsert_buffer = async (key: string, sliced_acts: any, sliced_samps: any) => {
-
-        const enums = this.sequelize.models['enums']
-
-        if (sliced_samps.length > this.buffer.max_samples) sliced_samps = sliced_samps.slice(this.buffer.max_samples - sliced_samps.length)
-        if (sliced_acts.length > this.buffer.max_activities) sliced_acts = sliced_acts.slice(this.buffer.max_activities - sliced_acts.length)
-
-        await enums.upsert({ type: 'activity.buffer', name: key, value: JSON.stringify({ buff_acts: sliced_acts, buff_samps: sliced_samps }), updatedAt: Now() })
-        await enums.upsert({ type: 'activity.now', name: key, value: JSON.stringify(sliced_acts[sliced_acts.length - 1]), updatedAt: Now() })
-
-    }
-
-    upsert_activity = async (activities: any, action = 'add') => {
-
-        if (Array.isArray(activities) == false || activities.length === 0) return
-
-        for (const x of activities)
-            await this.collection.upsert(x, { updateOnDuplicate: ['name', 'startedAt'] })
-        // await this.collection.bulkCreate(activities, { updateOnDuplicate: ['name', 'startedAt'] })
-
-    }
-
-    update_checkpoint = async (rows: any) => {
+    /** [06] **/ update_checkpoint = async (rows: any) => {
 
         if (rows.length > 0) {
 
+            debug && console.log(`[${this.name}.update_checkpoint]`)
             const enums = this.sequelize.models['enums']
             const item = rows[rows.length - 1]
-            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.createdAt} `, updatedAt: Now() })
+            await enums.upsert({ type: 'collect', name: this.name, value: `${item.id},${item.createdAt}`, updatedAt: Now() })
+            debug && log.success(`End checkpoint: ${item.id},${item.createdAt}`)
 
         }
 
@@ -283,8 +362,12 @@ export class Activities {
 
     executer = async () => {
 
+        debug = 'HLV796'
+
         /** Get the latest events by checkpoint **/
         const [rows, events] = await this.event_poller()
+
+        if (Array.isArray(rows) && rows.length === 0) return true
 
         /** Get the buffer from enums **/
         const buffer: any = await this.buffer_poller(events)
@@ -292,11 +375,16 @@ export class Activities {
         /** Merge the Events.data.array <-> Enums.buffer.string **/
         const merged = this.aggregator(events, buffer)
 
+        /** Get the Shapes **/
+        await this.pull_shapes()
+
         /** Cut_and_Calculate -> Save_Calculated -> Save_Uncalculated */
         await this.calculator(merged)
 
         /** ** Data saving **  **/
         await this.update_checkpoint(rows)
+
+        await AsyncWait(500)
 
     }
 

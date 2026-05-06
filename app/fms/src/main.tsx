@@ -7,8 +7,8 @@ import { mapHook } from './hooks/map'
 
 import LayoutHeader from './layouts/header'
 import LayoutFooter from './layouts/footer'
-import LayoutMenu from './layouts/menu'
 
+import ViewCube from './components/viewcube'
 import { DistanceTool } from './tools/distance'
 import { AreaTool } from './tools/area'
 
@@ -58,20 +58,48 @@ const GlobalStyle = createGlobalStyle`
         box-shadow: none !important;
     }
 
+    .tp-lblv_l {
+        text-transform: capitalize;
+    }
+
     :root {
-        --tp-base-background-color: ${({ dark = true }) => dark ? 'rgb(55, 56, 61)' : '#e5e5e5'};
+        --tp-base-background-color: ${({ dark = true }) => dark ? '#282828' : '#e5e5e5'};
         --tp-base-border-radius: 0px;
         --tp-input-background-color: ${({ dark = true }) => dark ? 'hsla(0, 0%, 0%, 0.3)' : 'hsla(0, 0%, 0%, 0.5)'};
         --tp-label-foreground-color: ${({ dark = true }) => dark ? 'hsla(0, 0%, 100%, 0.5)' : '#000'};
         --tp-container-foreground-color: ${({ dark = true }) => dark ? '#fff' : '#000'};
+
+        --tp-input-background-color-active: ${({ dark = true }) => dark ? '#2f2f34' : '#858585'};
+        --tp-input-background-color-focus: ${({ dark = true }) => dark ? '#2f2f34' : '#858585'};
+        --tp-input-background-color-hover: ${({ dark = true }) => dark ? '#2f2f34' : '#858585'};
     }
 
 `
 const Pane = styled.div`
     position: fixed;
     right: 8;
-    top: 40;
+    top: 32;
     z-index: 99;
+    > div {
+        position: relative;
+        margin-top: 8;
+        .tp-rotv_c {
+            padding-bottom: 0px !important;
+        }
+        > div > .tp-lblv {
+            margin: 0px !important;
+            button {
+                position: absolute;
+                border-radius: 50%;
+                top: 4px;
+                right: 4px;
+                background: #fff;
+                width: 16px;
+                height: 16px;
+                line-height: 1;
+            }
+        }
+    }
 `
 const Layers = styled.div``
 
@@ -82,21 +110,8 @@ export default (cfg: iArgs) => {
     const [isMapReady, Maptalks] = mapHook({ containerId: 'render_0', isDarkMode: cfg.isDarkMode, conf: {} })
     const [notifApi, contextHolderNotification] = notification.useNotification()
     const [messageApi, contextHolderMessage] = message.useMessage()
-    const [loaded, setLoaded] = useState(2)
-
+    const [loaded, setLoaded] = useState(1)
     const props: any = useRef({})
-
-    useEffect(() => {
-
-        Safe(async () => {
-
-            const { Pane } = await import('tweakpane')
-            props.current.Pane = new Pane({ container: document.getElementById('pane') || undefined })
-            setLoaded((v) => v - 1)
-
-        })
-
-    }, [])
 
     useEffect(() => {
 
@@ -126,11 +141,9 @@ export default (cfg: iArgs) => {
         <GlobalStyle dark={cfg.isDarkMode} />
 
         {loaded === 0 && <LayoutHeader {...cfg} />}
-
-        <LayoutMenu {...cfg} />
-        <Pane id="pane" />
         <Col id='render_0' span={24} style={{ height: '100%' }} />
-
+        <Pane id="pane" />
+        {loaded === 0 && <ViewCube {...cfg} />}
         {loaded === 0 && <LayoutFooter {...cfg} />}
 
         <Layers>

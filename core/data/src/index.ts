@@ -4,6 +4,7 @@ import { decodeENV, Safe, env, log } from 'utils'
 
 import { Event } from './events'
 import { Chunk } from './chunks'
+import { Shapes } from './shapes'
 
 const { name, version, mode, db_name, db_user, db_pass } = decodeENV()
 
@@ -42,6 +43,7 @@ Safe(async () => {
 
     new Event(cf)
     new Chunk(cf)
+    new Shapes(cf)
 
     const replica = new rMaster({
         api: cf.local,

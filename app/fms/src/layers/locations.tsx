@@ -1,9 +1,11 @@
 import { React, Row, Col } from 'uweb'
-import { AsyncWait, Safe, dateFormat } from 'utils/web'
+import { AsyncWait, Safe, KeyValue, Win } from 'utils/web'
 import { THREE } from 'uweb/three'
 import moment from 'moment'
 
-import { exportCSVFile } from '../hooks/utils'
+import { exportCSVFile, createPane, ListWithRemove } from '../hooks/utils'
+import { Shots } from './render/shots'
+import { Digs } from './render/dig'
 
 const { useEffect, useState, useRef } = React
 
@@ -65,13 +67,9 @@ export const coloredMaterial = () => {
 
 export default (cfg: iArgs) => {
 
-    const [on, setOn] = useState(false)
-    const folder: any = useRef(null)
     const group: any = useRef(null)
 
-    const addMesh = (mesh: any) => Safe(() => {
-        mesh && cfg.MapView?.threeLayer.addMesh(mesh)
-    }, 'Add mesh error')
+    const addMesh = (mesh: any) => Safe(() => { mesh && cfg.MapView?.threeLayer.addMesh(mesh) }, 'Add mesh error')
 
     const remMesh = (mesh: any) => Safe(() => {
         cfg.MapView?.threeLayer.removeMesh(mesh)
@@ -80,180 +78,217 @@ export default (cfg: iArgs) => {
         mesh = undefined
     }, 'Remove mesh error')
 
-    useEffect(() => { cfg.event.on('layer.locations', () => setOn((v) => !v)) }, [])
-
     useEffect(() => {
 
-        if (cfg.Pane) {
+        let emit: any = null
+        const shots = new Shots(cfg)
+        const digs = new Digs(cfg)
+        let list: ListWithRemove | any = null
 
-            if (on === false) {
+        cfg.event.on('tool.3D.enable', (is3D) => { console.log(`3D status change: ${is3D}`) })
 
-                folder.current && folder.current.dispose()
-                if (group.current) remMesh(group.current)
+        cfg.event.on('layer.locations', () => {
 
-            } else {
+            emit && emit('close')
 
-                const df = `YYYY-MM-DD HH:mm`
-                const arg = {
-                    Vehicles: '',
-                    Start: moment().add(-(24 * 1), 'hours').format(df),
-                    End: moment().format(df),
-                    '3D': false,
-                    Point: { r: 255, g: 55, b: 55 },
-                    Design: { r: 55, g: 255, b: 55 },
-                    TranslateX: -1000,
-                    'AI Integration': false,
+            let is_3D_enabled = KeyValue('3D') === 'yes'
+            let is_3D_diff = Number(KeyValue('Elevation'))
+
+            const df = `YYYY-MM-DD HH:mm`
+            const def: any = {
+                Vehicles: '---',
+                Start: moment().add(-(24 * 1), 'hours').format(df),
+                End: moment().format(df),
+                '3D': is_3D_enabled, '_3D': { disabled: true },
+                Point: { r: 255, g: 55, b: 55 }, _Point: { disabled: true },
+                Design: { r: 55, g: 255, b: 55 }, _Design: { disabled: true },
+                'AI Integration': false, '_AI Integration': { disabled: true },
+                btn: [{ title: 'Load' }, { title: 'CSV' }],
+            }
+
+            const arg = def
+            let fileTitle = '-'
+            let items: any = []
+            let headers = {
+                name: 'Name',
+                time: 'Time',
+                east: "East",
+                north: "North",
+                elevation: "Elevation",
+                ondesign: "On Design",
+                todesign: "To Design",
+                direction: "Direction",
+                precision: "Precision (GPS)",
+            }
+
+            emit = createPane('Location history...', (k: string, v: any = null) => {
+
+                if (k === 'close') {
+
+                    digs.remove_all()
+                    shots.remove_all()
+                    emit = null
+                    if (group.current) remMesh(group.current)
+
                 }
 
-                folder.current = cfg.Pane.addFolder({ title: 'Locations loading ...' })
+                if (k === 'change') {
 
-                cfg.core_collect.get("get-enums", { type: 'location.now' }).then((ls: any) => {
+                    if (Array.isArray(v.value)) {
 
-                    folder.current.title = 'Locations'
+                        const [_type, _name, _value] = v.value
 
-                    let fileTitle = '-'
-                    let headers = {
-                        name: 'Name',
-                        time: 'Time',
-                        east: "East",
-                        north: "North",
-                        elevation: "Elevation",
-                        ondesign: "On Design",
-                        todesign: "To Design",
-                        direction: "Direction",
-                        precision: "Precision (GPS)",
-                    }
-                    let items: any = []
-                    const options: any = {}
-                    const obj: any = {}
+                        if (_type === 'location') {
 
-                    for (const x of ls) {
+                            _value && cfg.MapView?.animateTo([_value[0], _value[1]], 0)
 
-                        let sp = x.name.split('.')
-                        let ki = `[${sp[1]}] ${sp[2]}`
-                        options[ki] = sp[2]
-                        const parsed = JSON.parse(x.value)
+                            cfg.core_data.poll('get-chunks-distinct', { dst: _name }, (e: any, data: any = []) => {
 
-                        const [_g, _g1, _g2, _gps, _gsm, _rtcm, _val] = parsed.data.split('|')
-                        const g = _g.split(',')
-                        const gps = [Number(g[0]), Number(g[1]), 0]
-                        obj[sp[2]] = gps
+                                if (Array.isArray(data) && data.length > 0) {
 
-                    }
-
-                    folder.current.on('change', (ev: any) => {
-
-                        const gps = obj[arg.Vehicles]
-                        gps && cfg.MapView?.animateTo([gps[0], gps[1]], 0)
-
-                    })
-
-                    folder.current.addBinding(arg, 'Vehicles', { options })
-                    folder.current.addBinding(arg, 'Start')
-                    folder.current.addBinding(arg, 'End')
-                    folder.current.addBinding(arg, 'Point', { disabled: true })
-                    folder.current.addBinding(arg, 'Design', { disabled: true })
-                    folder.current.addBinding(arg, '3D')
-                    folder.current.addBinding(arg, 'TranslateX', { min: -5000, max: 5000 })
-                    folder.current.addBinding(arg, 'AI Integration', { disabled: true })
-
-                    const btn = folder.current.addButton({ label: '', title: 'Load' })
-                    const csv = folder.current.addButton({ label: '', title: 'CSV', disabled: true })
-
-                    btn.on('click', () => {
-
-                        console.log('Query params', arg)
-                        btn.disabled = true; btn.title = 'Loading...';
-                        fileTitle = `${arg.Vehicles}-${arg.Start}-${arg.End}`
-
-                        cfg.core_collect.pull('get-locations-by-date', { name: arg.Vehicles, start: arg.Start, end: arg.End }, (err: any, res: any) => {
-
-                            if (err) {
-
-                                let message = err.response && err.response.data ? err.response.data : err.message
-                                cfg.messageApi.warning(`Load locations error: ${message}`)
-                                setTimeout(() => { btn.disabled = false; btn.title = 'Load'; csv.disabled = false; }, 0)
-                                return
-
-                            } else {
-
-                                console.log('Location result', res)
-                                const points: any = []
-                                let minElev = 99999, maxElev = -99999, top = 0
-                                let i = 0
-
-                                for (const x of res) {
-                                    const { east, north, elevation, data, updatedAt } = x
-                                    if (elevation < minElev) minElev = elevation
-                                    if (elevation > maxElev) maxElev = elevation
-                                }
-
-                                top = maxElev - minElev
-
-                                for (const x of res) {
-
-                                    const { east, north, elevation, data, updatedAt } = x
-                                    const _ = data.split('|')
-                                    const prc = _[4].split(',')
-                                    const [xlng, ylat] = _[0].split(',')
-                                    const coordinate: any = [Number(xlng), Number(ylat)]
-                                    const [scr, dir, dis] = _[6].split(',')
-                                    const dist = dis === '-' ? '-' : Number(dis)
-                                    const h = elevation + (arg.TranslateX)
-                                    const colorPoint = `rgb(${arg.Point.r},${arg.Point.g},${arg.Point.b})`
-                                    const colorDesign = `rgb(${arg.Design.r},${arg.Design.g},${arg.Design.b})`
-
-                                    items.push({
-                                        name: arg.Vehicles,
-                                        time: moment(updatedAt).format('YYYY-MM-DD HH:mm:ss'),
-                                        east: east,
-                                        north: north,
-                                        elevation: elevation,
-                                        ondeign: dist === '-' ? 'No' : (dist > 1 ? 'No' : 'Yes'),
-                                        todesign: dist === '-' ? '-' : dis,
-                                        direction: dir,
-                                        precition: `${prc[3]}cm ${prc[4]}cm`,
-                                    })
-
-                                    points.push({
-                                        coordinate,
-                                        value: ++i,
-                                        size: 2,
-                                        height: arg['3D'] ? h : 0,
-                                        color: dist === '-' ? colorPoint : (dist > 1 ? colorPoint : colorDesign),
-                                    })
+                                    const options: any = { '---': '---' }
+                                    for (const x of data) options[x.name] = ['file', _name, x]
+                                    emit('effect', { name: 'Design files', title: `Files ${_name}`, options })
 
                                 }
 
-                                console.log('CSV', items)
+                            })
 
-                                group.current = cfg.MapView?.threeLayer.toPoints(points, {}, goldenMaterial())
-                                addMesh(group.current)
+                        }
 
-                                setTimeout(() => { btn.disabled = false; btn.title = 'Load'; csv.disabled = false; }, 0)
+                        if (_type === 'file') {
+
+                            const [_type, _name, _value] = v.value
+                            const key = `${_value.dst}:${_value.name}`
+
+                            _value.type === 'dxf-geojson' && digs.render_plan(key, _value.name, _value.dst)
+                            _value.type === 'csv-geojson' && shots.render_all(key, _value.name, _value.dst)
+
+                            list?.addItem(key, () => {
+                                console.log(`${key} is removed ! ! ! `)
+                                _value.type === 'dxf-geojson' && digs.remove(key)
+                                _value.type === 'csv-geojson' && shots.remove(key)
+                            })
+
+                        }
+
+                    }
+
+                }
+
+                if (k === 'CSV') {
+
+                    exportCSVFile(headers, items, fileTitle)
+
+                }
+
+                if (k === 'Load') {
+
+                    emit && emit('btn', { name: 'Load', title: 'Loading...', disabled: true })
+                    emit && emit('btn', { name: 'CSV', title: 'CSV', disabled: true })
+
+                    fileTitle = `${arg.Vehicles[1]} - ${arg.Start} - ${arg.End}`
+
+                    cfg.core_collect.pull('get-locations-by-date', { name: arg.Vehicles[1], start: arg.Start, end: arg.End }, (err: any, res: any) => {
+
+                        if (err) {
+                            console.log(err)
+                            let message = err.response && err.response.data ? err.response.data : err.message
+                            cfg.messageApi.warning(`Load locations error: ${message}`)
+                            // setTimeout(() => { btn.disabled = false; btn.title = 'Load'; csv.disabled = false; }, 0)
+                            emit && emit('btn', { name: 'Load', title: 'Load', disabled: false })
+                            return
+
+                        } else {
+
+                            console.log('Location result', res)
+                            const points: any = []
+                            let i = 0
+
+                            for (const x of res) {
+
+                                const { east, north, elevation, data, updatedAt } = x
+                                const _ = data.split('|')
+                                const prc = _[4].split(',')
+                                const [xlng, ylat] = _[0].split(',')
+                                const coordinate: any = [Number(xlng), Number(ylat)]
+                                const [scr, dir, dis] = _[6].split(',')
+                                const dist = dis === '-' ? '-' : Number(dis)
+                                const h = elevation - (is_3D_diff)
+
+                                const colorPoint = `rgb(${arg.Point.r}, ${arg.Point.g}, ${arg.Point.b})`
+                                const colorDesign = `rgb(${arg.Design.r}, ${arg.Design.g}, ${arg.Design.b})`
+
+                                items.push({
+                                    name: arg.Vehicles,
+                                    time: moment(updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+                                    east: east,
+                                    north: north,
+                                    elevation: elevation,
+                                    ondeign: dist === '-' ? 'No' : (dist > 1 ? 'No' : 'Yes'),
+                                    todesign: dist === '-' ? '-' : dis,
+                                    direction: dir,
+                                    precition: `${prc[3]}cm ${prc[4]}cm`,
+                                })
+
+                                points.push({
+                                    coordinate,
+                                    value: ++i,
+                                    size: 2,
+                                    height: is_3D_enabled ? h : 0,
+                                    color: dist === '-' ? colorPoint : (dist > 1 ? colorPoint : colorDesign),
+                                })
 
                             }
 
-                        })
+                            console.log('CSV', items)
+
+                            group.current = cfg.MapView?.threeLayer.toPoints(points, {}, goldenMaterial())
+                            addMesh(group.current)
+
+                            // setTimeout(() => { btn.disabled = false; btn.title = 'Load'; csv.disabled = false; }, 0)
+                            emit && emit('btn', { name: 'Load', title: 'Load', disabled: false })
+                            emit && emit('btn', { name: 'CSV', title: 'CSV', disabled: false })
+
+                        }
 
                     })
 
-                    csv.on('click', () => exportCSVFile(headers, items, fileTitle))
+                }
 
-                }).catch(err => {
+            })
 
-                    folder.current && folder.current.dispose()
-                    setOn(false)
-                    let message = err.response && err.response.data ? err.response.data : err.message
-                    cfg.messageApi.warning(`Load locations error: ${message}`)
+            cfg.core_collect.get("get-enums", { type: 'location.now' }).then((ls: any) => {
 
+                const options: any = { '---': '---' }
+
+                for (const x of ls) {
+
+                    let sp = x.name.split('.')
+                    let ki = `[${sp[1]}]${sp[2]}`
+                    const parsed = JSON.parse(x.value)
+                    const [_g, _g1, _g2, _gps, _gsm, _rtcm, _val] = parsed.data.split('|')
+                    const g = _g.split(',')
+                    const gps = [Number(g[0]), Number(g[1]), 0]
+                    // obj[sp[2]] = gps
+                    options[ki] = ['location', sp[2], gps]
+
+                }
+
+                def._Vehicles = { options }
+                emit && emit(`setup`, def)
+                emit && emit('btn', { name: 'CSV', disabled: true })
+                emit && emit(`enable`)
+
+                list = new ListWithRemove(document.getElementById('tweak-files'), (item: any) => {
+                    console.log('Removed:', item)
                 })
 
-            }
+            }).catch((e) => emit && emit('close')).finally(() => emit && emit('title', 'Location history'))
 
-        }
+        })
 
-    }, [on])
+    }, [])
 
     return null
 

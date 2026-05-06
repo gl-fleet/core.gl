@@ -46,6 +46,6 @@ Safe(() => {
 
     new Bridge(API, 'BN', Number(bn[0]), Number(bn[1]))
 
-    NTRIP(API, 'BK', 2103, BK[1])
+    NTRIP(API, 'BK', 2103, BK[0])
 
 })

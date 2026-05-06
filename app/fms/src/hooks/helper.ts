@@ -4,6 +4,7 @@ export const AddMeta = () => {
 
     const local = window.location.hostname === 'localhost'
     const doc: any = document ?? {}
+    doc.title = "The Link | FMS"
     const low = doc.documentElement.clientWidth < 1024 ? '0.75' : '1'
     const meta = doc.createElement('meta')
 
@@ -139,4 +140,76 @@ export const parseLocation = (location: any) => {
 
     } catch (err) { return e }
 
+}
+
+export const DXF_GeoJson_Parser = (data: { features: any[] }) => {
+
+    const { features } = data
+
+    const points: tItem[] = []
+    const polygons: tItem[] = []
+    const linestrings: tItem[] = []
+
+    for (const x of features) {
+
+        const { geometry, properties } = x
+        const { type, coordinates } = geometry
+        /* const { Layer, SubClasses, EntityHandle } = properties */
+
+        type === 'LineString' && linestrings.push({ ...properties, Coords: coordinates })
+        type === 'Polygon' && polygons.push({ ...properties, Coords: coordinates })
+        type === 'Point' && points.push({ ...properties, Coords: coordinates })
+
+    }
+
+    return {
+        points,
+        polygons,
+        linestrings,
+    }
+
+}
+
+export const CSV_GeoJson_Parser = (data: { features: any[] }): csvItems[] => {
+
+    try {
+
+        const { features } = data
+
+        return features.map((e: any) => {
+            const { field_1, field_2, field_3, field_4, field_5 } = e.properties
+            return [field_1, Number(field_3), Number(field_2), Number(field_4), Number(field_5), undefined]
+        })
+
+    } catch (err) {
+        return []
+    }
+
+
+}
+
+export const findBoundaryPoints = (data: csvItems[]) => {
+    const points = data.map(row => ({
+        label: row[0],
+        x: row[1],
+        y: row[2],
+    }))
+
+    return {
+        minX: points.reduce((a, b) => b.x < a.x ? b : a),
+        maxX: points.reduce((a, b) => b.x > a.x ? b : a),
+        minY: points.reduce((a, b) => b.y < a.y ? b : a),
+        maxY: points.reduce((a, b) => b.y > a.y ? b : a)
+    }
+}
+
+export const expandBoundingBox = (data: csvItems[], n: number) => {
+    const { minX, maxX, minY, maxY } = findBoundaryPoints(data)
+
+    return {
+        bottomLeft: { x: minX.x - n, y: minY.y - n },
+        bottomRight: { x: maxX.x + n, y: minY.y - n },
+        topRight: { x: maxX.x + n, y: maxY.y + n },
+        topLeft: { x: minX.x - n, y: maxY.y + n }
+    }
 }

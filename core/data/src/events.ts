@@ -59,7 +59,7 @@ export class Event {
 
             try {
 
-                ulog(key, 'req', `Colloct pulling`, `cloud`, `db`)
+                ulog(key, 'req', `Collect pulling`, `cloud`, `db`)
                 const rows = await this.getStatus(req.query)
                 ulog(key, 'then', `Found ${rows?.length} items`, `db`, `cloud`)
                 return rows
@@ -70,6 +70,27 @@ export class Event {
                 return []
 
             }
+
+        })
+
+
+        this.local.on(`get-${this.name}-shot-actual`, async (req: any) => {
+
+            const { src, type, name } = req.query
+
+            /** Need lot more work on this **/
+            const items = await this.collection.findAll({
+                where: {
+                    src,
+                    type,
+                    name: { [Op.like]: `${name}%` },
+                    deletedAt: null,
+                },
+                order: [['createdAt', 'DESC']],
+                raw: true,
+            })
+
+            return items
 
         })
 
