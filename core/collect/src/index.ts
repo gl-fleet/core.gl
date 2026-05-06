@@ -6,7 +6,7 @@ import { Enums } from './enums'
 
 import { Locations } from './locations'
 import { Coverages } from './coverages'
-import { Activities } from './activities'
+// import { Activities } from './activities'
 
 const { name, version, mode, db_name, db_user, db_pass } = decodeENV()
 
@@ -48,7 +48,7 @@ Safe(async () => {
 
     const locations = new Locations(cf, mode !== 'development')
     const coverages = new Coverages(cf, mode !== 'development')
-    const activities = new Activities(cf, mode === 'development')
+    // const activities = new Activities(cf, mode === 'development')
 
     /* Following tables are generated from events and chunks */
 
