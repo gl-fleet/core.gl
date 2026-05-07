@@ -6,8 +6,6 @@ import { EventEmitter } from "events"
 import { AddMeta, Persist } from './hooks/helper'
 import Main from './main'
 
-const { useRef, useEffect, useState } = React
-
 const proxy = undefined
 const timeout = 15000 * 4
 

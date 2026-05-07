@@ -54,6 +54,7 @@ class DrawShape {
     lastAdded: any = null
     lastEdit: any = null
     cb: any = null
+    count: number = 0
 
     constructor(cfg: iArgs) {
 
@@ -164,8 +165,11 @@ class DrawShape {
 
                 const { id = '-', type, name, geojson, rules, style, connect, updatedAt, deletedAt } = raw
                 const styles = JSON.parse(style)
+                let json = JSON.parse(geojson)
 
-                let geometry = maptalks.GeoJSON.toGeometry({ "name": raw.name, "type": "Feature", "geometry": { "type": cf[type], "coordinates": JSON.parse(geojson) } })
+                if (type === 'LineString' && json[0].length !== 2) json = json[0]
+
+                let geometry = maptalks.GeoJSON.toGeometry({ "name": raw.name, "type": "Feature", "geometry": { "type": cf[type], "coordinates": json } })
 
                 if (type === 'Circle') {
 
@@ -202,7 +206,6 @@ class DrawShape {
 
                 } else {
 
-                    // console.log(`Adding geometry`, raw)
                     this.addGeometry({ id, type, name, rules, connect, ...styles, delete: deletedAt ? true : false }, geometry)
 
                 }
