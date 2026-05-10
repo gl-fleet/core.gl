@@ -34,12 +34,17 @@ export class Digs {
 
             if (e) { res({}) } else {
 
-                const { polygons, linestrings } = DXF_GeoJson_Parser(data)
+                const { polygons, linestrings, points } = DXF_GeoJson_Parser(data)
+
+                /* console.log(name)
+                console.log(data)
+                console.log(polygons)
+                console.log(linestrings) */
 
                 this.triangle.insert(key, polygons)
                 this.line.insert(key, linestrings)
 
-                res({ polygons, linestrings })
+                res({ polygons, linestrings, points })
 
             }
 

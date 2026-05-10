@@ -154,7 +154,6 @@ export const DXF_GeoJson_Parser = (data: { features: any[] }) => {
 
         const { geometry, properties } = x
         const { type, coordinates } = geometry
-        /* const { Layer, SubClasses, EntityHandle } = properties */
 
         type === 'LineString' && linestrings.push({ ...properties, Coords: coordinates })
         type === 'Polygon' && polygons.push({ ...properties, Coords: coordinates })

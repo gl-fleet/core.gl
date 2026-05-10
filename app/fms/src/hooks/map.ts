@@ -31,9 +31,7 @@ export const mapHook = ({ containerId, isDarkMode, conf }: {
             simulate: false,
             doubleClickZoom: lowReso,
             fps: 60,
-            custom: {
-                centerCross: true,
-            },
+            custom: { centerCross: true },
             ...conf,
         })
 

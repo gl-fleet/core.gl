@@ -4,6 +4,81 @@ const { Pane } = require('tweakpane')
 import type { ListApi } from 'tweakpane'
 
 export class ListWithRemove {
+    container: any
+    ul: any
+    onRemove: any
+    onReport: any
+
+    constructor(container: any, onRemove?: any, onReport?: any) {
+        this.container = typeof container === 'string' ? document.getElementById(container) : container
+        if (!this.container) throw new Error('Container not found')
+        this.onRemove = onRemove
+        this.onReport = onReport
+        this.ul = document.createElement('ul')
+        this.ul.style.listStyle = 'none'
+        this.ul.style.padding = '0'
+        this.ul.style.margin = '4px 0'
+        this.container.appendChild(this.ul)
+    }
+
+    clear() { this.ul.innerHTML = '' }
+
+    addItem(text: any, rmcb: any = null, rpcb: any = null) {
+        const li = document.createElement('li')
+        li.style.display = 'flex'
+        li.style.alignItems = 'center'
+        li.style.justifyContent = 'space-between'
+        li.style.fontSize = '11px'
+        li.style.padding = '2px 4px 2px 12px'
+        li.style.marginBottom = '2px'
+        li.style.borderRadius = '4px'
+        li.style.background = 'rgba(255,255,255,0.05)'
+
+        const label = document.createElement('span')
+        label.textContent = `👁 ${text}`
+        label.style.flex = '1'
+        label.style.color = '#52C41A'
+
+        // Report button
+        const reportBtn = document.createElement('button')
+        reportBtn.textContent = '📋'
+        reportBtn.title = 'Report'
+        reportBtn.style.border = 'none'
+        reportBtn.style.background = 'transparent'
+        reportBtn.style.cursor = 'pointer'
+        reportBtn.style.fontSize = '11px'
+        reportBtn.style.padding = '0 4px'
+        reportBtn.style.opacity = '0.6'
+        reportBtn.style.transition = 'opacity 0.15s'
+        reportBtn.onmouseenter = () => { reportBtn.style.opacity = '1' }
+        reportBtn.onmouseleave = () => { reportBtn.style.opacity = '0.6' }
+        reportBtn.onclick = () => {
+            rpcb && rpcb(text)
+            if (this.onReport) this.onReport(text)
+        }
+
+        // Remove button
+        const removeBtn = document.createElement('button')
+        removeBtn.textContent = '×'
+        removeBtn.style.border = 'none'
+        removeBtn.style.background = 'transparent'
+        removeBtn.style.cursor = 'pointer'
+        removeBtn.style.fontSize = '11px'
+        removeBtn.style.color = '#888'
+        removeBtn.onclick = () => {
+            rmcb && rmcb(text)
+            li.remove()
+            if (this.onRemove) this.onRemove(text)
+        }
+
+        li.appendChild(label)
+        li.appendChild(reportBtn)
+        li.appendChild(removeBtn)
+        this.ul.appendChild(li)
+    }
+}
+
+export class ListWithRemoveV1 {
 
     container: any;
     ul: any;

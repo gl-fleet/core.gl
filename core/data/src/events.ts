@@ -78,12 +78,15 @@ export class Event {
 
             const { src, type, name } = req.query
 
+            const where: any = {}
+            if (src) where['src'] = src
+            if (type) where['type'] = type
+
             /** Need lot more work on this **/
             const items = await this.collection.findAll({
                 where: {
-                    src,
-                    type,
-                    name: { [Op.like]: `${name}%` },
+                    ...where,
+                    name: { [Op.like]: `${name}-%` },
                     deletedAt: null,
                 },
                 order: [['createdAt', 'DESC']],

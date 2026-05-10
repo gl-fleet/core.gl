@@ -165,9 +165,12 @@ export default (cfg: iArgs) => {
                             _value.type === 'csv-geojson' && shots.render_all(key, _value.name, _value.dst)
 
                             list?.addItem(key, () => {
-                                console.log(`${key} is removed ! ! ! `)
+                                console.log(`${key} is remove !!! `)
                                 _value.type === 'dxf-geojson' && digs.remove(key)
                                 _value.type === 'csv-geojson' && shots.remove(key)
+                            }, () => {
+                                console.log(`${key} is report !!! `)
+                                _value.type === 'csv-geojson' && shots.report(key)
                             })
 
                         }
@@ -280,9 +283,7 @@ export default (cfg: iArgs) => {
                 emit && emit('btn', { name: 'CSV', disabled: true })
                 emit && emit(`enable`)
 
-                list = new ListWithRemove(document.getElementById('tweak-files'), (item: any) => {
-                    console.log('Removed:', item)
-                })
+                list = new ListWithRemove(document.getElementById('tweak-files'))
 
             }).catch((e) => emit && emit('close')).finally(() => emit && emit('title', 'Location history'))
 

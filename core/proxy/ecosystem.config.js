@@ -7,6 +7,7 @@ const env = encodeENV({
     mode: process.env.MODE,
     ports: `8010,8011,8012`,
     secret: process.env.TOKEN_SECRET ?? 'gearlink',
+    anthropic: process.env.ANTHROPIC_API_KEY ?? '-',
 })
 
 module.exports = {

@@ -3,19 +3,19 @@ import { log, KeyValue } from 'utils/web'
 import { Coordinate } from 'uweb/utils'
 import { CSV_GeoJson_Parser, expandBoundingBox } from '../../hooks/helper'
 
-const createTextLabel = (text: string) => {
+const createTextLabel = (text: string, color = '#444', size = 1) => {
     const canvas = document.createElement('canvas');
     const context: any = canvas.getContext('2d');
 
     // 1. Canvas-ийн нягтаршлыг өндөр хэвээр (high-res) үлдээх
-    canvas.width = 512;  // Өргөн
-    canvas.height = 256; // Өндөр
+    canvas.width = 600;  // Өргөн
+    canvas.height = 200; // Өндөр
 
     // Тунгалаг дэвсгэр
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     // 2. Том фонтоор тод зурах (Чанарыг хадгалахын тулд)
-    context.fillStyle = '#444';
+    context.fillStyle = color;
     context.font = 'Bold 80px Arial'; // 10px биш, том зураад дараа нь масштабаар багасгана
     context.textAlign = 'center';
     context.textBaseline = 'middle';
@@ -35,12 +35,14 @@ const createTextLabel = (text: string) => {
 
     // 3. Sprite-ийн хэмжээг энд л жижиг болгоно
     // 0.1 эсвэл 0.05 гэх мэт утгаар тоглож үзээрэй
-    sprite.scale.set(0.16, 0.08, 1);
+    sprite.scale.set(0.18 * size, 0.06 * size, 1);
 
     return sprite;
 }
 
 const LAYER_PRESETS: any = {
+    'target': '#333',
+    'actual': 'red',
     'Хоосон чулуулаг': '#d48806',
     'Элсэн чулуу': '#a89030',
     'Шавар': '#8c6a3f',
@@ -126,71 +128,112 @@ export class Shots {
 
         if (this.obj.hasOwnProperty(key)) this.remove(key)
 
-        const group = new THREE.Group()
-        this.obj[key] = group
+        const status: any = {
+            key,
+            name,
+            total: 0,
+            drilled: 0,
+            drilled_shots: [],
+        }
 
+        const group = new THREE.Group()
         const [shots, box] = await this.get_plan(name, dst)
         const actuals = await this.get_actual(name, dst)
-
         let is_3D_enabled = KeyValue('3D') === 'yes'
         let is_3D_diff = Number(KeyValue('Elevation'))
+        this.obj[key] = group
 
         const altitude = (el: number) => {
-            const elevation = el || 1500
+            const elevation = el
             const vector3 = this.Maptalks?.threeLayer.distanceToVector3(elevation, elevation)
             const zPos = vector3.x
             return zPos
         }
 
+        const add_cylinder = (name: string, layer: string, { x = 0, y = 0, z = 0, h = 0, s = 0 }) => {
+
+            const height = altitude(h)
+            const geometry = new THREE.CylinderGeometry(s, s, height, 8, 1)
+            let material = null
+
+            if (layer === 'target') material = new THREE.MeshStandardMaterial({
+                color: 'grey',
+                wireframe: true,
+                transparent: true,
+                opacity: 0.5
+            });
+            else if (layer === 'actual') material = new THREE.MeshPhongMaterial({
+                color: 'green',
+                wireframe: true,
+                transparent: true,
+                opacity: 0.5
+            });
+            else material = new THREE.MeshBasicMaterial({ color: LAYER_PRESETS[layer] ?? '#d48806' })
+
+            const cylinder = new THREE.Mesh(geometry, material)
+            cylinder.name = name
+            cylinder.rotateX(Math.PI / 2)
+            cylinder.position.set(x, y, z - (height / 2))
+            group.add(cylinder)
+
+        }
+
+        const add_text = (text: string, { x = 0, y = 0, z = 0, c = '#444', s = 1 }) => {
+
+            const label = createTextLabel(text, c, s)
+            label.position.set(x, y, z)
+            group.add(label)
+
+        }
+
         shots.forEach(([n, x, y, z, h]: csvItems) => {
 
-            let div = 50, data = null, hasEntry = false
+            let data = null
             const [aU, aL, oU, oL]: any = Coordinate(x, y, z - (h / 2))
-            const alt = is_3D_enabled ? altitude(z - is_3D_diff - (h / 2)) : -((h / div) / 2)
-            const ralt = is_3D_enabled ? altitude(z - is_3D_diff) : 0
+            const alt = is_3D_enabled ? altitude(z - is_3D_diff) : 0
+            const ralt = is_3D_enabled ? altitude(z - is_3D_diff + 1) : 0
             const cfg: any = { x: oL.x, y: oL.y, z: 0 }
             const f = this.Maptalks?.threeLayer.coordinateToVector3(cfg, 0)
 
-            const label = createTextLabel(n) // 'n' нь таны нэр
-            label.position.set(f.x, f.y, ralt) // Цилиндрийн орой дээр
-            group.add(label)
+            status.total++
 
             if (actuals[n]) {
 
-                hasEntry = true
                 data = actuals[n]
                 const { netDrillMs, totalPausedMs, finalDepth, entries } = data
-                const sorted = entries.sort((a: any, b: any) => a.depth - b.depth).filter(({ type }: any) => type === 'layer')
+                const sorted = entries.sort((a: any, b: any) => b.depth - a.depth)
+                const filtered = sorted.filter(({ type }: any) => type === 'layer')
 
-                sorted.forEach(({ depth, layer }: any, i: number) => {
+                data.target = h
+                status.drilled_shots.push(data)
 
-                    const geometry = new THREE.CylinderGeometry((0.180 - (i * 0.01)) / div, (0.180 - (i * 0.01)) / div, depth / div, 8, 1)
-                    const material = new THREE.MeshBasicMaterial({ color: LAYER_PRESETS[layer] ?? '#d48806' })
-                    const cylinder = new THREE.Mesh(geometry, material)
-                    cylinder.rotateX(Math.PI / 2)
-                    cylinder.name = n
-                    // cylinder.position.set(f.x, f.y, -(((depth) / div) / 2))
-                    cylinder.position.set(f.x, f.y, alt)
-                    cylinder.z = alt
-                    group.add(cylinder)
+                // console.log(n, data, sorted)
 
+                filtered.forEach(({ depth, layer }: any, i: number) => {
+                    add_cylinder(n, layer, { x: f.x, y: f.y, z: alt, h: depth, s: 0.01 + (0.00025 * (++i)) })
                 })
 
-            }
+                add_cylinder(n, 'target', { x: f.x, y: f.y, z: alt, h: h, s: 0.005 })
+                add_cylinder(n, 'actual', { x: f.x, y: f.y, z: alt, h: finalDepth, s: 0.0075 })
+                add_text(`${n}`, { x: f.x, y: f.y, z: ralt, c: 'green', s: 1 })
 
-            const geometry = new THREE.CylinderGeometry(0.100 / div, 0.100 / div, h / div, 8, 1)
-            const material = new THREE.MeshBasicMaterial({ color: hasEntry ? '#d48806' : '#1668dc' })
-            const cylinder = new THREE.Mesh(geometry, material)
-            cylinder.rotateX(Math.PI / 2)
-            cylinder.name = n
-            // cylinder.position.set(f.x, f.y, -((h / div) / 2))
-            cylinder.position.set(f.x, f.y, alt)
-            cylinder.z = alt
-            group.add(cylinder)
+                status.drilled++
+
+            } else {
+                add_cylinder(n, 'target', { x: f.x, y: f.y, z: alt, h: h, s: 0.005 })
+                add_text(`${n}`, { x: f.x, y: f.y, z: ralt, s: 1 })
+            }
 
         })
 
+        this.obj[`report-${key}`] = { name: key, data: { status, shots } }
         this.Maptalks?.threeLayer.addMesh(group)
+
+    }
+
+    report = (key: string) => {
+
+        this.cfg.event.emit('report', this.obj[`report-${key}`])
 
     }
 

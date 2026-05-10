@@ -17,7 +17,17 @@ const cf: any = {
     sequelize: new Sequelize(db_name, db_user, db_pass, {
         dialect: 'postgres',
         host: mode === 'development' ? '139.59.115.158' : 'localhost',
-        pool: { max: 16, min: 4, acquire: 30000, idle: 15000 },
+        pool: {
+            max: 64,
+            min: 0,
+            acquire: 30000,
+            idle: 10000,
+            evict: 1000
+        },
+        dialectOptions: {
+            keepAlive: true,
+            // ssl: { rejectUnauthorized: false } 
+        },
         logging: (sql, timing: any) => { },
         retry: {
             match: [

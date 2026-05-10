@@ -1,11 +1,14 @@
 import jwt from 'jsonwebtoken'
 import { Core, Host } from 'unet'
 import { moment, Run, decodeENV, log } from 'utils'
-import { Manage } from './pm2'
 
-const { name, version, mode, ports, secret } = decodeENV()
+import { Manage } from './pm2'
+import { AnthropicAPI } from './anthropic'
+
+const { name, version, mode, ports, secret, anthropic } = decodeENV()
 log.success(`"${name}" <${version}> module is running on "${process.pid}" / [${mode}] 🚀🚀🚀\n`)
 log.warn(`Secret: [${secret.slice(0, 8)}...]`)
+log.warn(`Anthropic: [${anthropic.slice(0, 8)}...]`)
 
 Run({
 
@@ -38,6 +41,8 @@ Run({
 
         /** Process Manage **/
         const API = new Host({ name, timeout: 30 * 1000, port: Number(ports[1]) })
+
+        const anthropic_api = new AnthropicAPI(API, anthropic)
 
         API.on('start', async ({ query }: any) => await _.manage.start(query.name))
         API.on('stop', async ({ query }: any) => await _.manage.stop(query.name))

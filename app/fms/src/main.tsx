@@ -9,13 +9,16 @@ import LayoutHeader from './layouts/header'
 import LayoutFooter from './layouts/footer'
 
 import ViewCube from './components/viewcube'
-import { DistanceTool } from './tools/distance'
+
 import { AreaTool } from './tools/area'
+import { DistanceTool } from './tools/distance'
 
 import LayerControllers from './layers/controllers'
 import LayerVehicles from './layers/vehicles'
 import LayerLocations from './layers/locations'
 import LayerGeofences from './layers/geofences'
+
+import Reporting from './reports'
 
 const GlobalStyle = createGlobalStyle`
 
@@ -74,6 +77,13 @@ const GlobalStyle = createGlobalStyle`
         --tp-input-background-color-hover: ${({ dark = true }) => dark ? '#2f2f34' : '#858585'};
     }
 
+    /* Thin scrollbars */
+    *::-webkit-scrollbar        { width: 3px; height: 3px; }
+    *::-webkit-scrollbar-track  { background: transparent; }
+    *::-webkit-scrollbar-thumb  { background: #2a2d35; border-radius: 2px; }
+    *::-webkit-scrollbar-thumb:hover { background: #3a3d45; }
+    * { scrollbar-width: thin; scrollbar-color: #2a2d35 transparent; }
+
 `
 const Pane = styled.div`
     position: fixed;
@@ -101,7 +111,8 @@ const Pane = styled.div`
         }
     }
 `
-const Layers = styled.div``
+const Layers = styled.div`
+`
 
 const { useEffect, useState, useRef } = React
 
@@ -151,6 +162,7 @@ export default (cfg: iArgs) => {
             {loaded === 0 && <LayerVehicles {...cfg} />}
             {loaded === 0 && <LayerLocations {...cfg} />}
             {loaded === 0 && <LayerGeofences {...cfg} />}
+            {loaded === 0 && <Reporting {...cfg} />}
         </Layers>
 
         {contextHolderNotification}

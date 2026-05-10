@@ -20,7 +20,17 @@ const cf = {
     sequelize: new Sequelize(db_name, db_user, db_pass, {
         dialect: 'postgres',
         host: mode === 'development' ? '139.59.115.158' : 'localhost',
-        pool: { max: 64, min: 16, acquire: 15000, idle: 15000 },
+        pool: {
+            max: 64,
+            min: 0,
+            acquire: 30000,
+            idle: 10000,
+            evict: 1000
+        },
+        dialectOptions: {
+            keepAlive: true,
+            // ssl: { rejectUnauthorized: false } 
+        },
         logging: (sql, timing: any) => { },
         retry: {
             match: [
@@ -46,6 +56,7 @@ Safe(async () => {
 
     const enums = new Enums(cf)
 
+    /** Enabling them in non-prod will make data duplication !!! **/
     const locations = new Locations(cf, mode !== 'development')
     const coverages = new Coverages(cf, mode !== 'development')
     // const activities = new Activities(cf, mode === 'development')
