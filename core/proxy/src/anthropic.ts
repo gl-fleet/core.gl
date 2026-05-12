@@ -28,8 +28,10 @@ export class AnthropicAPI {
     }
 
     private register() {
+
         this.api.on('get-anthropic-chat', async (req: any) => {
-            const { sessionId, message, reportContext } = req.query
+
+            const { sessionId, message, reportContext } = req.body
 
             const count = this.sessionUsage.get(sessionId) ?? 0
             if (count >= 20) {
@@ -53,5 +55,6 @@ export class AnthropicAPI {
                 return { error: err.message }
             }
         })
+
     }
 }

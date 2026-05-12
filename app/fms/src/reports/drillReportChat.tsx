@@ -199,7 +199,7 @@ export default function DrillReportChat({ cfg, data, shots, onCommand }: Props) 
         setLoading(true)
 
         try {
-            const res = await cfg.core_proxy.get('get-anthropic-chat', {
+            const res = await cfg.core_proxy.set('get-anthropic-chat', {
                 sessionId,
                 message: msg,
                 reportContext: context.current,
@@ -336,10 +336,10 @@ export default function DrillReportChat({ cfg, data, shots, onCommand }: Props) 
                                         ? 'rgba(129,140,248,0.15)'
                                         : 'rgba(255,255,255,0.05)',
                                 border: `1px solid ${m.isCommand
-                                        ? 'rgba(82,196,26,0.3)'
-                                        : m.role === 'user'
-                                            ? 'rgba(129,140,248,0.25)'
-                                            : '#2a2d35'
+                                    ? 'rgba(82,196,26,0.3)'
+                                    : m.role === 'user'
+                                        ? 'rgba(129,140,248,0.25)'
+                                        : '#2a2d35'
                                     }`,
                                 fontSize: 12, lineHeight: 1.6, whiteSpace: 'pre-wrap',
                                 color: m.isCommand ? '#52c41a' : m.role === 'user' ? '#c7d2fe' : '#d0d0d0',
