@@ -58,10 +58,10 @@ function buildContext(data: any, shots?: any[]): string {
     if (!data) return ''
 
     const lines: string[] = [
-        `Та өрөмдлөгийн үйл ажиллагааны шинжээч туслах юм.`,
-        `Дараах тэсэлгээний загварын тайланд холбоотой асуултуудад товч бөгөөд үнэн зөвөөр хариулна уу.`,
-        `Мэдээлэлд байхгүй зүйлийг хэлж өгнө үү. Утгыг зохиомоор бүү гар.`,
-        `Монгол хэлээр хариулна уу.`,
+        `You are a drilling operations assistant.`,
+        `Answer questions about the following blast pattern report accurately and concisely.`,
+        `If information is not in the data, say so. Do not make up values.`,
+        `Reply in the same language the user writes in.`,
         ``,
         `=== BLAST PATTERN: ${data.name} ===`,
         `Key: ${data.key}`,
